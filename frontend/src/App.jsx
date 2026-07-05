@@ -1,12 +1,14 @@
 // src/App.jsx
+import { Routes, Route } from 'react-router-dom';
+import Landing from './components/Landing/Landing';
 import './App.css';
 
 function App() {
   return (
-    <div className="app-container">
-      <h1>MiGo 🌱</h1>
-      <p>Your Friendly AI Learning Companion</p>
-    </div>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      {/* More routes (register, login, dashboard, assessment) added in later modules */}
+    </Routes>
   );
 }
 

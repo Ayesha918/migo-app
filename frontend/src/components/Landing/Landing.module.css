@@ -1,0 +1,59 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  text-align: center;
+  background: linear-gradient(135deg, #fdf6ec 0%, #eaf7ee 100%);
+  font-family: 'Segoe UI', 'Poppins', sans-serif;
+}
+
+.mascot {
+  font-size: 90px;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 44px;
+  font-weight: 800;
+  color: #2d2d2d;
+  margin: 0;
+}
+
+.tagline {
+  font-size: 18px;
+  color: #6b6b6b;
+  margin: 12px 0 40px 0;
+  max-width: 320px;
+}
+
+.primaryButton {
+  width: 100%;
+  max-width: 340px;
+  padding: 20px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #f1436d;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 16px rgba(241, 67, 109, 0.35);
+}
+
+.secondaryButton {
+  width: 100%;
+  max-width: 340px;
+  padding: 20px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2d2d2d;
+  background-color: #ffffff;
+  border: 2px solid #eeeeee;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
