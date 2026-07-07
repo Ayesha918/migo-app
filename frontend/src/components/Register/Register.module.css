@@ -1,0 +1,175 @@
+.page {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fdf6ec;
+  font-family: 'Segoe UI', 'Poppins', sans-serif;
+  position: relative;
+}
+
+.backButton {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #ffffff;
+  font-size: 22px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  cursor: pointer;
+}
+
+.pageTitle {
+  margin-top: 8px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2d2d2d;
+}
+
+.progressBar {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 40px 0;
+}
+
+.progressSegment {
+  width: 40px;
+  height: 6px;
+  border-radius: 4px;
+  background: #eeeeee;
+}
+
+.progressActive,
+.progressDone {
+  background: #f1436d;
+}
+
+.stepContent {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.emojiIcon {
+  font-size: 56px;
+  margin-bottom: 8px;
+}
+
+.question {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin-bottom: 24px;
+}
+
+.inputRow {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.textInput,
+.selectInput {
+  width: 100%;
+  padding: 18px;
+  font-size: 18px;
+  border-radius: 16px;
+  border: 2px solid #eeeeee;
+  outline: none;
+  text-align: center;
+}
+
+.textInput:focus,
+.selectInput:focus {
+  border-color: #f1436d;
+}
+
+.voiceRow {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.micButton,
+.speakerButton {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.micButton {
+  background-color: #f1436d;
+  color: white;
+}
+
+.speakerButton {
+  background-color: #ffffff;
+  color: #2d2d2d;
+}
+
+.avatarGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.avatarItem {
+  width: 64px;
+  height: 64px;
+  font-size: 30px;
+  border-radius: 16px;
+  border: 3px solid transparent;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarSelected {
+  border-color: #f1436d;
+  box-shadow: 0 0 0 4px rgba(241, 67, 109, 0.25);
+}
+
+.nextButton {
+  width: 100%;
+  max-width: 380px;
+  padding: 20px;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  background-color: #f1436d;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(241, 67, 109, 0.35);
+}
+
+.nextButton:disabled {
+  background-color: #f5b6c4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.micButtonListening {
+  animation: pulse 1s infinite;
+  background-color: #d81b5c;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(241, 67, 109, 0.5); }
+  70% { box-shadow: 0 0 0 16px rgba(241, 67, 109, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(241, 67, 109, 0); }
+}
