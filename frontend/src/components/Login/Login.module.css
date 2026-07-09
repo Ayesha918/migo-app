@@ -1,0 +1,143 @@
+.page {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fdf6ec;
+  font-family: 'Segoe UI', 'Poppins', sans-serif;
+  position: relative;
+}
+
+.backButton {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #ffffff;
+  font-size: 22px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  cursor: pointer;
+}
+
+.emojiIcon {
+  font-size: 56px;
+  margin-top: 40px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 8px 0 24px 0;
+}
+
+.modeToggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.modeButton {
+  flex: 1;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 14px;
+  border: 2px solid #eeeeee;
+  background: #ffffff;
+  color: #6b6b6b;
+  cursor: pointer;
+}
+
+.modeActive {
+  border-color: #f1436d;
+  color: #f1436d;
+  background: #fff0f4;
+}
+
+.searchRow {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 380px;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 16px;
+  font-size: 17px;
+  border-radius: 16px;
+  border: 2px solid #eeeeee;
+  outline: none;
+  text-align: center;
+}
+
+.searchInput:focus {
+  border-color: #f1436d;
+}
+
+.searchButton {
+  width: 56px;
+  border-radius: 16px;
+  border: none;
+  background: #f1436d;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.statusText {
+  color: #6b6b6b;
+  font-size: 15px;
+}
+
+.errorText {
+  color: #d81b5c;
+  font-size: 15px;
+  text-align: center;
+}
+
+.resultsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 380px;
+  margin-top: 12px;
+}
+
+.resultCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 2px solid #eeeeee;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.resultAvatar {
+  font-size: 34px;
+}
+
+.resultName {
+  font-size: 17px;
+  font-weight: 700;
+  color: #2d2d2d;
+  flex: 1;
+}
+
+.resultId {
+  font-size: 13px;
+  color: #999999;
+}

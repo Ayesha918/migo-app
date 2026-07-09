@@ -6,7 +6,7 @@ const LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'hi', label: 'Hindi' },
   { code: 'kn', label: 'Kannada' },
-  { code: 'ar', label: 'Arabic' },
+  { code: 'ta', label: 'Tamil' },
 ];
 
 function StepLanguage({ value, onChange }) {

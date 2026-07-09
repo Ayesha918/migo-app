@@ -7,7 +7,9 @@ import StepName from './StepName';
 import StepAge from './StepAge';
 import StepLanguage from './StepLanguage';
 import StepAvatar from './StepAvatar';
+import { registerLearner } from '../../services/api';
 import styles from './Register.module.css';
+import RegistrationSuccess from './RegistrationSuccess';
 
 const TOTAL_STEPS = 4;
 
@@ -20,7 +22,9 @@ function Register() {
     language: '',
     avatar: '',
   });
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [registeredLearner, setRegisteredLearner] = useState(null);
   const updateField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -51,11 +55,33 @@ function Register() {
     }
   };
 
-  const handleFinish = () => {
-    // TODO (Module 9 area): replace this with a real API call once the
-    // Learner model + /api/users/register endpoint exist on the backend.
-    console.log('Registration data ready to submit:', formData);
-    alert('Registration complete! (Backend save wired in a later module)');
+  const handleFinish = async () => {
+    setIsSubmitting(true);
+    setSubmitError('');
+    try {
+      const response = await registerLearner({
+        name: formData.name.trim(),
+        age: Number(formData.age),
+        preferred_language: formData.language,
+        avatar: formData.avatar,
+      });
+
+      const learner = response.data;
+
+      // Pass the full learner record forward to the Dashboard via navigation state.
+      // (No login system/tokens in this milestone — the spec explicitly has no
+      // PIN/password, so the learner record itself is what identifies the session.)
+      setRegisteredLearner(response.data);
+    } catch (error) {
+      console.error('Registration failed:', error);
+      setSubmitError(
+        error.response?.data
+          ? JSON.stringify(error.response.data)
+          : 'Something went wrong. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const steps = [
@@ -64,7 +90,9 @@ function Register() {
     <StepLanguage value={formData.language} onChange={(v) => updateField('language', v)} />,
     <StepAvatar value={formData.avatar} onChange={(v) => updateField('avatar', v)} />,
   ];
-
+  if (registeredLearner) {
+  return <RegistrationSuccess learner={registeredLearner} />;
+}
   return (
     <div className={styles.page}>
       <button className={styles.backButton} onClick={handleBack} type="button">‹</button>
@@ -85,13 +113,19 @@ function Register() {
         </motion.div>
       </AnimatePresence>
 
+      {submitError && <p className={styles.errorText}>{submitError}</p>}
+
       <button
         className={styles.nextButton}
         onClick={handleNext}
-        disabled={!isStepValid()}
+        disabled={!isStepValid() || isSubmitting}
         type="button"
       >
-        {currentStep === TOTAL_STEPS - 1 ? 'Finish' : 'Next'}
+        {isSubmitting
+          ? 'Saving...'
+          : currentStep === TOTAL_STEPS - 1
+          ? 'Finish'
+          : 'Next'}
       </button>
     </div>
   );
