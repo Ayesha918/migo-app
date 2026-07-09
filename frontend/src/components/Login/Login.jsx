@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { searchLearnerById, searchLearnerByName } from '../../services/api';
 import styles from './Login.module.css';
+import { useLearner } from '../../services/LearnerContext';
 
 const AVATAR_EMOJI = {
   boy: '👦', girl: '👧', grandmother: '👵', grandfather: '👴',
@@ -36,7 +37,10 @@ function Login() {
     }
   };
 
+  const { setLearner } = useLearner();
+
   const handleSelectLearner = (learner) => {
+    setLearner(learner);
     navigate('/dashboard', { state: { learner } });
   };
 

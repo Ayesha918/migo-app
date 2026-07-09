@@ -1,0 +1,154 @@
+.page {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fdf6ec;
+  font-family: 'Segoe UI', 'Poppins', sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 20px;
+}
+
+.backButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #ffffff;
+  font-size: 22px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  cursor: pointer;
+}
+
+.progressText {
+  font-size: 15px;
+  font-weight: 700;
+  color: #6b6b6b;
+}
+
+.speakerButtonSmall {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: #ffffff;
+  font-size: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  cursor: pointer;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.passageText {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #2d2d2d;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.questionText {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin-bottom: 20px;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.optionButton {
+  padding: 24px 12px;
+  font-size: 28px;
+  border-radius: 18px;
+  border: 3px solid #eeeeee;
+  background: #fafafa;
+  cursor: pointer;
+}
+
+.optionButtonSelected {
+  border-color: #f1436d;
+  background: #fff0f4;
+}
+
+.textareaInput {
+  width: 100%;
+  min-height: 120px;
+  padding: 16px;
+  font-size: 17px;
+  border-radius: 16px;
+  border: 2px solid #eeeeee;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+}
+
+.textareaInput:focus {
+  border-color: #f1436d;
+}
+
+.nextButton {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  background-color: #f1436d;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(241, 67, 109, 0.35);
+}
+
+.nextButton:disabled {
+  background-color: #f5b6c4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.resultEmoji {
+  font-size: 80px;
+  margin-bottom: 12px;
+}
+
+.resultScore {
+  font-size: 48px;
+  font-weight: 800;
+  color: #f1436d;
+  margin-bottom: 8px;
+}
+
+.resultMessage {
+  font-size: 18px;
+  color: #6b6b6b;
+  margin-bottom: 32px;
+}
+@keyframes pulseListening {
+  0% { box-shadow: 0 0 0 0 rgba(241, 67, 109, 0.5); }
+  70% { box-shadow: 0 0 0 14px rgba(241, 67, 109, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(241, 67, 109, 0); }
+}
+.pulseListening {
+  animation: pulseListening 1s infinite;
+}

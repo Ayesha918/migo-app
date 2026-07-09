@@ -10,6 +10,7 @@ import StepAvatar from './StepAvatar';
 import { registerLearner } from '../../services/api';
 import styles from './Register.module.css';
 import RegistrationSuccess from './RegistrationSuccess';
+import { useLearner } from '../../services/LearnerContext';
 
 const TOTAL_STEPS = 4;
 
@@ -28,6 +29,7 @@ function Register() {
   const updateField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+  const { setLearner } = useLearner();
 
   const isStepValid = () => {
     switch (currentStep) {
@@ -71,6 +73,7 @@ function Register() {
       // Pass the full learner record forward to the Dashboard via navigation state.
       // (No login system/tokens in this milestone — the spec explicitly has no
       // PIN/password, so the learner record itself is what identifies the session.)
+      setLearner(response.data);
       setRegisteredLearner(response.data);
     } catch (error) {
       console.error('Registration failed:', error);

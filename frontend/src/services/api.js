@@ -17,3 +17,13 @@ export const searchLearnerByName = (name) =>
   api.get('/users/search', { params: { name } });
 
 export default api;
+// add to src/services/api.js, alongside existing exports
+
+export const fetchQuestions = (type, language) =>
+  api.get('/assessments/questions', { params: { type, language } });
+
+export const submitAssessment = (payload) =>
+  api.post('/assessments/submit', payload);
+
+export const fetchDashboardSummary = (learnerId) =>
+  api.get('/dashboard/summary', { params: { learner_id: learnerId } });

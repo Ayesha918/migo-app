@@ -1,0 +1,73 @@
+// src/services/translations.js
+const translations = {
+  en: {
+    welcome: 'Welcome',
+    readingAssessment: 'Reading Assessment',
+    writingAssessment: 'Writing Assessment',
+    comprehensionAssessment: 'Reading Comprehension',
+    latestScore: 'Latest Score',
+    completion: 'Completion',
+    recentActivity: 'Recent Activity',
+    continueBtn: 'Continue',
+    startBtn: 'Start',
+    overallLevel: 'Your Level',
+    noActivityYet: 'No activity yet — try an assessment!',
+    beginner: 'Beginner',
+    intermediate: 'Intermediate',
+    advanced: 'Advanced',
+  },
+  hi: {
+    welcome: 'स्वागत है',
+    readingAssessment: 'पठन मूल्यांकन',
+    writingAssessment: 'लेखन मूल्यांकन',
+    comprehensionAssessment: 'पठन बोध',
+    latestScore: 'नवीनतम स्कोर',
+    completion: 'पूर्णता',
+    recentActivity: 'हाल की गतिविधि',
+    continueBtn: 'जारी रखें',
+    startBtn: 'शुरू करें',
+    overallLevel: 'आपका स्तर',
+    noActivityYet: 'अभी कोई गतिविधि नहीं — एक मूल्यांकन आज़माएं!',
+    beginner: 'शुरुआती',
+    intermediate: 'मध्यम',
+    advanced: 'उन्नत',
+  },
+  kn: {
+    welcome: 'ಸ್ವಾಗತ',
+    readingAssessment: 'ಓದುವ ಮೌಲ್ಯಮಾಪನ',
+    writingAssessment: 'ಬರವಣಿಗೆ ಮೌಲ್ಯಮಾಪನ',
+    comprehensionAssessment: 'ಓದುವ ಗ್ರಹಿಕೆ',
+    latestScore: 'ಇತ್ತೀಚಿನ ಅಂಕ',
+    completion: 'ಪೂರ್ಣಗೊಂಡಿದ್ದು',
+    recentActivity: 'ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ',
+    continueBtn: 'ಮುಂದುವರಿಸಿ',
+    startBtn: 'ಪ್ರಾರಂಭಿಸಿ',
+    overallLevel: 'ನಿಮ್ಮ ಮಟ್ಟ',
+    noActivityYet: 'ಇನ್ನೂ ಯಾವುದೇ ಚಟುವಟಿಕೆ ಇಲ್ಲ — ಒಂದು ಮೌಲ್ಯಮಾಪನ ಪ್ರಯತ್ನಿಸಿ!',
+    beginner: 'ಆರಂಭಿಕ',
+    intermediate: 'ಮಧ್ಯಂತರ',
+    advanced: 'ಮುಂದುವರಿದ',
+  },
+  ta: {
+    welcome: 'வரவேற்கிறோம்',
+    readingAssessment: 'வாசிப்பு மதிப்பீடு',
+    writingAssessment: 'எழுத்து மதிப்பீடு',
+    comprehensionAssessment: 'படித்துப் புரிதல்',
+    latestScore: 'சமீபத்திய மதிப்பெண்',
+    completion: 'நிறைவு',
+    recentActivity: 'சமீபத்திய செயல்பாடு',
+    continueBtn: 'தொடரவும்',
+    startBtn: 'தொடங்கு',
+    overallLevel: 'உங்கள் நிலை',
+    noActivityYet: 'இன்னும் செயல்பாடு இல்லை — ஒரு மதிப்பீட்டை முயற்சிக்கவும்!',
+    beginner: 'ஆரம்பநிலை',
+    intermediate: 'இடைநிலை',
+    advanced: 'மேம்பட்ட',
+  },
+};
+
+export function translate(key, langCode = 'en') {
+  return translations[langCode]?.[key] || translations.en[key] || key;
+}
+
+export default translations;

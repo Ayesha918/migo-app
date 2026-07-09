@@ -40,15 +40,58 @@ def get_questions(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-def _score_answer(question, learner_answer):
-    """Returns True/False depending on question_type's grading rule."""
-    if question.question_type == 'mcq':
-        return learner_answer.strip().upper() == question.correct_answer.strip().upper()
-    else:  # text_input — heuristic word-count check (see limitation noted above)
-        min_words = int(question.correct_answer)
-        word_count = len([w for w in learner_answer.strip().split() if w])
-        return word_count >= min_words
+def _score_writing_answer(text, min_words):
+    """
+    Heuristic writing score (0.0 to 1.0). NOT true content/grammar grading —
+    that requires an NLP/AI model, which is out of scope for this milestone.
+    This catches obvious junk (keyboard mashing, repeated words, empty gibberish)
+    and rewards longer, more varied text with partial credit instead of a
+    blunt pass/fail.
+    """
+    words = [w for w in text.strip().split() if w]
+    word_count = len(words)
+    if word_count == 0:
+        return 0.0
 
+    lower_words = [w.lower() for w in words]
+    unique_ratio = len(set(lower_words)) / word_count
+    avg_len = sum(len(w) for w in words) / word_count
+
+    def is_gibberish(word):
+        # Flags things like "aaaaa" or "zzzzzz" — a real word rarely repeats
+        # the same character for its entire length.
+        return len(word) >= 2 and len(set(word.lower())) == 1
+
+    gibberish_ratio = sum(1 for w in words if is_gibberish(w)) / word_count
+
+    score = 1.0
+
+    # Not enough words yet — scale down proportionally rather than zero it out
+    if word_count < min_words:
+        score *= word_count / min_words
+
+    # Same word(s) repeated over and over (e.g. "good good good good")
+    if unique_ratio < 0.5:
+        score *= 0.4 + unique_ratio
+
+    # Words suspiciously short on average (e.g. "a a a a a a")
+    if avg_len < 2:
+        score *= 0.5
+
+    # Penalize proportion of gibberish "words"
+    score *= (1 - gibberish_ratio)
+
+    return round(max(0.0, min(1.0, score)), 2)
+
+
+def _score_answer(question, learner_answer):
+    """Returns a 0.0–1.0 correctness fraction for any question type."""
+    if question.question_type == 'mcq':
+        is_correct = learner_answer.strip().upper() == question.correct_answer.strip().upper()
+        return 1.0 if is_correct else 0.0
+    else:  # text_input
+        min_words = int(question.correct_answer)
+        return _score_writing_answer(learner_answer, min_words)
 
 @api_view(['POST'])
 def submit_assessment(request):
@@ -74,7 +117,8 @@ def submit_assessment(request):
     if not answers:
         return Response({'error': 'No answers submitted.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    correct_count = 0
+    total_fraction = 0.0
+    correct_count = 0  # kept as a whole-number count for display ("2 out of 3")
     response_records = []
 
     for answer_item in answers:
@@ -84,7 +128,10 @@ def submit_assessment(request):
             continue
 
         learner_answer = str(answer_item.get('answer', ''))
-        is_correct = _score_answer(question, learner_answer)
+        fraction = _score_answer(question, learner_answer)
+        total_fraction += fraction
+
+        is_correct = fraction >= 0.6  # threshold for "counts as correct" in the display
         if is_correct:
             correct_count += 1
 
@@ -97,7 +144,7 @@ def submit_assessment(request):
         )
 
     total_questions = len(answers)
-    score = round((correct_count / total_questions) * 100, 1) if total_questions else 0
+    score = round((total_fraction / total_questions) * 100, 1) if total_questions else 0
 
     attempt = AssessmentAttempt.objects.create(
         learner=learner,

@@ -1,0 +1,139 @@
+.page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #fdf6ec;
+  font-family: 'Segoe UI', 'Poppins', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 24px;
+}
+
+.avatarBig {
+  font-size: 56px;
+  background: #ffffff;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.welcomeText {
+  font-size: 22px;
+  font-weight: 800;
+  color: #2d2d2d;
+  margin: 0;
+}
+
+.subText {
+  font-size: 14px;
+  color: #999999;
+  margin: 4px 0 0 0;
+}
+
+.cardsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 24px;
+}
+
+.assessmentCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  text-align: left;
+}
+
+.cardEmoji {
+  font-size: 40px;
+}
+
+.cardLabel {
+  font-size: 19px;
+  font-weight: 700;
+  color: #2d2d2d;
+}
+
+.progressCard {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.progressRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.progressLabel {
+  font-size: 15px;
+  color: #6b6b6b;
+}
+
+.progressValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f1436d;
+}
+
+.recentTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 20px 0 10px 0;
+}
+
+.activityList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activityItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #2d2d2d;
+}
+
+.activityScore {
+  font-weight: 700;
+  color: #f1436d;
+}
+
+.primaryButton {
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  background: #f1436d;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  margin-top: 16px;
+}
