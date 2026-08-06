@@ -118,6 +118,7 @@
 
 .searchButton {
   width: 60px;
+  flex-shrink: 0;
   border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--color-orange), #FF9F43);
   color: #FFFFFF;
@@ -131,6 +132,7 @@
 
 .micButton {
   width: 60px;
+  flex-shrink: 0;
   border-radius: var(--radius-md);
   border: 3px solid var(--color-peach);
   background-color: #FFFFFF;
@@ -290,6 +292,7 @@
   .micButton, .searchButton {
     width: 48px;
     height: 48px;
+    flex-shrink: 0;
   }
   .speakInstruction {
     font-size: 13px;

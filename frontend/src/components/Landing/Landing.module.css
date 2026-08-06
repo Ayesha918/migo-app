@@ -1819,37 +1819,27 @@
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 16px 20px;
-    justify-content: center;
+    padding: 12px 16px;
+    justify-content: space-between;
   }
   
   .navLinks {
-    gap: 16px;
-    width: 100%;
-    justify-content: center;
-    margin-top: 8px;
+    width: auto;
+    margin-top: 0;
+    gap: 8px;
   }
 
-  @media (max-width: 480px) {
-    .navbar {
-      padding: 12px 16px;
-      justify-content: space-between;
-    }
-    .navLinks {
-      width: auto;
-      margin-top: 0;
-      gap: 0;
-    }
-    .navLinks > a {
-      display: none;
-    }
-    .navLogoText {
-      font-size: 20px;
-    }
-    .navLogoImg {
-      width: 36px;
-      height: 36px;
-    }
+  .navLinks > a {
+    display: none;
+  }
+
+  .navLogoText {
+    font-size: 20px;
+  }
+
+  .navLogoImg {
+    width: 36px;
+    height: 36px;
   }
 
   .heroTitle {
