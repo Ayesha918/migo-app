@@ -254,3 +254,5 @@ yarl==1.23.0
 # Deployment
 dj-database-url
 gunicorn
+
+psycopg2-binary
