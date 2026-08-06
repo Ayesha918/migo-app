@@ -413,6 +413,10 @@ class Command(BaseCommand):
     help = 'Seeds grouped alphabet lessons and simple CVC word lessons into the database'
 
     def handle(self, *args, **options):
+        if Lesson.objects.exists():
+            self.stdout.write(self.style.SUCCESS('Lessons already seeded. Skipping.'))
+            return
+
         self.stdout.write('Wiping all user data from database to start fresh...')
         LearningPath.objects.all().delete()
         RewardProfile.objects.all().delete()

@@ -40,6 +40,10 @@ class Command(BaseCommand):
     help = 'Seeds a large multilingual question pool for random, non-repeating assessments'
 
     def handle(self, *args, **options):
+        if AssessmentQuestion.objects.exists():
+            self.stdout.write(self.style.SUCCESS('Assessment questions already seeded. Skipping.'))
+            return
+
         self.stdout.write('Clearing old question set...')
         AssessmentQuestion.objects.all().delete()
 
