@@ -635,3 +635,15 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Responsive sidebar and main layout padding overrides */
+@media (max-width: 768px) {
+  .pageLayout {
+    flex-direction: column !important;
+  }
+  .mainContent {
+    padding: 16px 16px 80px 16px !important;
+    gap: 16px !important;
+  }
+}

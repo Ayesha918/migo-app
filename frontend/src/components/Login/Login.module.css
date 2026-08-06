@@ -101,6 +101,7 @@
 
 .searchInput {
   flex: 1;
+  min-width: 0;
   padding: 16px 20px;
   font-size: 18px;
   font-weight: 700;
@@ -282,12 +283,13 @@
     font-size: 14px;
   }
   .searchRow {
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 16px;
+    width: 100%;
   }
   .searchInput {
-    padding: 12px 16px;
-    font-size: 16px;
+    padding: 10px 12px;
+    font-size: 15px;
   }
   .micButton, .searchButton {
     width: 48px;

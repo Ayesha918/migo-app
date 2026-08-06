@@ -255,3 +255,47 @@
   white-space: nowrap;
   box-shadow: var(--shadow-button-orange);
 }
+
+@media (max-width: 768px) {
+  .pageLayout {
+    flex-direction: column;
+  }
+  
+  .mainContent {
+    padding: 16px 16px 80px 16px;
+    gap: 16px;
+  }
+
+  .emptyPathCard, .loadingBox, .loginPromptCard {
+    padding: 24px 16px;
+    border-width: 3px;
+  }
+
+  .owlImgLarge {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 12px;
+  }
+
+  .gateAssessmentItem {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .gateIcon {
+    font-size: 24px;
+  }
+
+  .gateDetails h3 {
+    font-size: 14px;
+  }
+
+  .gateDetails span {
+    font-size: 11px;
+  }
+
+  .gatePlayBtn, .gateDoneBadge {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
