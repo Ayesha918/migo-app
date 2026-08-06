@@ -1,0 +1,17 @@
+{
+  "short_name": "MiGo",
+  "name": "MiGo Literacy Platform",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#FF7A00",
+  "background_color": "#FFFDF9",
+  "orientation": "any"
+}
