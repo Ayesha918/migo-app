@@ -83,6 +83,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 import os
+IS_RENDER = os.environ.get('RENDER', 'false') == 'true'
 DATABASE_URL = config('DATABASE_URL', default=None)
 DB_NAME = config('DB_NAME', default=None)
 
@@ -91,7 +92,7 @@ if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
     }
-elif DB_NAME:
+elif DB_NAME and not IS_RENDER:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
