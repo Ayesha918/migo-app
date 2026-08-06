@@ -1,0 +1,68 @@
+/* src/components/Common/VoiceInputField.module.css */
+
+.inputContainer {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.inputField {
+  width: 100%;
+  padding: 16px 54px 16px 20px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-peach);
+  outline: none;
+  font-family: var(--font-body);
+  background-color: #FFFFFF;
+  color: var(--text-dark);
+  transition: border-color 0.15s ease;
+}
+
+.inputField:focus {
+  border-color: var(--color-orange);
+}
+
+.textareaField {
+  width: 100%;
+  padding: 18px 54px 18px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-peach);
+  outline: none;
+  resize: vertical;
+  font-family: var(--font-body);
+  background-color: #FFFFFF;
+  color: var(--text-dark);
+  transition: border-color 0.15s ease;
+}
+
+.textareaField:focus {
+  border-color: var(--color-orange);
+}
+
+.micButton {
+  position: absolute;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-peach-light);
+  border: 2px solid var(--color-peach);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+  z-index: 2;
+  transition: background-color 0.2s ease;
+}
+
+.micListening {
+  background-color: #FF4757;
+  border-color: #FF4757;
+  box-shadow: 0 0 0 6px rgba(255, 71, 87, 0.3);
+}

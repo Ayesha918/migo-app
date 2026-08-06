@@ -7,7 +7,8 @@ function RegistrationSuccess({ learner }) {
   const navigate = useNavigate();
 
   const handleContinue = () => {
-    navigate('/dashboard', { state: { learner } });
+    // Force the student to take the Placement Assessment right after registering!
+    navigate('/assessment/placement', { state: { learner } });
   };
 
   return (
@@ -19,14 +20,21 @@ function RegistrationSuccess({ learner }) {
         className={styles.stepContent}
       >
         <div className={styles.emojiIcon}>🎉</div>
-        <h2 className={styles.question}>You're all set, {learner.name}!</h2>
+        <h2 className={styles.question}>Welcome, {learner.name}!</h2>
+        <p className={styles.subtitle} style={{ fontSize: '18px', margin: '12px 0 24px', fontWeight: 'bold' }}>
+          Your Learner ID is:
+        </p>
 
         <div className={styles.learnerIdBox}>
           {learner.learner_id}
         </div>
 
+        <p style={{ margin: '20px 0 28px', color: 'var(--text-muted)', fontWeight: 600 }}>
+          Let's take a quick 3-step check to place you in the perfect learning level!
+        </p>
+
         <button className={styles.nextButton} type="button" onClick={handleContinue}>
-          Continue to Dashboard
+          Start Placement Assessment 📝
         </button>
       </motion.div>
     </div>

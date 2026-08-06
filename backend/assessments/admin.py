@@ -1,7 +1,12 @@
 # backend/assessments/admin.py
 from django.contrib import admin
 from .models import AssessmentQuestion, AssessmentAttempt, AssessmentResponse, LiteracyProfile
+from .models import AssessmentQuestion, AssessmentAttempt, AssessmentResponse, LiteracyProfile, SkillBreakdown
 
+@admin.register(SkillBreakdown)
+class SkillBreakdownAdmin(admin.ModelAdmin):
+    list_display = ('learner', 'skill_tag', 'score', 'band', 'attempts_counted', 'updated_at')
+    list_filter = ('skill_tag', 'band')
 
 @admin.register(AssessmentQuestion)
 class AssessmentQuestionAdmin(admin.ModelAdmin):

@@ -1,0 +1,95 @@
+/* src/components/Home/Sidebar.module.css */
+
+.sidebar {
+  width: 240px;
+  background-color: #FFFFFF;
+  border-right: 3px solid var(--color-peach-light);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.03);
+}
+
+.logoBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: var(--bg-cream);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-peach);
+  cursor: pointer;
+  margin-bottom: 32px;
+}
+
+.logoImg {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.logoTitle {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-orange-dark);
+  margin-bottom: 2px;
+}
+
+.logoSub {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.navMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-muted);
+  background-color: transparent;
+  transition: all 0.15s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.navItem:hover {
+  background-color: var(--color-peach-light);
+  color: var(--color-orange-dark);
+  transform: translateX(4px);
+}
+
+.activeNavItem {
+  background: linear-gradient(135deg, var(--color-orange), #FF9F43);
+  color: #FFFFFF !important;
+  box-shadow: var(--shadow-button-orange);
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #FF4757;
+  background-color: #FFEAEB;
+  transition: all 0.15s ease;
+  margin-top: auto;
+}
+
+.logoutBtn:hover {
+  background-color: #FF4757;
+  color: #FFFFFF;
+}

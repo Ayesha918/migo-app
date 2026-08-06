@@ -4,11 +4,11 @@ from django.db import models
 
 class Learner(models.Model):
     LANGUAGE_CHOICES = [
-        ('en', 'English'),
-        ('hi', 'Hindi'),
-        ('kn', 'Kannada'),
-        ('ar', 'Arabic'),
+        ('en', 'English'), ('hi', 'Hindi'), ('kn', 'Kannada'), ('ta', 'Tamil'),
     ]
+    # ... existing fields ...
+    known_language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='en')     # RENAMED from preferred_language
+    learning_language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='en')   # NEW
 
     AVATAR_CHOICES = [
         ('boy', 'Boy'),
@@ -53,3 +53,13 @@ class Learner(models.Model):
 
     def __str__(self):
         return f"{self.learner_id} - {self.name}"
+
+
+class StudySession(models.Model):
+    learner = models.ForeignKey(Learner, on_delete=models.CASCADE, related_name='study_sessions')
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    duration_seconds = models.FloatField(default=0.0)
+
+    def __str__(self):
+        return f"{self.learner.learner_id} - Session {self.id} ({self.duration_seconds}s)"

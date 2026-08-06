@@ -1,0 +1,224 @@
+/* src/components/Home/HeroMap.module.css */
+
+.mapSection {
+  width: 100%;
+  background: linear-gradient(180deg, #FFFDF9 0%, #FFF4E5 50%, #FFF8F0 100%);
+  border-radius: var(--radius-lg);
+  padding: 28px 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 36px rgba(255, 122, 0, 0.05);
+  border: 4px solid #FFE4CB;
+}
+
+/* Floating Decorative Clouds */
+.cloud1, .cloud2, .cloud3 {
+  position: absolute;
+  font-size: 32px;
+  opacity: 0.6;
+  pointer-events: none;
+  animation: floatSlow 6s infinite ease-in-out;
+}
+
+.cloud1 { top: 40px; left: 8%; animation-delay: 0s; }
+.cloud2 { top: 280px; right: 10%; animation-delay: 2s; }
+.cloud3 { top: 520px; left: 12%; animation-delay: 4s; }
+
+/* Header */
+.mapHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 0 12px;
+}
+
+.mapTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mapTitleGroup h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-orange-dark);
+}
+
+.counterChip {
+  background-color: #FFFFFF;
+  border: 2px solid var(--color-peach);
+  padding: 8px 16px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text-dark);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+/* Map Canvas Container */
+.mapContainer {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.svgLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Node Wrapper */
+.nodeWrapper {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 5;
+}
+
+/* Floating Mascot Pin */
+.mascotFloating {
+  position: absolute;
+  top: -76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+.owlPin {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.2));
+}
+
+.startBadge {
+  background-color: #FF4757;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(255, 71, 87, 0.4);
+  white-space: nowrap;
+}
+
+/* Main Node Button */
+.nodeButton {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.nodeEmoji {
+  font-size: 38px;
+}
+
+.nodeStatusIcon {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background-color: #FFFFFF;
+  border-radius: 50%;
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Node States */
+.completedNode {
+  background: linear-gradient(135deg, #FFEAA7, #FDCB6E);
+  border: 5px solid #F39C12;
+  box-shadow: 0 8px 0 #D38B00;
+}
+
+.availableNode {
+  background: linear-gradient(135deg, var(--color-orange), #FF9F43);
+  border: 5px solid #FFFFFF;
+  box-shadow: 0 8px 0 var(--color-orange-dark);
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+.lockedNode {
+  background: linear-gradient(135deg, #DFE6E9, #B2BEC3);
+  border: 5px solid #FFFFFF;
+  box-shadow: 0 6px 0 #95A5A6;
+  opacity: 0.75;
+}
+
+/* Node Label Card */
+.nodeCard {
+  margin-top: 10px;
+  background-color: #FFFFFF;
+  border: 2px solid var(--color-peach);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  max-width: 160px;
+}
+
+.dayLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-orange-dark);
+  text-transform: uppercase;
+}
+
+.nodeTitle {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Milestone Chest */
+.milestoneWrap {
+  position: absolute;
+  right: -90px;
+  top: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chestImg {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  animation: bounceSoft 2s infinite;
+}
+
+.chestBadge {
+  background-color: var(--color-yellow);
+  color: #795548;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}

@@ -1,11 +1,12 @@
+/* src/components/Assessment/Assessment.module.css */
+
 .page {
   min-height: 100vh;
-  padding: 24px;
+  padding: 32px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #fdf6ec;
-  font-family: 'Segoe UI', 'Poppins', sans-serif;
+  background-color: var(--bg-cream);
 }
 
 .header {
@@ -13,25 +14,29 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 420px;
-  margin-bottom: 20px;
+  max-width: 540px;
+  margin-bottom: 24px;
 }
 
 .backButton {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
-  background: #ffffff;
-  font-size: 22px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  background-color: #FFFFFF;
+  color: var(--text-dark);
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .progressText {
-  font-size: 15px;
-  font-weight: 700;
-  color: #6b6b6b;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-orange-dark);
 }
 
 .speakerButtonSmall {
@@ -39,90 +44,107 @@
   height: 44px;
   border-radius: 50%;
   border: none;
-  background: #ffffff;
+  background-color: #FFFFFF;
+  color: var(--color-orange-dark);
   font-size: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .card {
   width: 100%;
-  max-width: 420px;
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 28px 20px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  max-width: 540px;
+  background-color: #FFFFFF;
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+  border: 3px solid var(--color-peach);
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .passageText {
   font-size: 18px;
   line-height: 1.6;
-  color: #2d2d2d;
-  margin-bottom: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 24px;
   text-align: left;
+  background-color: var(--bg-cream);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--color-peach);
 }
 
 .questionText {
-  font-size: 22px;
-  font-weight: 700;
-  color: #2d2d2d;
-  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 24px;
 }
 
 .optionsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 16px;
 }
 
 .optionButton {
-  padding: 24px 12px;
-  font-size: 28px;
-  border-radius: 18px;
-  border: 3px solid #eeeeee;
-  background: #fafafa;
+  padding: 20px;
+  font-size: 24px;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-peach-light);
+  background-color: #FFFFFF;
+  color: var(--text-dark);
   cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease;
 }
 
 .optionButtonSelected {
-  border-color: #f1436d;
-  background: #fff0f4;
+  border-color: var(--color-orange);
+  background-color: var(--color-peach-light);
+  color: var(--color-orange-dark);
+  box-shadow: 0 6px 0 var(--color-orange-dark);
 }
 
 .textareaInput {
   width: 100%;
-  min-height: 120px;
-  padding: 16px;
-  font-size: 17px;
-  border-radius: 16px;
-  border: 2px solid #eeeeee;
+  min-height: 140px;
+  padding: 18px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-peach);
   outline: none;
   resize: none;
-  font-family: inherit;
+  font-family: var(--font-body);
 }
 
 .textareaInput:focus {
-  border-color: #f1436d;
+  border-color: var(--color-orange);
 }
 
 .nextButton {
   width: 100%;
-  max-width: 420px;
-  padding: 20px;
+  max-width: 540px;
+  padding: 18px;
   font-size: 20px;
-  font-weight: 700;
-  color: white;
-  background-color: #f1436d;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--color-orange), #FF9F43);
   border: none;
-  border-radius: 20px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(241, 67, 109, 0.35);
+  box-shadow: var(--shadow-button-orange);
 }
 
 .nextButton:disabled {
-  background-color: #f5b6c4;
+  opacity: 0.5;
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -130,25 +152,29 @@
 .resultEmoji {
   font-size: 80px;
   margin-bottom: 12px;
+  animation: float 2.5s infinite ease-in-out;
 }
 
 .resultScore {
   font-size: 48px;
   font-weight: 800;
-  color: #f1436d;
+  color: var(--color-orange-dark);
   margin-bottom: 8px;
 }
 
 .resultMessage {
   font-size: 18px;
-  color: #6b6b6b;
+  font-weight: 700;
+  color: var(--text-muted);
   margin-bottom: 32px;
 }
-@keyframes pulseListening {
-  0% { box-shadow: 0 0 0 0 rgba(241, 67, 109, 0.5); }
-  70% { box-shadow: 0 0 0 14px rgba(241, 67, 109, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(241, 67, 109, 0); }
-}
+
 .pulseListening {
-  animation: pulseListening 1s infinite;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 122, 0, 0.5); }
+  70% { box-shadow: 0 0 0 16px rgba(255, 122, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 122, 0, 0); }
 }

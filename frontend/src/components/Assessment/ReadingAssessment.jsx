@@ -1,5 +1,6 @@
 // src/components/Assessment/ReadingAssessment.jsx
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchQuestions, submitAssessment } from '../../services/api';
 import speak from '../../services/speak';
 import AssessmentResult from './AssessmentResult';
@@ -8,6 +9,7 @@ import styles from './Assessment.module.css';
 const LANG_SPEECH_CODES = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN' };
 
 function ReadingAssessment({ learner }) {
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -15,19 +17,27 @@ function ReadingAssessment({ learner }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+  const [alreadyDone, setAlreadyDone] = useState(false);
+
+  const preferredLang = learner?.learning_language || learner?.preferred_language || 'en';
 
   useEffect(() => {
-    fetchQuestions('reading', learner.preferred_language)
+    fetchQuestions('reading', preferredLang, learner.learner_id)
       .then((res) => setQuestions(res.data))
-      .catch(() => setQuestions([]))
+      .catch((err) => {
+        if (err.response?.data?.error === 'already_completed') {
+          setAlreadyDone(true);
+        }
+        setQuestions([]);
+      })
       .finally(() => setLoading(false));
-  }, [learner.preferred_language]);
+  }, [learner, preferredLang]);
 
   const currentQuestion = questions[currentIndex];
-
+  
   const handleSpeak = () => {
     if (currentQuestion) {
-      speak(currentQuestion.question_text, LANG_SPEECH_CODES[learner.preferred_language] || 'en-US');
+      speak(currentQuestion.question_text, LANG_SPEECH_CODES[preferredLang] || 'en-US');
     }
   };
 
@@ -51,7 +61,7 @@ function ReadingAssessment({ learner }) {
         const response = await submitAssessment({
           learner_id: learner.learner_id,
           assessment_type: 'reading',
-          language: learner.preferred_language,
+          language: preferredLang,
           answers: updatedAnswers,
         });
         setResult(response.data);
@@ -63,9 +73,20 @@ function ReadingAssessment({ learner }) {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (alreadyDone) {
+    return (
+      <div className={styles.card} style={{ textAlign: 'center' }}>
+        <p>You've already completed this assessment. 🎉</p>
+        <button className={styles.nextButton} onClick={() => navigate('/dashboard')} type="button">
+          Back to Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  if (loading) return <p className={styles.progressText}>Loading assessment...</p>;
   if (result) return <AssessmentResult result={result} assessmentType="reading" />;
-  if (!currentQuestion) return <p>No questions available.</p>;
+  if (!currentQuestion) return <p className={styles.progressText}>No questions available.</p>;
 
   const options = [
     { letter: 'A', text: currentQuestion.option_a },

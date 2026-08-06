@@ -9,31 +9,36 @@ const LANGUAGES = [
   { code: 'ta', label: 'Tamil' },
 ];
 
-function StepLanguage({ value, onChange }) {
+function StepLanguage({ knownValue, learningValue, onKnownChange, onLearningChange }) {
   const handleSpeak = () => {
-    speak('Which language would you like to learn?');
+    speak('Which language are you comfortable with, and which language do you want to learn?');
   };
 
   return (
     <>
       <div className={styles.emojiIcon}>🌐</div>
-      <h2 className={styles.question}>Preferred Language</h2>
+      <h2 className={styles.question}>I am comfortable with...</h2>
       <div className={styles.inputRow}>
-        <select
-          className={styles.selectInput}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        >
+        <select className={styles.selectInput} value={knownValue} onChange={(e) => onKnownChange(e.target.value)}>
           <option value="" disabled>Select a language</option>
           {LANGUAGES.map((lang) => (
             <option key={lang.code} value={lang.code}>{lang.label}</option>
           ))}
         </select>
       </div>
+
+      <h2 className={styles.question} style={{ marginTop: 20 }}>I want to learn...</h2>
+      <div className={styles.inputRow}>
+        <select className={styles.selectInput} value={learningValue} onChange={(e) => onLearningChange(e.target.value)}>
+          <option value="" disabled>Select a language</option>
+          {LANGUAGES.map((lang) => (
+            <option key={lang.code} value={lang.code}>{lang.label}</option>
+          ))}
+        </select>
+      </div>
+
       <div className={styles.voiceRow}>
-        <button className={styles.speakerButton} type="button" onClick={handleSpeak}>
-          🔊
-        </button>
+        <button className={styles.speakerButton} type="button" onClick={handleSpeak}>🔊</button>
       </div>
     </>
   );

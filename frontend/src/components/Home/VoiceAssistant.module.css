@@ -1,0 +1,39 @@
+/* src/components/Home/VoiceAssistant.module.css */
+
+.floatingWidget {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 900;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-orange), #FF9F43);
+  border: 4px solid #FFFFFF;
+  box-shadow: 0 10px 28px rgba(255, 122, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: fixed;
+}
+
+.mascotIcon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.iconCircle {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background-color: var(--color-mint);
+  border-radius: 50%;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}

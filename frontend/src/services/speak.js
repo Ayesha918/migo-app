@@ -47,7 +47,7 @@ function pickFemaleVoice(lang) {
  * @param {string} text - The text to speak.
  * @param {string} lang - BCP-47 language code (e.g. 'en-US', 'hi-IN', 'kn-IN', 'ar-SA').
  */
-function speak(text, lang = 'en-US') {
+function speak(text, lang = 'en-US', rate = 0.95) {
   if (!window.speechSynthesis) {
     console.warn('SpeechSynthesis not supported in this browser.');
     return;
@@ -57,7 +57,7 @@ function speak(text, lang = 'en-US') {
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = lang;
-  utterance.rate = 0.95;
+  utterance.rate = rate;
   utterance.pitch = 1;
   utterance.volume = 1;
 

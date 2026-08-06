@@ -15,6 +15,7 @@ class QuestionSerializer(serializers.ModelSerializer):
             'id', 'assessment_type', 'language', 'group_key',
             'passage_text', 'question_text', 'question_type',
             'option_a', 'option_b', 'option_c', 'option_d', 'order',
+            'skill_tag',   
         ]
 
 

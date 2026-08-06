@@ -1,0 +1,89 @@
+/* src/components/Assessment/VirtualKeyboard.module.css */
+
+.keyboard {
+  width: 100%;
+  max-width: 520px;
+  background-color: var(--bg-cream);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 16px;
+  border: 3px solid var(--color-peach);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.tabRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tabButton {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-peach-light);
+  background-color: #FFFFFF;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tabActive {
+  border-color: var(--color-orange);
+  color: var(--color-orange-dark);
+  background-color: var(--color-peach-light);
+}
+
+.keyGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.keyButton {
+  padding: 12px 0;
+  font-size: 22px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-peach-light);
+  background-color: #FFFFFF;
+  color: var(--text-dark);
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.04);
+  transition: transform 0.1s ease;
+}
+
+.keyButton:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-orange);
+  background-color: var(--color-peach-light);
+}
+
+.controlRow {
+  display: flex;
+  gap: 12px;
+}
+
+.controlButton {
+  flex: 1;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, var(--color-orange), #FF9F43);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-button-orange);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.controlButton:hover {
+  transform: translateY(-2px);
+}

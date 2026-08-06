@@ -1,0 +1,123 @@
+.card{
+
+    background:linear-gradient(
+        135deg,
+        #F8F2FF,
+        #FFF7FB
+    );
+
+    border-radius:28px;
+
+    padding:28px;
+
+    box-shadow:0 15px 30px rgba(0,0,0,.08);
+
+    transition:.3s;
+
+}
+
+.card:hover{
+
+    transform:translateY(-6px);
+
+}
+
+.header{
+
+    display:flex;
+
+    gap:12px;
+
+    align-items:center;
+
+}
+
+.header svg{
+
+    color:#8B5CF6;
+
+}
+
+.header h2{
+
+    margin:0;
+
+}
+
+.badge{
+
+    display:inline-block;
+
+    margin-top:18px;
+
+    padding:8px 16px;
+
+    border-radius:30px;
+
+    background:#8B5CF6;
+
+    color:white;
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+h3{
+
+    margin:18px 0 10px;
+
+    font-size:24px;
+
+    color:#222;
+
+}
+
+.reason{
+
+    color:#666;
+
+    line-height:1.7;
+
+    min-height:70px;
+
+}
+
+.button{
+
+    margin-top:25px;
+
+    background:#8B5CF6;
+
+    color:white;
+
+    border:none;
+
+    border-radius:16px;
+
+    padding:14px 22px;
+
+    font-size:16px;
+
+    font-weight:700;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.button:hover{
+
+    transform:scale(1.05);
+
+    box-shadow:0 15px 25px rgba(139,92,246,.25);
+
+}

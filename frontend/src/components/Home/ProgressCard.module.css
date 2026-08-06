@@ -1,0 +1,161 @@
+.card{
+
+    background:white;
+
+    border-radius:28px;
+
+    padding:25px;
+
+    box-shadow:0 15px 30px rgba(0,0,0,.08);
+
+}
+
+.header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:20px;
+
+}
+
+.header svg{
+
+    color:#6C63FF;
+
+}
+
+.header h2{
+
+    margin:0;
+
+    font-size:26px;
+
+}
+
+.circleWrapper{
+
+    display:flex;
+
+    justify-content:center;
+
+    margin:20px 0;
+
+}
+
+.circle{
+
+    width:150px;
+
+    height:150px;
+
+    border-radius:50%;
+
+    background:conic-gradient(
+        #FF4D86 0%,
+        #FFB300 65%,
+        #ECECEC 65%
+    );
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    position:relative;
+
+}
+
+.circle::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:115px;
+
+    height:115px;
+
+    border-radius:50%;
+
+    background:white;
+
+}
+
+.circle span{
+
+    position:relative;
+
+    z-index:2;
+
+    font-size:28px;
+
+    font-weight:700;
+
+}
+
+.info{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:14px;
+
+    margin-top:20px;
+
+}
+
+.row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    color:#666;
+
+}
+
+.row strong{
+
+    color:#222;
+
+}
+
+.levelCard{
+
+    margin-top:25px;
+
+    display:flex;
+
+    gap:15px;
+
+    background:#EEF8FF;
+
+    border-radius:20px;
+
+    padding:18px;
+
+}
+
+.levelCard svg{
+
+    color:#6C63FF;
+
+}
+
+.levelCard strong{
+
+    display:block;
+
+}
+
+.levelCard small{
+
+    color:#666;
+
+}

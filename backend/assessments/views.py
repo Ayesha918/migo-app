@@ -5,40 +5,76 @@ from rest_framework import status
 from users.models import Learner
 from .models import AssessmentQuestion, AssessmentAttempt, AssessmentResponse, LiteracyProfile
 from .serializers import QuestionSerializer, LiteracyProfileSerializer
+import random
+from .models import AssessmentQuestion, AssessmentAttempt, AssessmentResponse, LiteracyProfile, SeenQuestion
+from .models import AssessmentQuestion, AssessmentAttempt, AssessmentResponse, LiteracyProfile, SkillBreakdown
+from .prediction import predict_learner_trajectory
+
+QUESTIONS_PER_ATTEMPT = {
+    'reading': 3,
+    'comprehension': 3,
+    'writing': 1,
+}
 
 
 @api_view(['GET'])
 def get_questions(request):
-    """
-    GET /api/assessments/questions?type=reading&language=hi
-    Returns that assessment's questions in the requested language,
-    WITHOUT the correct_answer field.
-    """
     assessment_type = request.query_params.get('type')
     language = request.query_params.get('language', 'en')
+    learner_id = request.query_params.get('learner_id')
 
-    if assessment_type not in ['reading', 'writing', 'comprehension']:
+    if assessment_type not in QUESTIONS_PER_ATTEMPT:
         return Response(
             {'error': 'type must be one of: reading, writing, comprehension'},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    questions = AssessmentQuestion.objects.filter(
-        assessment_type=assessment_type,
-        language=language
-    ).order_by('order')
+    if learner_id:
+        learner = Learner.objects.filter(learner_id__iexact=learner_id).first()
+        if learner and AssessmentAttempt.objects.filter(
+            learner=learner, assessment_type=assessment_type, is_initial=True
+        ).exists():
+            return Response(
+                {'error': 'already_completed', 'message': 'Initial assessment already completed for this section.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-    # Fallback: if no questions exist yet in that language, use English
-    # rather than showing the learner a blank assessment.
-    if not questions.exists():
-        questions = AssessmentQuestion.objects.filter(
-            assessment_type=assessment_type,
-            language='en'
-        ).order_by('order')
+    needed = QUESTIONS_PER_ATTEMPT[assessment_type]
+
+    all_questions = AssessmentQuestion.objects.filter(assessment_type=assessment_type, language=language)
+    if not all_questions.exists():
+        all_questions = AssessmentQuestion.objects.filter(assessment_type=assessment_type, language='en')
+
+    all_ids = list(all_questions.values_list('id', flat=True))
+
+    learner = None
+    if learner_id:
+        learner = Learner.objects.filter(learner_id__iexact=learner_id).first()
+
+    if learner:
+        seen_ids = set(
+            SeenQuestion.objects.filter(learner=learner, question__in=all_ids).values_list('question_id', flat=True)
+        )
+        unseen_ids = [qid for qid in all_ids if qid not in seen_ids]
+        if len(unseen_ids) < needed:
+            SeenQuestion.objects.filter(learner=learner, question__in=all_ids).delete()
+            unseen_ids = all_ids
+    else:
+        unseen_ids = all_ids
+
+    sample_size = min(needed, len(unseen_ids))
+    chosen_ids = random.sample(unseen_ids, sample_size) if unseen_ids else []
+
+    questions = AssessmentQuestion.objects.filter(id__in=chosen_ids).order_by('order')
+
+    if learner:
+        SeenQuestion.objects.bulk_create(
+            [SeenQuestion(learner=learner, question_id=qid) for qid in chosen_ids],
+            ignore_conflicts=True,
+        )
 
     serializer = QuestionSerializer(questions, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 def _score_writing_answer(text, min_words):
     """
@@ -95,15 +131,6 @@ def _score_answer(question, learner_answer):
 
 @api_view(['POST'])
 def submit_assessment(request):
-    """
-    POST /api/assessments/submit
-    Body: {
-      "learner_id": "MG000001",
-      "assessment_type": "reading",
-      "language": "hi",
-      "answers": [{ "question_id": 3, "answer": "A" }, ...]
-    }
-    """
     learner_id = request.data.get('learner_id')
     assessment_type = request.data.get('assessment_type')
     language = request.data.get('language', 'en')
@@ -114,12 +141,22 @@ def submit_assessment(request):
     except Learner.DoesNotExist:
         return Response({'error': 'Learner not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+    already_done = AssessmentAttempt.objects.filter(
+        learner=learner, assessment_type=assessment_type, is_initial=True
+    ).exists()
+    if already_done:
+        return Response(
+            {'error': 'already_completed', 'message': 'Initial assessment already completed for this section.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
     if not answers:
         return Response({'error': 'No answers submitted.'}, status=status.HTTP_400_BAD_REQUEST)
 
     total_fraction = 0.0
-    correct_count = 0  # kept as a whole-number count for display ("2 out of 3")
+    correct_count = 0
     response_records = []
+    skill_totals = {}
 
     for answer_item in answers:
         try:
@@ -131,46 +168,86 @@ def submit_assessment(request):
         fraction = _score_answer(question, learner_answer)
         total_fraction += fraction
 
-        is_correct = fraction >= 0.6  # threshold for "counts as correct" in the display
+        is_correct = fraction >= 0.6
         if is_correct:
             correct_count += 1
 
+        if question.skill_tag:
+            bucket = skill_totals.setdefault(question.skill_tag, {'sum': 0.0, 'count': 0})
+            bucket['sum'] += fraction
+            bucket['count'] += 1
+
         response_records.append(
-            AssessmentResponse(
-                question=question,
-                learner_answer=learner_answer,
-                is_correct=is_correct,
-            )
+            AssessmentResponse(question=question, learner_answer=learner_answer, is_correct=is_correct)
         )
 
     total_questions = len(answers)
     score = round((total_fraction / total_questions) * 100, 1) if total_questions else 0
 
     attempt = AssessmentAttempt.objects.create(
-        learner=learner,
-        assessment_type=assessment_type,
-        language=language,
-        score=score,
-        total_questions=total_questions,
-        correct_count=correct_count,
+        learner=learner, assessment_type=assessment_type, language=language,
+        is_initial=True,
+        score=score, total_questions=total_questions, correct_count=correct_count,
     )
     for record in response_records:
         record.attempt = attempt
         record.save()
 
-    # Update the learner's aggregate literacy profile
+    skill_breakdown_result = []
+
+    if assessment_type == 'writing':
+        answer_text = str(answers[0].get('answer', ''))
+        fluency_score, vocab_score = _writing_skill_scores(answer_text)
+        for tag, val in [('writing_fluency', fluency_score), ('writing_vocabulary', vocab_score)]:
+            sb, _ = SkillBreakdown.objects.get_or_create(learner=learner, skill_tag=tag, defaults={'score': 0, 'band': 'weak'})
+            sb.update_with(val)
+            skill_breakdown_result.append({'skill_tag': tag, 'score': sb.score, 'band': sb.band})
+    else:
+        for tag, totals in skill_totals.items():
+            avg = round((totals['sum'] / totals['count']) * 100, 1)
+            sb, _ = SkillBreakdown.objects.get_or_create(learner=learner, skill_tag=tag, defaults={'score': 0, 'band': 'weak'})
+            sb.update_with(avg)
+            skill_breakdown_result.append({'skill_tag': tag, 'score': sb.score, 'band': sb.band})
+
     profile, _ = LiteracyProfile.objects.get_or_create(learner=learner)
-    if assessment_type == 'reading':
-        profile.reading_score = score
-    elif assessment_type == 'writing':
-        profile.writing_score = score
-    elif assessment_type == 'comprehension':
-        profile.comprehension_score = score
-    profile.recalculate()  # also saves
+    profile.recalculate_from_skills()
 
     return Response({
         'score': score,
         'correct_count': correct_count,
         'total_questions': total_questions,
         'literacy_profile': LiteracyProfileSerializer(profile).data,
+        'skill_breakdown': skill_breakdown_result,
     }, status=status.HTTP_201_CREATED)
+
+
+def _writing_skill_scores(text):
+    words = [w for w in text.strip().split() if w]
+    word_count = len(words)
+    if word_count == 0:
+        return 0.0, 0.0
+    lower_words = [w.lower() for w in words]
+    unique_ratio = len(set(lower_words)) / word_count
+    fluency_score = round(min(1.0, word_count / 10) * 100, 1)
+    vocabulary_score = round(unique_ratio * 100, 1)
+    return fluency_score, vocabulary_score
+
+
+@api_view(['GET'])
+def get_prediction(request):
+    """GET /api/assessments/prediction?learner_id=MG000001&study_duration_seconds=1200"""
+    learner_id = request.query_params.get('learner_id', '').strip()
+    study_duration_seconds = request.query_params.get('study_duration_seconds', '0.0').strip()
+
+    try:
+        study_secs = float(study_duration_seconds)
+    except ValueError:
+        study_secs = 0.0
+
+    try:
+        learner = Learner.objects.get(learner_id__iexact=learner_id)
+    except Learner.DoesNotExist:
+        return Response({'error': 'Learner not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    prediction = predict_learner_trajectory(learner, study_secs)
+    return Response(prediction, status=status.HTTP_200_OK)

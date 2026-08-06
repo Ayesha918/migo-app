@@ -17,12 +17,6 @@ const TOTAL_STEPS = 4;
 function Register() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({
-    name: '',
-    age: '',
-    language: '',
-    avatar: '',
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [registeredLearner, setRegisteredLearner] = useState(null);
@@ -35,7 +29,7 @@ function Register() {
     switch (currentStep) {
       case 0: return formData.name.trim().length > 0;
       case 1: return formData.age !== '' && Number(formData.age) > 0;
-      case 2: return formData.language !== '';
+      case 2: return formData.knownLanguage !== '' && formData.learningLanguage !== '';
       case 3: return formData.avatar !== '';
       default: return false;
     }
@@ -62,11 +56,12 @@ function Register() {
     setSubmitError('');
     try {
       const response = await registerLearner({
-        name: formData.name.trim(),
-        age: Number(formData.age),
-        preferred_language: formData.language,
-        avatar: formData.avatar,
-      });
+          name: formData.name.trim(),
+          age: Number(formData.age),
+          known_language: formData.knownLanguage,
+          learning_language: formData.learningLanguage,
+          avatar: formData.avatar,
+    });
 
       const learner = response.data;
 
@@ -86,11 +81,16 @@ function Register() {
       setIsSubmitting(false);
     }
   };
-
+  const [formData, setFormData] = useState({
+  name: '', age: '', knownLanguage: '', learningLanguage: '', avatar: '',
+});
   const steps = [
     <StepName value={formData.name} onChange={(v) => updateField('name', v)} />,
     <StepAge value={formData.age} onChange={(v) => updateField('age', v)} />,
-    <StepLanguage value={formData.language} onChange={(v) => updateField('language', v)} />,
+    <StepLanguage knownValue={formData.knownLanguage}
+  learningValue={formData.learningLanguage}
+  onKnownChange={(v) => updateField('knownLanguage', v)}
+  onLearningChange={(v) => updateField('learningLanguage', v)} />,
     <StepAvatar value={formData.avatar} onChange={(v) => updateField('avatar', v)} />,
   ];
   if (registeredLearner) {

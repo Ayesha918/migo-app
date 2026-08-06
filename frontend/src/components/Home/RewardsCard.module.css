@@ -1,0 +1,121 @@
+.card{
+
+    background:white;
+
+    border-radius:28px;
+
+    padding:25px;
+
+    box-shadow:0 15px 30px rgba(0,0,0,.08);
+
+}
+
+.header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:25px;
+
+}
+
+.header h2{
+
+    margin:0;
+
+    font-size:28px;
+
+}
+
+.header svg{
+
+    color:#FF4D86;
+
+}
+
+.rewardGrid{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:15px;
+
+}
+
+.rewardItem{
+
+    background:#FFF8F2;
+
+    border-radius:20px;
+
+    padding:20px;
+
+    text-align:center;
+
+    transition:.3s;
+
+}
+
+.rewardItem:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.rewardItem h3{
+
+    margin:12px 0 5px;
+
+    font-size:26px;
+
+    color:#222;
+
+}
+
+.rewardItem span{
+
+    color:#777;
+
+}
+
+.nextReward{
+
+    margin-top:25px;
+
+    background:#FFEFD5;
+
+    border-radius:20px;
+
+    padding:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+.nextReward svg{
+
+    color:#FFB300;
+
+}
+
+.nextReward strong{
+
+    display:block;
+
+    color:#222;
+
+}
+
+.nextReward small{
+
+    color:#666;
+
+}

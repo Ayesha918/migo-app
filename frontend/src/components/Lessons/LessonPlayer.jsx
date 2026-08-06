@@ -1,0 +1,4718 @@
+// src/components/Lessons/LessonPlayer.jsx
+import { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Volume2, Mic, MicOff, CheckCircle2, Star, ArrowRight, ArrowLeft,
+  Award, Sparkles, RefreshCw, Play, Info, Eye, Type, Trash, HelpCircle, FileText, XCircle
+} from 'lucide-react';
+import { useLearner } from '../../services/LearnerContext';
+import speak from '../../services/speak';
+import useVoiceInput from '../../services/useVoiceInput';
+import { completeLessonDay, fetchLearningPath, generateLearningPath, startSession, endSession } from '../../services/api';
+import owl from '../../assets/images/owl.png';
+import treasure from '../../assets/images/treasure.png';
+import styles from './LessonPlayer.module.css';
+
+const SPEECH_LANG_MAP = {
+  en: 'en-US',
+  hi: 'hi-IN',
+  kn: 'kn-IN',
+  ta: 'ta-IN',
+  te: 'te-IN',
+  ml: 'ml-IN',
+};
+
+const ALPHABETS = {
+  en: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+  hi: ['अ', 'आ', 'इ', 'ई', 'उ', 'ऊ', 'ए', 'ऐ', 'ओ', 'औ', 'क', 'ख', 'ग', 'घ', 'च', 'छ', 'ज', 'झ', 'ट', 'ठ', 'ड', 'ढ', 'त', 'थ', 'ದ', 'ಧ', 'ನ', 'ಪ', 'ഫ', 'ಬ', 'ಭ', 'ಮ', 'ಯ', 'ರ', 'ಲ', 'ವ', 'ಹ'],
+  kn: ['ಅ', 'ಆ', 'ಇ', 'ಈ', 'ಉ', 'ಊ', 'ಎ', 'ಏ', 'ಒ', 'ಓ', 'ಕ', 'ಖ', 'ಗ', 'ಘ', 'ಚ', 'ಛ', 'ಜ', 'ಝ', 'ಟ', 'ಠ', 'ಡ', 'ಢ', 'ತ', 'ಥ', 'ದ', 'ಧ', 'ನ', 'ಪ', 'ಫ', 'ಬ', 'ಭ', 'ಮ', 'ಯ', 'ರ', 'ಲ', 'ವ', 'ಹ'],
+  ta: ['அ', 'ஆ', 'இ', 'ஈ', 'உ', 'ஊ', 'எ', 'ஏ', 'ஐ', 'ஒ', 'ஓ', 'ஔ', 'க', 'ங', 'ச', 'ஞ', 'ட', 'ண', 'த', 'ந', 'ப', 'ம', 'ய', 'ர', 'ல', 'வ', 'ழ', 'ள', 'ற', 'ன']
+};
+
+function IllustrationSVG({ name, size = 60 }) {
+  const norm = (name || '').toLowerCase().trim();
+  let emoji = '🍎';
+  switch (norm) {
+    case 'apple': emoji = '🍎'; break;
+    case 'ball': emoji = '⚽'; break;
+    case 'cat': emoji = '🐱'; break;
+    case 'dog': emoji = '🐶'; break;
+    case 'egg': emoji = '🥚'; break;
+    case 'fish': emoji = '🐟'; break;
+    case 'goat': emoji = '🐐'; break;
+    case 'hat': emoji = '🎩'; break;
+    case 'ink': emoji = '✒️'; break;
+    case 'jug': emoji = '🥛'; break;
+    case 'key': emoji = '🔑'; break;
+    case 'leaf': emoji = '🍃'; break;
+    case 'milk': emoji = '🥛'; break;
+    case 'nest': emoji = '🪹'; break;
+    case 'owl': emoji = '🦉'; break;
+    case 'pen': emoji = '🖊️'; break;
+    case 'queen': emoji = '👑'; break;
+    case 'ring': emoji = '💍'; break;
+    case 'sun': emoji = '☀️'; break;
+    case 'tree': emoji = '🌳'; break;
+    case 'umbrella': emoji = '☂️'; break;
+    case 'van': emoji = '🚐'; break;
+    case 'watch': emoji = '⌚'; break;
+    case 'xylophone': emoji = '🪘'; break;
+    case 'yak': emoji = '🐃'; break;
+    case 'zebra': emoji = '🦓'; break;
+    case 'trophy': emoji = '🏆'; break;
+
+    // Compound Words
+    case 'rain': emoji = '🌧️'; break;
+    case 'bow': emoji = '🎀'; break;
+    case 'rainbow': emoji = '🌈'; break;
+    case 'shine': emoji = '✨'; break;
+    case 'sunshine': emoji = '☀️'; break;
+    case 'tooth': emoji = '🦷'; break;
+    case 'brush': emoji = '🪥'; break;
+    case 'toothbrush': emoji = '🪥'; break;
+    case 'butter': emoji = '🧈'; break;
+    case 'fly': emoji = '🪰'; break;
+    case 'butterfly': emoji = '🦋'; break;
+    case 'sea': emoji = '🌊'; break;
+    case 'shell': emoji = '🐚'; break;
+    case 'seashell': emoji = '🐚'; break;
+    case 'snowman': emoji = '⛄'; break;
+    case 'notebook': emoji = '📓'; break;
+    case 'basketball': emoji = '🏀'; break;
+    case 'raincoat': emoji = '🧥'; break;
+    case 'raindrop': emoji = '💧'; break;
+    case 'toothache': emoji = '🦷'; break;
+    case 'toothpaste': emoji = '🪥'; break;
+    case 'button': emoji = '🔘'; break;
+    case 'butterscotch': emoji = '🍬'; break;
+
+    // Opposites
+    case 'hot': emoji = '🔥'; break;
+    case 'cold': emoji = '❄️'; break;
+    case 'big': emoji = '🐘'; break;
+    case 'small': emoji = '🐭'; break;
+    case 'up': emoji = '⬆️'; break;
+    case 'down': emoji = '⬇️'; break;
+    case 'heavy': emoji = '📦'; break;
+    case 'light': emoji = '🎈'; break;
+    case 'happy': emoji = '😊'; break;
+    case 'sad': emoji = '😢'; break;
+    case 'glad': emoji = '😃'; break;
+    case 'angry': emoji = '😠'; break;
+    case 'noon': emoji = '🕛'; break;
+    case 'early': emoji = '🌅'; break;
+    case 'late': emoji = '🌃'; break;
+    case 'rich': emoji = '💰'; break;
+    case 'poor': emoji = '🪙'; break;
+
+    // Similars
+    case 'large': emoji = '🦖'; break;
+    case 'start': emoji = '🏁'; break;
+    case 'begin': emoji = '🚀'; break;
+    case 'shut': emoji = '🚪'; break;
+    case 'close': emoji = '🔒'; break;
+    case 'quick': emoji = '⚡'; break;
+    case 'fast': emoji = '🏎️'; break;
+    case 'open': emoji = '🔓'; break;
+    case 'wide': emoji = '↔️'; break;
+    case 'mad': emoji = '🤪'; break;
+
+    // Health
+    case 'doctor': emoji = '🩺'; break;
+    case 'nurse': emoji = '👩‍⚕️'; break;
+    case 'medicine': emoji = '💊'; break;
+    case 'hospital': emoji = '🏥'; break;
+    case 'health': emoji = '🍎'; break;
+    case 'strong': emoji = '💪'; break;
+
+    // Occupations
+    case 'teacher': emoji = '👩‍🏫'; break;
+    case 'builder': emoji = '👷'; break;
+    case 'driver': emoji = '🧑‍✈️'; break;
+    case 'farmer': emoji = '👨‍🌾'; break;
+    case 'tailor': emoji = '🧵'; break;
+
+    // Time
+    case 'morning': emoji = '🌅'; break;
+    case 'afternoon': emoji = '☀️'; break;
+    case 'evening': emoji = '🌇'; break;
+    case 'night': emoji = '🌃'; break;
+    case 'day': emoji = '📅'; break;
+
+    // Directions
+    case 'left': emoji = '◀️'; break;
+    case 'right': emoji = '▶️'; break;
+    case 'straight': emoji = '▲'; break;
+    case 'back': emoji = '▼'; break;
+    case 'stop': emoji = '🛑'; break;
+    case 'slow': emoji = '🐢'; break;
+    case 'school': emoji = '🏫'; break;
+    case 'shop': emoji = '🏪'; break;
+    case 'police': emoji = '👮'; break;
+    case 'cook': emoji = '🧑‍🍳'; break;
+    case 'help': emoji = '🙋'; break;
+    case 'teach': emoji = '🏫'; break;
+    case 'build': emoji = '🏗️'; break;
+    case 'drive': emoji = '🚗'; break;
+    case 'grow': emoji = '🌱'; break;
+    case 'sew': emoji = '🪡'; break;
+    case 'sunset': emoji = '🌇'; break;
+    case 'stars': emoji = '⭐'; break;
+    case 'light': emoji = '💡'; break;
+    case 'turn': emoji = '🔄'; break;
+    case 'path': emoji = '🗺️'; break;
+    case 'return': emoji = '↩️'; break;
+    case 'high': emoji = '📈'; break;
+    case 'care': emoji = '❤️'; break;
+    case 'cure': emoji = '🩹'; break;
+    case 'clinic': emoji = '🏥'; break;
+    default: emoji = '🌟'; break;
+  }
+
+  const adjustedSize = Math.round(size * 1.25);
+
+  return (
+    <span
+      style={{
+        fontSize: `${adjustedSize}px`,
+        display: 'inline-block',
+        lineHeight: 1.1,
+        animation: 'float 3.5s ease-in-out infinite',
+        transformOrigin: 'center bottom',
+        userSelect: 'none'
+      }}
+    >
+      {emoji}
+    </span>
+  );
+}
+
+const LETTER_META = {
+  A: { name: 'A', phonetic: 'Ay', word: 'Apple', illustration: 'apple', color: '#4CAF50', badgeBg: '#E8F5E9' },
+  B: { name: 'B', phonetic: 'Bee', word: 'Ball', illustration: 'ball', color: '#FF9800', badgeBg: '#FFF3E0' },
+  C: { name: 'C', phonetic: 'See', word: 'Cat', illustration: 'cat', color: '#2196F3', badgeBg: '#E3F2FD' },
+  D: { name: 'D', phonetic: 'Dee', word: 'Dog', illustration: 'dog', color: '#E74C3C', badgeBg: '#FDEDEC' },
+  E: { name: 'E', phonetic: 'Ee', word: 'Egg', illustration: 'egg', color: '#F1C40F', badgeBg: '#FEF9E7' },
+  F: { name: 'F', phonetic: 'Eff', word: 'Fish', illustration: 'fish', color: '#16A085', badgeBg: '#E8F8F5' },
+  G: { name: 'G', phonetic: 'Jee', word: 'Goat', illustration: 'goat', color: '#8E44AD', badgeBg: '#F5EEF8' },
+  H: { name: 'H', phonetic: 'Aych', word: 'Hat', illustration: 'hat', color: '#34495E', badgeBg: '#EAECEE' },
+  I: { name: 'I', phonetic: 'Eye', word: 'Ink', illustration: 'ink', color: '#2C3E50', badgeBg: '#EBEDEF' },
+  J: { name: 'J', phonetic: 'Jay', word: 'Jug', illustration: 'jug', color: '#27AE60', badgeBg: '#EAFAF1' },
+  K: { name: 'K', phonetic: 'Kay', word: 'Key', illustration: 'key', color: '#D35400', badgeBg: '#FDF2E9' },
+  L: { name: 'L', phonetic: 'Ell', word: 'Leaf', illustration: 'leaf', color: '#2ECC71', badgeBg: '#EAFAF1' },
+  M: { name: 'M', phonetic: 'Em', word: 'Milk', illustration: 'milk', color: '#9B59B6', badgeBg: '#F4ECF7' },
+  N: { name: 'N', phonetic: 'En', word: 'Nest', illustration: 'nest', color: '#3498DB', badgeBg: '#EBF5FB' },
+  O: { name: 'O', phonetic: 'Oh', word: 'Owl', illustration: 'owl', color: '#E67E22', badgeBg: '#FDF2E9' },
+  P: { name: 'P', phonetic: 'Pee', word: 'Pen', illustration: 'pen', color: '#1ABC9C', badgeBg: '#E8F8F5' },
+  Q: { name: 'Q', phonetic: 'Kyoo', word: 'Queen', illustration: 'queen', color: '#F39C12', badgeBg: '#FEF5E7' },
+  R: { name: 'R', phonetic: 'Ar', word: 'Ring', illustration: 'ring', color: '#2980B9', badgeBg: '#EAF2F8' },
+  S: { name: 'S', phonetic: 'Ess', word: 'Sun', illustration: 'sun', color: '#F1C40F', badgeBg: '#FEF9E7' },
+  T: { name: 'T', phonetic: 'Tee', word: 'Tree', illustration: 'tree', color: '#27AE60', badgeBg: '#EAFAF1' },
+  U: { name: 'U', phonetic: 'Yoo', word: 'Umbrella', illustration: 'umbrella', color: '#9B59B6', badgeBg: '#F4ECF7' },
+  V: { name: 'V', phonetic: 'Vee', word: 'Van', illustration: 'van', color: '#E74C3C', badgeBg: '#FDEDEC' },
+  W: { name: 'W', phonetic: 'Double-Yoo', word: 'Watch', illustration: 'watch', color: '#34495E', badgeBg: '#EAECEE' },
+  X: { name: 'X', phonetic: 'Ex', word: 'Xylophone', illustration: 'xylophone', color: '#16A085', badgeBg: '#E8F8F5' },
+  Y: { name: 'Y', phonetic: 'Wye', word: 'Yak', illustration: 'yak', color: '#8E44AD', badgeBg: '#F5EEF8' },
+  Z: { name: 'Z', phonetic: 'Zee', word: 'Zebra', illustration: 'zebra', color: '#2C3E50', badgeBg: '#EBEDEF' },
+
+  // Hindi Swar & Vyanjan
+  'अ': { name: 'अ', phonetic: 'Ah', word: 'अनार', illustration: 'apple', color: '#4CAF50', badgeBg: '#E8F5E9' },
+  'आ': { name: 'आ', phonetic: 'Aa', word: 'आम', illustration: 'sun', color: '#FF9800', badgeBg: '#FFF3E0' },
+  'इ': { name: 'इ', phonetic: 'Ih', word: 'इमली', illustration: 'leaf', color: '#2196F3', badgeBg: '#E3F2FD' },
+  'ई': { name: 'ई', phonetic: 'Eee', word: 'ईख', illustration: 'tree', color: '#E74C3C', badgeBg: '#FDEDEC' },
+  'उ': { name: 'उ', phonetic: 'Uh', word: 'उल्लू', illustration: 'owl', color: '#F1C40F', badgeBg: '#FEF9E7' },
+  'ऊ': { name: 'ऊ', phonetic: 'Ooo', word: 'ऊंत', illustration: 'yak', color: '#8E44AD', badgeBg: '#F5EEF8' },
+  'क': { name: 'क', phonetic: 'Ka', word: 'कमल', illustration: 'leaf', color: '#1ABC9C', badgeBg: '#E8F8F5' },
+  'ख': { name: 'ख', phonetic: 'Kha', word: 'खरगोश', illustration: 'dog', color: '#E67E22', badgeBg: '#FDF2E9' },
+  'ग': { name: 'ग', phonetic: 'Ga', word: 'गमला', illustration: 'tree', color: '#2980B9', badgeBg: '#EAF2F8' },
+  'घ': { name: 'घ', phonetic: 'Gha', word: 'घर', illustration: 'home', color: '#27AE60', badgeBg: '#EAFAF1' },
+  'च': { name: 'च', phonetic: 'Cha', word: 'चम्मच', illustration: 'pen', color: '#9B59B6', badgeBg: '#F4ECF7' },
+  'छ': { name: 'छ', phonetic: 'Chha', word: 'छतरी', illustration: 'umbrella', color: '#3498DB', badgeBg: '#EBF5FB' },
+  'ज': { name: 'ज', phonetic: 'Ja', word: 'जग', illustration: 'jug', color: '#E74C3C', badgeBg: '#FDEDEC' },
+  'झ': { name: 'झ', phonetic: 'Jha', word: 'झंडा', illustration: 'sun', color: '#F1C40F', badgeBg: '#FEF9E7' },
+  'ट': { name: 'ट', phonetic: 'Ta', word: 'टमाटर', illustration: 'apple', color: '#16A085', badgeBg: '#E8F8F5' },
+  'ठ': { name: 'ठ', phonetic: 'Tha', word: 'ठठेरा', illustration: 'key', color: '#D35400', badgeBg: '#FDF2E9' },
+  'ड': { name: 'ड', phonetic: 'Da', word: 'डमरू', illustration: 'ball', color: '#2ECC71', badgeBg: '#EAFAF1' },
+  'ढ': { name: 'ढ', phonetic: 'Dha', word: 'ढक्कन', illustration: 'jug', color: '#9B59B6', badgeBg: '#F4ECF7' },
+  'त': { name: 'त', phonetic: 'Ta', word: 'तरबूज', illustration: 'apple', color: '#3498DB', badgeBg: '#EBF5FB' },
+  'थ': { name: 'थ', phonetic: 'Tha', word: 'थर्मस', illustration: 'jug', color: '#E67E22', badgeBg: '#FDF2E9' },
+  'द': { name: 'द', phonetic: 'Da', word: 'दवात', illustration: 'ink', color: '#1ABC9C', badgeBg: '#E8F8F5' },
+  'ध': { name: 'ध', phonetic: 'Dha', word: 'धनुष', illustration: 'pen', color: '#F39C12', badgeBg: '#FEF5E7' },
+  'प': { name: 'प', phonetic: 'Pa', word: 'पतंग', illustration: 'sun', color: '#2980B9', badgeBg: '#EAF2F8' },
+  'फ': { name: 'फ', phonetic: 'Pha', word: 'फल', illustration: 'food', color: '#27AE60', badgeBg: '#EAFAF1' },
+  'ब': { name: 'ब', phonetic: 'Ba', word: 'बतख', illustration: 'fish', color: '#9B59B6', badgeBg: '#F4ECF7' },
+  'भ': { name: 'भ', phonetic: 'Bha', word: 'भालू', illustration: 'dog', color: '#E74C3C', badgeBg: '#FDEDEC' },
+  'म': { name: 'म', phonetic: 'Ma', word: 'मछली', illustration: 'fish', color: '#34495E', badgeBg: '#EAECEE' },
+  'य': { name: 'य', phonetic: 'Ya', word: 'यज्ञ', illustration: 'sun', color: '#2C3E50', badgeBg: '#EBEDEF' },
+  'र': { name: 'र', phonetic: 'Ra', word: 'रथ', illustration: 'van', color: '#27AE60', badgeBg: '#EAFAF1' },
+  'ल': { name: 'ल', phonetic: 'La', word: 'ಲಟ್ಟೂ', illustration: 'ball', color: '#FF9800', badgeBg: '#FFF3E0' },
+
+  // Kannada Swar & Vyanjan
+  'ಅ': { name: 'ಅ', phonetic: 'Ah', word: 'ಅರಸ', illustration: 'queen', color: '#4CAF50', badgeBg: '#E8F5E9' },
+  'ಆ': { name: 'ಆ', phonetic: 'Aa', word: 'ಆನೆ', illustration: 'dog', color: '#FF9800', badgeBg: '#FFF3E0' },
+  'ಇ': { name: 'ಇ', phonetic: 'Ih', word: 'ಇಲಿ', illustration: 'cat', color: '#2196F3', badgeBg: '#E3F2FD' },
+  'ಈ': { name: 'ಈ', phonetic: 'Eee', word: 'ಈಜು', illustration: 'fish', color: '#E74C3C', badgeBg: '#FDEDEC' },
+  'ಉ': { name: 'ಉ', phonetic: 'Uh', word: 'ಉಡುಪು', illustration: 'hat', color: '#F1C40F', badgeBg: '#FEF9E7' },
+  'ಊ': { name: 'ಊ', phonetic: 'Ooo', word: 'ಊಟ', illustration: 'food', color: '#8E44AD', badgeBg: '#F5EEF8' },
+
+  // Tamil Uyir & Mei
+  'அ': { name: 'அ', phonetic: 'Ah', word: 'அம்மா', illustration: 'owl', color: '#4CAF50', badgeBg: '#E8F5E9' },
+  'ஆ': { name: 'ஆ', phonetic: 'Aa', word: 'ஆடு', illustration: 'goat', color: '#FF9800', badgeBg: '#FFF3E0' },
+  'இ': { name: 'இ', phonetic: 'Ih', word: 'இலை', illustration: 'leaf', color: '#2196F3', badgeBg: '#E3F2FD' },
+  'ஈ': { name: 'ஈ', phonetic: 'Eee', word: 'ஈட்டி', illustration: 'pen', color: '#E74C3C', badgeBg: '#FDEDEC' },
+  'உ': { name: 'உ', phonetic: 'Uh', word: 'உரல்', illustration: 'jug', color: '#F1C40F', badgeBg: '#FEF9E7' },
+  'ஊ': { name: 'ஊ', phonetic: 'Ooo', word: 'ஊஞ்சல்', illustration: 'ball', color: '#8E44AD', badgeBg: '#F5EEF8' },
+  'க்': { name: 'க்', phonetic: 'Ik', word: 'கொக்கு', illustration: 'fish', color: '#1ABC9C', badgeBg: '#E8F8F5' },
+  'ங': { name: 'ங', phonetic: 'Ing', word: 'சிங்கம்', illustration: 'dog', color: '#E67E22', badgeBg: '#FDF2E9' },
+  'ச்': { name: 'ச்', phonetic: 'Ich', word: 'தச்சர்', illustration: 'pen', color: '#2980B9', badgeBg: '#EAF2F8' },
+  'ஞ்': { name: 'ஞ்', phonetic: 'Inj', word: 'பஞ்சு', illustration: 'egg', color: '#27AE60', badgeBg: '#EAFAF1' },
+  'ட்': { name: 'ட்', phonetic: 'It', word: 'வட்டம்', illustration: 'ball', color: '#9B59B6', badgeBg: '#F4ECF7' },
+  'ண்': { name: 'ண்', phonetic: 'Inn', word: 'வண்ணம்', illustration: 'ball', color: '#3498DB', badgeBg: '#EBF5FB' },
+  'த்': { name: 'த்', phonetic: 'Ith', word: 'நத்தை', illustration: 'cat', color: '#E74C3C', badgeBg: '#FDEDEC' },
+  'ந்': { name: 'ந்', phonetic: 'In', word: 'பந்து', illustration: 'ball', color: '#F1C40F', badgeBg: '#FEF9E7' },
+  'ப்': { name: 'ப்', phonetic: 'Ip', word: 'கப்பல்', illustration: 'van', color: '#16A085', badgeBg: '#E8F8F5' },
+  'ம்': { name: 'ம்', phonetic: 'Im', word: 'மரம்', illustration: 'tree', color: '#D35400', badgeBg: '#FDF2E9' },
+  'ய்': { name: 'ய்', phonetic: 'Iy', word: 'நாய்', illustration: 'dog', color: '#2ECC71', badgeBg: '#EAFAF1' },
+  'ர்': { name: 'ர்', phonetic: 'Ir', word: 'தேர்', illustration: 'van', color: '#9B59B6', badgeBg: '#F4ECF7' }
+};
+
+const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+
+function TracingCanvas({ targetText = 'A', mode = 'letter' }) {
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  const width = mode === 'sentence' ? 480 : 300;
+  const height = 240;
+
+  const redrawCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw notebook lines
+    const lines = [40, 100, 140, 200];
+    lines.forEach((y, idx) => {
+      ctx.strokeStyle = idx === 0 || idx === 3 ? '#FFB6B6' : '#B3E5FC';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    });
+
+    // Draw dotted helper text in the background
+    ctx.fillStyle = '#E2E8F0';
+    ctx.strokeStyle = '#D1D5DB';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([4, 6]);
+    ctx.font = mode === 'sentence' ? 'bold 36px Outfit, sans-serif' : (mode === 'word' ? 'bold 72px Outfit, sans-serif' : 'bold 130px Outfit, sans-serif');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Position text in the middle
+    ctx.strokeText(targetText, width / 2, 120);
+    ctx.setLineDash([]);
+  };
+
+  useEffect(() => {
+    redrawCanvas();
+  }, [targetText, mode]);
+
+  const startDrawing = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    const ctx = canvas.getContext('2d');
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = '#FF7A00'; // Brand orange pencil
+    ctx.lineWidth = mode === 'sentence' ? 6 : 10;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
+        onMouseDown={startDrawing}
+        onMouseMove={draw}
+        onMouseUp={stopDrawing}
+        onMouseLeave={stopDrawing}
+        onTouchStart={startDrawing}
+        onTouchMove={draw}
+        onTouchEnd={stopDrawing}
+        style={{
+          border: '3px dashed var(--color-peach-light)',
+          borderRadius: '20px',
+          background: '#FFFFFF',
+          cursor: 'crosshair',
+          touchAction: 'none',
+          boxShadow: '0 4px 15px rgba(255, 122, 0, 0.05)'
+        }}
+      />
+      <button
+        onClick={redrawCanvas}
+        type="button"
+        style={{
+          padding: '6px 18px',
+          borderRadius: '20px',
+          background: '#FFF0F0',
+          border: 'none',
+          color: '#E74C3C',
+          fontWeight: 800,
+          fontSize: '12px',
+          cursor: 'pointer',
+          boxShadow: '0 2px 6px rgba(231, 76, 60, 0.1)'
+        }}
+      >
+        Clear Tracing 🧹
+      </button>
+    </div>
+  );
+}
+
+const BEGINNER_WRITING_TOPICS = [
+  { title: 'Writing the Alphabet', desc: 'Learn to write A to Z' },
+  { title: 'Writing Small Letters', desc: 'Learn to write a to z' },
+  { title: 'Writing Numbers', desc: 'Learn to write 1 to 10' },
+  { title: 'Simple Words', desc: 'Write easy 3-letter words' },
+  { title: 'Naming Words', desc: 'Write names of things around us' },
+  { title: 'Action Words', desc: 'Write words for actions' },
+  { title: 'Small Sentences', desc: 'Write short and simple sentences' },
+  { title: 'Fun with Practice', desc: 'Let\'s write what you know!' }
+];
+
+const INTERMEDIATE_WRITING_TOPICS = [
+  { title: 'Word Building', desc: 'Unscramble the letters' },
+  { title: 'Sentence Building', desc: 'Create meaningful sentences' },
+  { title: 'Paragraph Writing', desc: 'Write short paragraphs' },
+  { title: 'Punctuation', desc: 'Use punctuation correctly' },
+  { title: 'Capitalization', desc: 'Use capital letters' },
+  { title: 'Creative Writing', desc: 'Write your own ideas' },
+  { title: 'Letter Writing', desc: 'Write friendly letters' },
+  { title: 'Practice Test', desc: 'Test your writing skills' }
+];
+
+const WRITING_TRANSLATIONS = {
+  hi: {
+    'Writing the Alphabet': 'वर्णमाला लिखना',
+    'Writing Small Letters': 'छोटे अक्षर लिखना',
+    'Writing Numbers': 'संख्याएँ लिखना',
+    'Simple Words': 'सरल शब्द',
+    'Naming Words': 'नामकरण शब्द',
+    'Action Words': 'क्रिया शब्द',
+    'Small Sentences': 'छोटे वाक्य',
+    'Fun with Practice': 'अभ्यास का मज़ा',
+    'Word Building': 'शब्द निर्माण',
+    'Sentence Building': 'वाक्य निर्माण',
+    'Paragraph Writing': 'अनुच्छेद लेखन',
+    'Punctuation': 'विराम चिन्ह',
+    'Capitalization': 'बड़े अक्षर',
+    'Creative Writing': 'रचनात्मक लेखन',
+    'Letter Writing': 'पत्र लेखन',
+    'Practice Test': 'अभ्यास परीक्षा',
+  },
+  kn: {
+    'Writing the Alphabet': 'ಅಕ್ಷರಮಾಲೆ ಬರೆಯುವುದು',
+    'Writing Small Letters': 'ಚಿಕ್ಕ ಅಕ್ಷರಗಳನ್ನು ಬರೆಯುವುದು',
+    'Writing Numbers': 'ಸಂಖ್ಯೆಗಳನ್ನು ಬರೆಯುವುದು',
+    'Simple Words': 'ಸರಳ ಪದಗಳು',
+    'Naming Words': 'ಹೆಸರಿಸುವ ಪದಗಳು',
+    'Action Words': 'ಕ್ರಿಯಾ ಪದಗಳು',
+    'Small Sentences': 'ಸಣ್ಣ ವಾಕ್ಯಗಳು',
+    'Fun with Practice': 'ಅಭ್ಯಾಸದ ಆಟ',
+    'Word Building': 'ಪದ ರಚನೆ',
+    'Sentence Building': 'ವಾಕ್ಯ ರಚನೆ',
+    'Paragraph Writing': 'ಪ್ಯಾರಾಗ್ರಾಫ್ ಬರೆಯುವುದು',
+    'Punctuation': 'ವಿರಾಮ ಚಿಹ್ನೆಗಳು',
+    'Capitalization': 'ದೊಡ್ಡ ಅಕ್ಷರಗಳು',
+    'Creative Writing': 'ಸೃಜನಶೀಲ ಬರವಣಿಗೆ',
+    'Letter Writing': 'ಪತ್ರ ಬರವಣಿಗೆ',
+    'Practice Test': 'ಅಭ್ಯಾಸ ಪರೀಕ್ಷೆ',
+  },
+  ta: {
+    'Writing the Alphabet': 'நெடுங்கணக்கு எழுதுதல்',
+    'Writing Small Letters': 'சிறிய எழுத்துக்களை எழுதுதல்',
+    'Writing Numbers': 'எண்களை எழுதுதல்',
+    'Simple Words': 'எளிய சொற்கள்',
+    'Naming Words': 'பெயர்ச்சொற்கள்',
+    'Action Words': 'வினைச்சொற்கள்',
+    'Small Sentences': 'சிறு வாக்கியங்கள்',
+    'Fun with Practice': 'பயிற்சி விளையாட்டு',
+    'Word Building': 'சொல் உருவாக்கம்',
+    'Sentence Building': 'வாக்கிய உருவாக்கம்',
+    'Paragraph Writing': 'பத்தி எழுதுதல்',
+    'Punctuation': 'நிறுத்தற்குறிகள்',
+    'Capitalization': 'பெரிய எழுத்துக்கள்',
+    'Creative Writing': 'படைப்பாற்றல் எழுத்து',
+    'Letter Writing': 'கடிதம் எழுதுதல்',
+    'Practice Test': 'பயிற்சி தேர்வு',
+  }
+};
+
+export default function LessonPlayer() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { learner } = useLearner();
+
+  const [currentEntry, setCurrentEntry] = useState(location.state?.entry);
+  const [learningPath, setLearningPath] = useState(location.state?.path || []);
+
+  const lesson = currentEntry?.lesson_detail || (currentEntry?.lesson_id ? currentEntry : null) || {
+    lesson_id: 'BEG-EN-001',
+    title: 'Tap Letters: Apple',
+    difficulty: 'beginner',
+    lesson_type: 'tap_letters',
+    audio_text: 'Tap the Apple to hear its sound.',
+    image_emoji: '🍎',
+    activities_data: [
+      { type: 'explore_prompt', instruction: 'Explore the letters soundboard', term: 'Apple', emoji: '🍎', phonetic: 'A' },
+      { type: 'practice_mic', voice_target: 'A' },
+      { type: 'tap_grid', items: [{ label: 'Apple', emoji: '🍎', sound: 'Apple' }] }
+    ],
+    quiz_data: {
+      recognition: [{ question: 'Tap the letter B', options: ['A', 'B', 'D'], correct: 'B' }],
+      understanding: [{ question: 'Which picture starts with C?', options: ['🐱 Cat', '🍎 Apple', '⚽ Ball'], correct: '🐱 Cat' }],
+      application: [{ question: 'Tap Apple', options: ['Apple', 'Water', 'Doctor'], correct: 'Apple' }]
+    }
+  };
+
+  const lessonNumber = currentEntry?.day_number || 1;
+  const preferredLanguage = learner?.learning_language || lesson.language || 'en';
+  const speechLang = SPEECH_LANG_MAP[preferredLanguage] || 'en-US';
+
+  // 5 strict steps:
+  // 0: Explore (Alphabet soundboard or target prompter)
+  // 1: Practice (Tracing or Voice microphone repetition)
+  // 2: Game (Memory flip cards, unscramble, connect pairs)
+  // 3: Short Quiz (Exactly 3 questions)
+  // 4: Reward / Certificate
+  const [stage, setStage] = useState(0);
+  const [audioSpeed, setAudioSpeed] = useState(0.95);
+
+  // Animated Hand Pointer Guide State
+  const [showHandPointer, setShowHandPointer] = useState(true);
+
+  // Tracing Canvas Refs
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  // Voice Speaking states
+  const [voiceSuccess, setVoiceSuccess] = useState(false);
+  const [userSpokenText, setUserSpokenText] = useState('');
+  const [completing, setCompleting] = useState(false);
+
+  // Game Engine Specific States
+  const [leftMatchItems, setLeftMatchItems] = useState([]);
+  const [rightMatchItems, setRightMatchItems] = useState([]);
+  const [selectedLeft, setSelectedLeft] = useState(null);
+  const [selectedRight, setSelectedRight] = useState(null);
+  const [completedMatches, setCompletedMatches] = useState({});
+  const [matchSuccess, setMatchSuccess] = useState(false);
+
+  const [targetWord, setTargetWord] = useState('');
+  const [shuffledLetters, setShuffledLetters] = useState([]);
+  const [builtSpelling, setBuiltSpelling] = useState([]);
+
+  const [memoryCards, setMemoryCards] = useState([]);
+  const [flippedCards, setFlippedCards] = useState([]);
+  const [matchedCardKeys, setMatchedCardKeys] = useState([]);
+
+  // Quiz states (Exactly 3 questions randomly selected from the pool)
+  const [activeQuizQuestions, setActiveQuizQuestions] = useState([]);
+  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+  const [selectedQuizOption, setSelectedQuizOption] = useState(null);
+  const [quizScore, setQuizScore] = useState(0);
+  const [quizFailed, setQuizFailed] = useState(false);
+
+  const [unscrambleAnswers, setUnscrambleAnswers] = useState({});
+  const [unscrambleChecked, setUnscrambleChecked] = useState(false);
+  const [unscrambleIsCorrect, setUnscrambleIsCorrect] = useState(false);
+
+  const [activeStoryTab, setActiveStoryTab] = useState('');
+  const [storyAnswers, setStoryAnswers] = useState({});
+  const [storyChecked, setStoryChecked] = useState(false);
+
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatSelectedOption, setChatSelectedOption] = useState(null);
+
+  const [essayText, setEssayText] = useState('');
+  const [essaySubmitted, setEssaySubmitted] = useState(false);
+
+  const [sentenceAnswer, setSentenceAnswer] = useState([]);
+  const [sentenceChecked, setSentenceChecked] = useState(false);
+  const [sentenceCorrect, setSentenceCorrect] = useState(false);
+
+  const [paragraphText, setParagraphText] = useState('');
+  const [paragraphSubmitted, setParagraphSubmitted] = useState(false);
+
+  const [assessmentAnswers, setAssessmentAnswers] = useState(Array(10).fill(null));
+  const [assessmentFinished, setAssessmentFinished] = useState(false);
+  const [assessmentTimeLeft, setAssessmentTimeLeft] = useState(900);
+
+  const [letterTo, setLetterTo] = useState('');
+  const [letterSubject, setLetterSubject] = useState('');
+  const [letterBody, setLetterBody] = useState('');
+  const [letterSubmitted, setLetterSubmitted] = useState(false);
+
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [incorrectQuizGuesses, setIncorrectQuizGuesses] = useState({});
+  const [lessonCompleted, setLessonCompleted] = useState(false);
+
+  const [alphabetAnswer, setAlphabetAnswer] = useState(null);
+  const [alphabetAnswerCorrect, setAlphabetAnswerCorrect] = useState(false);
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  const exploreData = (lesson.activities && lesson.activities.length > 0) ? lesson.activities[0] : (lesson.activities_data?.[0] || {});
+  const practiceData = (lesson.activities && lesson.activities.length > 1) ? lesson.activities[1] : (lesson.activities_data?.[1] || {});
+  const gameData = (lesson.mini_game && Object.keys(lesson.mini_game).length > 0) ? lesson.mini_game : (lesson.activities_data?.[2] || {});
+  const isAlphabetLesson = (exploreData?.type === 'audio_match') || (lesson?.difficulty === 'intermediate') || (lesson?.difficulty === 'advanced') || (lesson?.skill === 'writing');
+
+  const groupLetters = exploreData?.options || ['A', 'B', 'C'];
+  const slides = [];
+
+  if (isAlphabetLesson) {
+    if (lesson?.difficulty === 'intermediate' || lesson?.difficulty === 'advanced' || lesson?.skill === 'writing') {
+      slides.push(...(lesson.activities || []));
+    } else {
+      // 1. Welcome Slide
+      slides.push({
+        type: 'welcome',
+        title: `Meet the Letters ${groupLetters.slice(0, -1).join(', ')} & ${groupLetters[groupLetters.length - 1]}`,
+        subtitle: `Welcome! Today you'll learn your first ${groupLetters.length === 3 ? 'three' : groupLetters.length} letters.`,
+        objectives: groupLetters.map(letter => `Recognise ${letter}`).concat('Identify them by sound')
+      });
+
+      // 2. Learn Slides
+      groupLetters.forEach((letter) => {
+        const meta = LETTER_META[letter] || { name: letter, phonetic: letter, word: letter, illustration: 'default', color: '#8E44AD', badgeBg: '#F5EEF8' };
+        slides.push({
+          type: 'learn_letter',
+          letter: letter,
+          meta: meta
+        });
+      });
+
+      // 3. Audio check checkups
+      groupLetters.forEach((letter, qIdx) => {
+        slides.push({
+          type: 'practice_audio',
+          questionNumber: qIdx + 1,
+          questionText: 'Tap the letter you hear.',
+          target: letter,
+          options: groupLetters,
+          hint: `Listen closely: ${letter}`
+        });
+      });
+
+      // 4. Missing Letter checkups
+      groupLetters.forEach((letter, qIdx) => {
+        const otherLetters = [...groupLetters];
+        const targetPos = otherLetters.indexOf(letter);
+        const displaySequence = otherLetters.map((l, lIdx) => lIdx === targetPos ? '__' : l).join(' ');
+        slides.push({
+          type: 'practice_missing',
+          questionNumber: groupLetters.length + qIdx + 1,
+          questionText: 'What is the missing letter?',
+          displaySequence: displaySequence,
+          target: letter,
+          options: [letter, groupLetters[(targetPos + 1) % groupLetters.length], 'Z'].sort(() => Math.random() - 0.5),
+          hint: `Sequence is ${otherLetters.join(', ')}`
+        });
+      });
+
+      // 5. Graduation Slide
+      slides.push({
+        type: 'graduation',
+        title: 'Great job!',
+        subtitle: 'You learned:',
+        letters: groupLetters
+      });
+    }
+  }
+
+  // Generate 3 unique questions testing different skills from pool
+  const generateActiveQuiz = () => {
+    const data = (lesson.quiz_bank && lesson.quiz_bank.length > 0) ? lesson.quiz_bank : (lesson.quiz_data || {});
+    let selected = [];
+    if (Array.isArray(data)) {
+      selected = data;
+    } else if (data.recognition && data.understanding && data.application) {
+      const rec = shuffle(data.recognition)[0];
+      const und = shuffle(data.understanding)[0];
+      const app = shuffle(data.application)[0];
+      if (rec) selected.push(rec);
+      if (und) selected.push(und);
+      if (app) selected.push(app);
+    }
+    
+    if (selected.length === 0) {
+      selected = [
+        { question: 'Identify the letter', options: ['A', 'B', 'C'], correct: 'A' },
+        { question: 'Match the card', options: ['Apple', 'Water', 'Doctor'], correct: 'Apple' },
+        { question: 'Speak word', options: ['Apple', 'Ball'], correct: 'Apple' }
+      ];
+    }
+    setActiveQuizQuestions(selected);
+  };
+
+  // Generate quiz questions on load and reset states
+  useEffect(() => {
+    resetPlayerStates();
+    generateActiveQuiz();
+    setAssessmentTimeLeft(900);
+  }, [lesson]);
+
+  useEffect(() => {
+    if (!lesson.lesson_id || !lesson.lesson_id.includes('-ASSESS-') || assessmentFinished) return;
+    const interval = setInterval(() => {
+      setAssessmentTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setAssessmentFinished(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lesson, assessmentFinished]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Speech triggers on loading stage
+  useEffect(() => {
+    setShowHandPointer(true);
+    setVoiceSuccess(false);
+
+    if (isAlphabetLesson) {
+      if (stage === 0) {
+        speak(exploreData.question || 'Tap the letter you hear', speechLang, audioSpeed);
+      } else if (stage === 1) {
+        speak(practiceData.question || 'Find the missing letter', speechLang, audioSpeed);
+      }
+    } else {
+      if (stage === 0) {
+        const welcome = exploreData.instruction || 'Let\'s explore this target character!';
+        speak(welcome, speechLang, audioSpeed);
+      } else if (stage === 1) {
+        const prInst = practiceData.instruction || 'Practice pronunciation check!';
+        speak(prInst, speechLang, audioSpeed);
+      } else if (stage === 2) {
+        const gmInst = gameData.instruction || 'Let\'s play a quick interactive game!';
+        speak(gmInst, speechLang, audioSpeed);
+
+        // Setup games
+      if (gameData.type === 'match_pairs') {
+        const pairs = gameData.pairs || [];
+        setLeftMatchItems(shuffle(pairs.map(p => ({ id: p.id, text: p.left }))));
+        setRightMatchItems(shuffle(pairs.map(p => ({ id: p.id, text: p.right }))));
+        setCompletedMatches({});
+        setMatchSuccess(false);
+      }
+      if (gameData.type === 'unscramble') {
+        setTargetWord(gameData.word || '');
+        setShuffledLetters(gameData.letters || []);
+        setBuiltSpelling([]);
+        setMatchSuccess(false);
+      }
+      if (gameData.type === 'memory_cards') {
+        const cards = gameData.cards || [];
+        setMemoryCards(shuffle(cards.map(c => ({ ...c, isFlipped: false }))));
+        setFlippedCards([]);
+        setMatchedCardKeys([]);
+        setMatchSuccess(false);
+      }
+    } else if (stage === 3) {
+      speak('Let\'s complete the quiz checkup!', speechLang, audioSpeed);
+    }
+  }
+}, [lesson, stage]);
+
+  const handleVoiceResult = (transcript) => {
+    setUserSpokenText(transcript);
+    const activeSlide = slides[slideIndex] || {};
+    const target = (activeSlide.voice_target || practiceData.voice_target || 'Apple').toLowerCase().trim();
+    const spoken = transcript.toLowerCase().trim();
+
+    if (spoken.includes(target)) {
+      setVoiceSuccess(true);
+      speak('Excellent!', speechLang, audioSpeed);
+    } else {
+      speak(`Try again.`, speechLang, audioSpeed);
+    }
+  };
+
+  const { startListening, listening } = useVoiceInput(handleVoiceResult, speechLang);
+
+  // Tracing drawing helpers
+  const startDrawing = (e) => {
+    setShowHandPointer(false);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#FF7A00';
+    ctx.lineWidth = 14;
+    ctx.lineCap = 'round';
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+    
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  // Drag matches columns checkup
+  const selectLeftItem = (leftId) => {
+    setShowHandPointer(false);
+    if (completedMatches[leftId]) return;
+    setSelectedLeft(leftId);
+
+    if (selectedRight) {
+      evaluateMatch(leftId, selectedRight);
+    }
+  };
+
+  const selectRightItem = (rightId) => {
+    setShowHandPointer(false);
+    if (Object.values(completedMatches).includes(rightId)) return;
+    setSelectedRight(rightId);
+
+    if (selectedLeft) {
+      evaluateMatch(selectedLeft, rightId);
+    }
+  };
+
+  const evaluateMatch = (leftId, rightId) => {
+    if (leftId === rightId) {
+      const updated = { ...completedMatches, [leftId]: rightId };
+      setCompletedMatches(updated);
+      speak('Match connected!', speechLang, audioSpeed);
+      setSelectedLeft(null);
+      setSelectedRight(null);
+
+      if (Object.keys(updated).length === leftMatchItems.length) {
+        setMatchSuccess(true);
+        speak('All matches found! Great job!', speechLang, audioSpeed);
+      }
+    } else {
+      speak('Try again.', speechLang, audioSpeed);
+      setSelectedLeft(null);
+      setSelectedRight(null);
+    }
+  };
+
+  const handleLetterTap = (letter, index) => {
+    setShowHandPointer(false);
+    const updatedSpelling = [...builtSpelling, letter];
+    setBuiltSpelling(updatedSpelling);
+    speak(letter, speechLang, audioSpeed);
+
+    const updatedLetters = [...shuffledLetters];
+    updatedLetters.splice(index, 1);
+    setShuffledLetters(updatedLetters);
+
+    if (updatedSpelling.join('').toLowerCase() === targetWord.toLowerCase()) {
+      setMatchSuccess(true);
+      speak(`Excellent! You spelled ${targetWord}!`, speechLang, audioSpeed);
+    } else if (updatedSpelling.length >= targetWord.length) {
+      speak('Try again.', speechLang, audioSpeed);
+      setBuiltSpelling([]);
+      setShuffledLetters(gameData.letters || []);
+    }
+  };
+
+  const handleCardFlip = (card, index) => {
+    setShowHandPointer(false);
+    if (flippedCards.length >= 2 || matchedCardKeys.includes(card.match_key) || flippedCards.some(fc => fc.id === card.id)) {
+      return;
+    }
+
+    speak(card.label, speechLang, audioSpeed);
+    const newFlipped = [...flippedCards, card];
+    setFlippedCards(newFlipped);
+
+    if (newFlipped.length === 2) {
+      if (newFlipped[0].match_key === newFlipped[1].match_key) {
+        setMatchedCardKeys([...matchedCardKeys, newFlipped[0].match_key]);
+        setFlippedCards([]);
+        speak('Match connected!', speechLang, audioSpeed);
+        if (matchedCardKeys.length + 1 === memoryCards.length / 2) {
+          setMatchSuccess(true);
+          speak('Great job!', speechLang, audioSpeed);
+        }
+      } else {
+        setTimeout(() => {
+          setFlippedCards([]);
+          speak('Try again.', speechLang, audioSpeed);
+        }, 1200);
+      }
+    }
+  };
+
+  const handleTokenClick = (itemId, letter) => {
+    const currentAns = unscrambleAnswers[itemId] || [];
+    setUnscrambleAnswers({
+      ...unscrambleAnswers,
+      [itemId]: [...currentAns, letter]
+    });
+  };
+
+  const handleAnswerLetterClick = (itemId, ansIdx) => {
+    const currentAns = unscrambleAnswers[itemId] || [];
+    const newAns = currentAns.filter((_, idx) => idx !== ansIdx);
+    setUnscrambleAnswers({
+      ...unscrambleAnswers,
+      [itemId]: newAns
+    });
+  };
+
+  const clearUnscrambleRow = (itemId) => {
+    setUnscrambleAnswers({
+      ...unscrambleAnswers,
+      [itemId]: []
+    });
+    setUnscrambleChecked(false);
+    setUnscrambleIsCorrect(false);
+  };
+
+  const checkUnscrambleAnswers = (items) => {
+    let allCorrect = true;
+    items.forEach((item) => {
+      const userWord = (unscrambleAnswers[item.id] || []).join('').toLowerCase().trim();
+      const target = item.target.toLowerCase().trim();
+      if (userWord !== target) {
+        allCorrect = false;
+      }
+    });
+    setUnscrambleChecked(true);
+    setUnscrambleIsCorrect(allCorrect);
+    if (allCorrect) {
+      speak("Excellent unscrambling! All words are correct!", speechLang, audioSpeed);
+    } else {
+      speak("Some words are incorrect. Click Clear and try again.", speechLang, audioSpeed);
+    }
+  };
+
+  const handleHuntTap = (letter) => {
+    setShowHandPointer(false);
+    speak(letter, speechLang, audioSpeed);
+    if (letter === gameData.target) {
+      setMatchSuccess(true);
+      speak('Excellent!', speechLang, audioSpeed);
+    } else {
+      speak('Try again.', speechLang, audioSpeed);
+    }
+  };
+
+  const handleQuizAnswer = (option) => {
+    const q = activeQuizQuestions[currentQuizIndex];
+    const correct = q?.correct || (q && q.options && q.correct_index !== undefined ? q.options[q.correct_index] : 'A');
+
+    if (option === correct) {
+      setSelectedQuizOption(option);
+      const wasAlreadyGuessedWrong = (incorrectQuizGuesses[currentQuizIndex] || []).length > 0;
+      if (!wasAlreadyGuessedWrong) {
+        setQuizScore((prev) => prev + 1);
+      }
+      speak('Correct!', speechLang, audioSpeed);
+    } else {
+      const currentWrong = incorrectQuizGuesses[currentQuizIndex] || [];
+      if (!currentWrong.includes(option)) {
+        setIncorrectQuizGuesses({
+          ...incorrectQuizGuesses,
+          [currentQuizIndex]: [...currentWrong, option]
+        });
+      }
+      speak('Incorrect. Here is an AI tip: ' + (q?.explanation || 'Try again!'), speechLang, audioSpeed);
+    }
+  };
+
+  const handleNextQuizQuestion = () => {
+    setSelectedQuizOption(null);
+    if (currentQuizIndex < (activeQuizQuestions.length - 1)) {
+      setCurrentQuizIndex((prev) => prev + 1);
+    } else {
+      const passThreshold = activeQuizQuestions.length >= 3 ? 2 : activeQuizQuestions.length;
+      const passed = quizScore >= passThreshold;
+      if (passed) {
+        handleFinishQuest();
+      } else {
+        setQuizFailed(true);
+      }
+    }
+  };
+
+  const restartQuiz = () => {
+    setCurrentQuizIndex(0);
+    setSelectedQuizOption(null);
+    setQuizScore(0);
+    setQuizFailed(false);
+    setIncorrectQuizGuesses({});
+    generateActiveQuiz();
+  };
+
+  const handleFinishQuest = async () => {
+    setCompleting(true);
+    try {
+      if (learner && lessonNumber) {
+        await completeLessonDay(learner.learner_id, lessonNumber);
+        await endSession(learner.learner_id).catch(() => {});
+        await startSession(learner.learner_id).catch(() => {});
+      }
+      setLessonCompleted(true);
+      setStage(isAlphabetLesson ? 2 : 4);
+    } catch (err) {
+      console.error('Failed to complete lesson:', err);
+      setLessonCompleted(true);
+      setStage(isAlphabetLesson ? 2 : 4);
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  const resetPlayerStates = () => {
+    setStage(0);
+    setSlideIndex(0);
+    setVoiceSuccess(false);
+    setUserSpokenText('');
+    setCompletedMatches({});
+    setMatchSuccess(false);
+    setCurrentQuizIndex(0);
+    setSelectedQuizOption(null);
+    setQuizScore(0);
+    setQuizFailed(false);
+    setAlphabetAnswer(null);
+    setAlphabetAnswerCorrect(false);
+    
+    setShowQuiz(false);
+    setLessonCompleted(false);
+    setIncorrectQuizGuesses({});
+    setActiveStoryTab('');
+    setStoryAnswers({});
+    setStoryChecked(false);
+    setChatMessages([]);
+    setChatSelectedOption(null);
+    setEssayText('');
+    setEssaySubmitted(false);
+    setSentenceAnswer([]);
+    setSentenceChecked(false);
+    setSentenceCorrect(false);
+    setParagraphText('');
+    setParagraphSubmitted(false);
+    setAssessmentAnswers(Array(10).fill(null));
+    setAssessmentFinished(false);
+    setLetterTo('');
+    setLetterSubject('');
+    setLetterBody('');
+    setLetterSubmitted(false);
+  };
+
+  const handlePlayNextLesson = async () => {
+    if (!learner) return;
+
+    setCompleting(true);
+    try {
+      const pathRes = await fetchLearningPath(learner.learner_id);
+      let freshPath = pathRes.data || [];
+
+      let nextEntryNode = freshPath.find((node) => node.day_number === lessonNumber + 1);
+
+      if (!nextEntryNode) {
+        await generateLearningPath(learner.learner_id);
+        const updatedPath = await fetchLearningPath(learner.learner_id);
+        freshPath = updatedPath.data || [];
+        nextEntryNode = freshPath.find((node) => node.day_number === lessonNumber + 1);
+      }
+
+      if (nextEntryNode) {
+        resetPlayerStates();
+        setCurrentEntry(nextEntryNode);
+        setLearningPath(freshPath);
+      } else {
+        navigate('/home');
+      }
+    } catch (err) {
+      console.error('Play next lesson failed:', err);
+      navigate('/home');
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  const handleCompleteAndPlayNext = async () => {
+    setCompleting(true);
+    try {
+      if (learner && lessonNumber) {
+        await completeLessonDay(learner.learner_id, lessonNumber);
+        await endSession(learner.learner_id).catch(() => {});
+        await startSession(learner.learner_id).catch(() => {});
+      }
+      
+      const pathRes = await fetchLearningPath(learner.learner_id);
+      let freshPath = pathRes.data || [];
+      let nextEntryNode = freshPath.find((node) => node.day_number === lessonNumber + 1);
+
+      if (!nextEntryNode) {
+        await generateLearningPath(learner.learner_id);
+        const updatedPath = await fetchLearningPath(learner.learner_id);
+        freshPath = updatedPath.data || [];
+        nextEntryNode = freshPath.find((node) => node.day_number === lessonNumber + 1);
+      }
+
+      if (nextEntryNode) {
+        resetPlayerStates();
+        setCurrentEntry(nextEntryNode);
+        setLearningPath(freshPath);
+      } else {
+        navigate('/home');
+      }
+    } catch (err) {
+      console.error('Failed to complete and play next lesson:', err);
+      navigate('/home');
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  if (lesson.lesson_id && lesson.lesson_id.includes('-ASSESS-')) {
+    const qList = activeQuizQuestions || [];
+    const passingScore = lesson.difficulty === 'beginner' ? 7 : 8;
+    
+    // Calculate score
+    const correctCount = assessmentAnswers.reduce((count, ans, qIdx) => {
+      const q = qList[qIdx];
+      if (q && ans !== null && ans === q.correct_index) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
+
+    const isPassed = correctCount >= passingScore;
+
+    const handleFinishAssessment = async () => {
+      try {
+        if (learner && lessonNumber) {
+          await completeLessonDay(learner.learner_id, lessonNumber);
+          await endSession(learner.learner_id).catch(() => {});
+          await startSession(learner.learner_id).catch(() => {});
+        }
+        navigate('/home');
+      } catch (err) {
+        console.error('Failed to complete assessment:', err);
+        navigate('/home');
+      }
+    };
+
+    if (assessmentFinished) {
+      return (
+        <div className={styles.container} style={{ background: '#FFFDF9', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px' }}>
+          <div style={{ maxWidth: '1100px', width: '100%' }}>
+            
+            {/* Assessment Result Banner */}
+            <div style={{ background: 'linear-gradient(135deg, #FFF0DB, #FFE2BC)', border: '2.5px solid var(--color-orange)', borderRadius: '24px', padding: '24px 32px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 8px 30px rgba(255, 122, 0, 0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span style={{ fontSize: '48px' }}>🎉</span>
+                <div style={{ textAlign: 'left' }}>
+                  <h1 style={{ fontSize: '28px', fontWeight: 900, color: 'var(--color-orange-dark)', margin: 0 }}>
+                    {lesson.title} Passed!
+                  </h1>
+                  <p style={{ fontSize: '15px', color: 'var(--text-dark)', margin: '4px 0 0 0', fontWeight: 700 }}>
+                    Excellent work, {learner?.name || 'Literacy Graduate'}! You completed the final checkpoint.
+                  </p>
+                </div>
+              </div>
+              <div style={{ fontSize: '32px' }}>🏆</div>
+            </div>
+
+            {/* Main results columns */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+              
+              {/* Left Column: Scores & Mascot */}
+              <div className={styles.card} style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '28px', textAlign: 'left' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--color-peach-light)', paddingBottom: '16px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '14px', fontWeight: 900, color: 'var(--color-orange-dark)', textTransform: 'uppercase', margin: 0 }}>Your Final Score</h3>
+                    <h2 style={{ fontSize: '44px', fontWeight: 950, color: isPassed ? '#2E7D32' : 'var(--color-orange-dark)', margin: '4px 0 0 0' }}>
+                      {correctCount} / 10
+                    </h2>
+                  </div>
+                  <div style={{ padding: '8px 16px', borderRadius: '12px', background: isPassed ? '#E8F5E9' : '#FFEBEE', color: isPassed ? '#2E7D32' : '#C62828', fontWeight: 900, fontSize: '14px', border: '1.5px solid' }}>
+                    {isPassed ? 'PASSED 🎓' : 'TRY AGAIN 💪'}
+                  </div>
+                </div>
+
+                {/* Mascot owl advice */}
+                <div style={{ display: 'flex', gap: '16px', background: 'var(--color-cream-bg)', padding: '16px', borderRadius: '16px', border: '1.5px solid var(--color-peach-light)', alignItems: 'center' }}>
+                  <span style={{ fontSize: '40px' }}>🦉</span>
+                  <div>
+                    <p style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-dark)', margin: 0, lineHeight: '1.5' }}>
+                      "Excellent work! You are one step closer to becoming a master learner. Go ahead and start the next level!"
+                    </p>
+                  </div>
+                </div>
+
+                {/* Topic Breakdown */}
+                <div>
+                  <h4 style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', textTransform: 'uppercase' }}>Performance by Topic</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {[
+                      { topic: 'Vocabulary', score: correctCount * 10, count: correctCount },
+                      { topic: 'Grammar & Writing', score: 80, count: 8 },
+                      { topic: 'Reading Comprehension', score: 70, count: 7 },
+                      { topic: 'Punctuation & Spelling', score: 90, count: 9 }
+                    ].map((item, index) => (
+                      <div key={index}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 805, color: 'var(--text-dark)', marginBottom: '4px' }}>
+                          <span>{item.topic}</span>
+                          <span>{item.score}% ({item.count}/10)</span>
+                        </div>
+                        <div style={{ width: '100%', height: '8px', background: '#F1F5F9', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ width: `${item.score}%`, height: '100%', background: item.score >= 80 ? '#4CAF50' : '#FF9800', borderRadius: '4px' }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* You Earned */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
+                  <div style={{ background: '#FFF9F2', border: '1.5px dashed var(--color-peach)', borderRadius: '16px', padding: '12px', textAlign: 'center' }}>
+                    <span style={{ fontSize: '20px' }}>✨</span>
+                    <h5 style={{ margin: '4px 0 0 0', fontSize: '12px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>+250 XP</h5>
+                  </div>
+                  <div style={{ background: '#FFF9F2', border: '1.5px dashed var(--color-peach)', borderRadius: '16px', padding: '12px', textAlign: 'center' }}>
+                    <span style={{ fontSize: '20px' }}>🔥</span>
+                    <h5 style={{ margin: '4px 0 0 0', fontSize: '12px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>8 Day Streak</h5>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Graduation Certificate Box */}
+              <div className={styles.card} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px', background: '#FFFFFF' }}>
+                
+                {/* Visual Certificate Frame */}
+                <div style={{ width: '100%', border: '8px double var(--color-orange)', borderRadius: '16px', padding: '20px', background: '#FFFDF9', position: 'relative', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
+                  <div style={{ textAlign: 'center', border: '2px solid var(--color-peach)', padding: '16px', background: '#FFFFFF', borderRadius: '8px' }}>
+                    <span style={{ fontSize: '20px', display: 'block', marginBottom: '8px' }}>🦉 MiGo Buddy</span>
+                    <h3 style={{ fontSize: '20px', fontWeight: 950, color: 'var(--color-orange-dark)', margin: '0 0 8px 0', letterSpacing: '1px' }}>
+                      CERTIFICATE OF ACHIEVEMENT
+                    </h3>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px 0' }}>This is proudly presented to:</p>
+                    <h2 style={{ fontSize: '24px', fontWeight: 950, color: 'var(--text-dark)', textDecoration: 'underline', textDecorationColor: 'var(--color-orange)', textUnderlineOffset: '6px', margin: '0 0 16px 0' }}>
+                      {learner?.name || 'Literacy Graduate'}
+                    </h2>
+                    <p style={{ fontSize: '12px', color: 'var(--text-dark)', lineHeight: '1.6', margin: '0 0 16px 0', fontWeight: 800 }}>
+                      for successfully completing the <strong style={{ color: 'var(--color-orange-dark)' }}>{lesson.difficulty.toUpperCase()} LEVEL</strong> final assessment, demonstrating great dedication and knowledge.
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: 'var(--text-muted)', marginTop: '20px', fontWeight: 700 }}>
+                      <div>
+                        <div style={{ borderBottom: '1px solid #CBD5E1', width: '80px', paddingBottom: '4px', marginBottom: '4px' }}>05th August 2026</div>
+                        <span>Date</span>
+                      </div>
+                      <div style={{ fontSize: '28px' }}>🏅</div>
+                      <div>
+                        <div style={{ borderBottom: '1px solid #CBD5E1', width: '80px', paddingBottom: '4px', marginBottom: '4px', fontFamily: 'cursive', color: 'var(--color-orange)' }}>MiGo Buddy</div>
+                        <span>Learning Companion</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '24px' }}>
+                  <button
+                    onClick={() => window.print()}
+                    style={{
+                      flex: 1,
+                      padding: '12px 24px',
+                      background: '#FFFFFF',
+                      border: '2px solid var(--color-peach)',
+                      color: 'var(--color-orange-dark)',
+                      borderRadius: '12px',
+                      fontWeight: 900,
+                      cursor: 'pointer'
+                    }}
+                    type="button"
+                  >
+                    💾 Download PDF
+                  </button>
+                  <button
+                    onClick={handleFinishAssessment}
+                    style={{
+                      flex: 1.5,
+                      padding: '12px 24px',
+                      background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '12px',
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 15px rgba(255,122,0,0.3)'
+                    }}
+                    type="button"
+                  >
+                    Unlock {lesson.difficulty === 'beginner' ? 'Intermediate' : lesson.difficulty === 'intermediate' ? 'Advanced' : 'Next'} Level ➔
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const currentQ = qList[currentQuizIndex];
+
+    return (
+      <div className={styles.container} style={{ background: '#FFFDF9', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 16px' }}>
+        <div style={{ maxWidth: '840px', width: '100%' }}>
+          
+          {/* Assessment Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <button
+              onClick={() => navigate(-1)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-orange-dark)',
+                fontWeight: 900,
+                cursor: 'pointer'
+              }}
+            >
+              <ArrowLeft size={20} />
+              <span>Exit Assessment</span>
+            </button>
+            <h1 style={{ fontSize: '20px', fontWeight: 950, color: 'var(--text-dark)', margin: 0 }}>
+              {lesson.title}
+            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFF5E8', border: '1.5px solid var(--color-peach)', padding: '6px 14px', borderRadius: '12px', color: 'var(--color-orange-dark)', fontWeight: 900 }}>
+              <span>⏱️</span>
+              <span>{formatTime(assessmentTimeLeft)}</span>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 800, color: 'var(--text-dark)' }}>
+              <span>Question {currentQuizIndex + 1} of 10</span>
+              <span>{assessmentAnswers.filter(a => a !== null).length} answered</span>
+            </div>
+            <div style={{ width: '100%', height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ width: `${(currentQuizIndex + 1) * 10}%`, height: '100%', background: '#FF7A00', borderRadius: '4px', transition: 'all 0.3s ease' }} />
+            </div>
+          </div>
+
+          {/* Assessment Main Panel */}
+          <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '24px', alignItems: 'start' }}>
+            
+            {/* Sidebar Number Grid */}
+            <div className={styles.card} style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+              {Array.from({ length: 10 }).map((_, idx) => {
+                const isSelected = currentQuizIndex === idx;
+                const isAnswered = assessmentAnswers[idx] !== null;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentQuizIndex(idx)}
+                    style={{
+                      height: '40px',
+                      borderRadius: '10px',
+                      border: isSelected ? '2.5px solid var(--color-orange)' : '1.5px solid #CBD5E1',
+                      background: isSelected ? 'var(--color-cream-bg)' : isAnswered ? '#FFEED9' : '#FFFFFF',
+                      color: isSelected ? 'var(--color-orange-dark)' : isAnswered ? 'var(--color-orange-dark)' : 'var(--text-dark)',
+                      fontWeight: 900,
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {idx + 1}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Question Pane */}
+            <div className={styles.card} style={{ padding: '32px', textAlign: 'left', minHeight: '360px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              
+              {currentQ ? (
+                <div>
+                  <span style={{ fontSize: '12px', color: 'var(--color-orange-dark)', fontWeight: 900, textTransform: 'uppercase' }}>Checkup Question</span>
+                  <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '8px', marginBottom: '24px', lineHeight: '1.4' }}>
+                    {currentQ.question}
+                  </h2>
+
+                  {/* Options List */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {currentQ.options?.map((opt, oIdx) => {
+                      const isOptionChosen = assessmentAnswers[currentQuizIndex] === oIdx;
+                      const hasSelectedAny = assessmentAnswers[currentQuizIndex] !== null;
+                      const isCorrectOpt = oIdx === currentQ.correct_index;
+
+                      let btnStyle = {
+                        width: '100%',
+                        padding: '16px 20px',
+                        borderRadius: '14px',
+                        border: '2px solid #E2E8F0',
+                        background: '#FFFFFF',
+                        color: 'var(--text-dark)',
+                        fontWeight: 800,
+                        fontSize: '15px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      };
+
+                      if (hasSelectedAny) {
+                        if (isCorrectOpt) {
+                          btnStyle.border = '2.5px solid #2E7D32';
+                          btnStyle.background = '#E8F5E9';
+                          btnStyle.color = '#2E7D32';
+                        } else if (isOptionChosen) {
+                          btnStyle.border = '2.5px solid #C62828';
+                          btnStyle.background = '#FFEBEE';
+                          btnStyle.color = '#C62828';
+                        } else {
+                          btnStyle.opacity = 0.6;
+                        }
+                      }
+
+                      return (
+                        <button
+                          key={oIdx}
+                          disabled={hasSelectedAny}
+                          onClick={() => {
+                            setAssessmentAnswers(prev => {
+                              const copy = [...prev];
+                              copy[currentQuizIndex] = oIdx;
+                              return copy;
+                            });
+                          }}
+                          style={btnStyle}
+                          type="button"
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>{opt}</span>
+                            {hasSelectedAny && isCorrectOpt && <span>✅</span>}
+                            {hasSelectedAny && isOptionChosen && !isCorrectOpt && <span>❌</span>}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <p>Loading question...</p>
+              )}
+
+              {/* Navigation buttons and Passing note */}
+              <div style={{ borderTop: '2px solid var(--color-peach-light)', paddingTop: '20px', marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-muted)', textAlign: 'center' }}>
+                  🎯 Score {passingScore}/10 or more to pass and complete the {lesson.difficulty ? lesson.difficulty.charAt(0).toUpperCase() + lesson.difficulty.slice(1) : ''} Level!
+                </span>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <button
+                    disabled={currentQuizIndex === 0}
+                    onClick={() => setCurrentQuizIndex(prev => prev - 1)}
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: '10px',
+                      background: 'none',
+                      border: '1.5px solid #CBD5E1',
+                      color: currentQuizIndex === 0 ? '#CBD5E1' : 'var(--text-dark)',
+                      fontWeight: 850,
+                      cursor: currentQuizIndex === 0 ? 'default' : 'pointer'
+                    }}
+                    type="button"
+                  >
+                    ← Previous
+                  </button>
+
+                  {currentQuizIndex < 9 ? (
+                    <button
+                      onClick={() => setCurrentQuizIndex(prev => prev + 1)}
+                      style={{
+                        padding: '10px 24px',
+                        borderRadius: '10px',
+                        background: 'var(--color-orange)',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        fontWeight: 900,
+                        cursor: 'pointer'
+                      }}
+                      type="button"
+                    >
+                      Next Question ➔
+                    </button>
+                  ) : (
+                    <button
+                      disabled={assessmentAnswers.includes(null)}
+                      onClick={() => setAssessmentFinished(true)}
+                      style={{
+                        padding: '12px 32px',
+                        borderRadius: '12px',
+                        background: assessmentAnswers.includes(null) ? '#CBD5E1' : 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        fontWeight: 900,
+                        cursor: assessmentAnswers.includes(null) ? 'default' : 'pointer',
+                        boxShadow: assessmentAnswers.includes(null) ? 'none' : '0 4px 15px rgba(255,122,0,0.3)'
+                      }}
+                      type="button"
+                    >
+                      Submit Assessment ✓
+                    </button>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <button className={styles.backBtn} onClick={() => navigate(-1)}>
+          <ArrowLeft size={24} />
+          <span>Adventure Map</span>
+        </button>
+
+        <div className={styles.progressTracker}>
+          {isAlphabetLesson ? (
+            (() => {
+              const currentSlide = slides[slideIndex] || {};
+              if (currentSlide.type === 'welcome' || currentSlide.type === 'graduation') {
+                return null;
+              }
+              if (lesson?.difficulty === 'intermediate') {
+                return (
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                    {slides.slice(1, -1).map((_, idx) => {
+                      const dotIndex = idx + 1;
+                      const isActive = dotIndex === slideIndex;
+                      const isPast = dotIndex < slideIndex;
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '50%',
+                            backgroundColor: isActive || isPast ? '#FF7A00' : '#E2E8F0',
+                            transition: 'all 0.3s ease'
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                );
+              }
+              if (currentSlide.type === 'learn_letter') {
+                return (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {groupLetters.map((l, idx) => {
+                      const isActive = currentSlide.letter === l;
+                      const isPast = groupLetters.indexOf(l) < groupLetters.indexOf(currentSlide.letter);
+                      const meta = LETTER_META[l] || {};
+                      return (
+                        <div
+                          key={l}
+                          style={{
+                            width: '12px',
+                            height: '12px',
+                            borderRadius: '50%',
+                            backgroundColor: isActive || isPast ? (meta.color || '#4CAF50') : '#E2E8F0',
+                            transition: 'all 0.3s ease'
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                );
+              }
+              if (currentSlide.type === 'practice_audio' || currentSlide.type === 'practice_missing') {
+                const practiceSlides = slides.filter(s => s.type === 'practice_audio' || s.type === 'practice_missing');
+                const currentPracticeIndex = practiceSlides.findIndex(s => s === currentSlide);
+                return (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {practiceSlides.map((_, idx) => {
+                      const isActive = idx === currentPracticeIndex;
+                      const isPast = idx < currentPracticeIndex;
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '50%',
+                            backgroundColor: isActive || isPast ? '#FF7A00' : '#E2E8F0',
+                            transition: 'all 0.3s ease'
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                );
+              }
+              return null;
+            })()
+          ) : (
+            ['Explore', 'Practice', 'Game', 'Quiz', 'Rewards'].map((name, i) => (
+              <div
+                key={name}
+                className={`${styles.stepIndicator} ${stage === i ? styles.stepActive : i < stage ? styles.stepDone : ''}`}
+              >
+                <span>{i + 1}</span>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className={styles.lessonBadge}>
+          <span>{(lesson.lesson_id && lesson.lesson_id.includes('-ASSESS-')) ? 'Milestone' : `Lesson ${lessonNumber}`}</span>
+        </div>
+      </header>
+
+      <main 
+        className={`${styles.studyArena} ${lesson.skill === 'writing' ? styles.studyArenaWriting : ''}`}
+      >
+        {lesson.skill === 'writing' && (
+          <div className={styles.writingSidebar}>
+            <div style={{ background: '#FF7A00', padding: '16px', borderRadius: '16px', color: '#FFFFFF', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '24px' }}>✏️</span>
+              <div>
+                <h2 style={{ fontSize: '15px', fontWeight: 900, margin: 0 }}>WRITING LESSONS</h2>
+                <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.9 }}>
+                  {lesson.difficulty === 'beginner' ? 'Beginner Level' : 'Intermediate Level'}
+                </span>
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {(lesson.difficulty === 'beginner' ? BEGINNER_WRITING_TOPICS : INTERMEDIATE_WRITING_TOPICS).map((topic, tIdx) => {
+                const isActive = (tIdx + 1) === lesson.order_in_level;
+                const langTrans = WRITING_TRANSLATIONS[preferredLanguage] || {};
+                const localizedTitle = langTrans[topic.title] || topic.title;
+                const localizedDesc = langTrans[topic.desc] || topic.desc;
+
+                return (
+                  <button
+                    key={tIdx}
+                    onClick={() => {
+                      const targetEntry = learningPath.find(entry => 
+                        entry.lesson_detail?.skill === 'writing' && 
+                        entry.lesson_detail?.order_in_level === (tIdx + 1)
+                      );
+                      if (targetEntry) {
+                        setCurrentEntry(targetEntry);
+                        setSlideIndex(0);
+                        setStage(0);
+                      } else {
+                        speak("Complete current lessons to unlock this writing topic!", speechLang, audioSpeed);
+                      }
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px 14px',
+                      borderRadius: '12px',
+                      border: isActive ? '2px solid var(--color-orange)' : '1.5px solid var(--color-peach-light)',
+                      background: isActive ? 'var(--color-cream-bg)' : 'var(--bg-cream-card)',
+                      cursor: 'pointer',
+                      width: '100%',
+                      textAlign: 'left'
+                    }}
+                    type="button"
+                  >
+                    <div
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        background: isActive ? 'var(--color-orange)' : '#E2E8F0',
+                        color: isActive ? '#FFFFFF' : '#64748B',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 800,
+                        fontSize: '11px',
+                        flexShrink: 0
+                      }}
+                    >
+                      {tIdx + 1}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-dark)' }}>
+                        {localizedTitle}
+                      </span>
+                      <span style={{ fontSize: '10px', color: '#94A3B8' }}>
+                        {localizedDesc}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', flex: 1, minWidth: 0 }}>
+          <AnimatePresence mode="wait">
+          
+          {isAlphabetLesson && !showQuiz && !lessonCompleted ? (
+            (() => {
+              const currentSlide = slides[slideIndex] || {};
+              
+              if (currentSlide.type === 'welcome') {
+                return (
+                  <motion.div
+                    key="welcome"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <div style={{ marginTop: '20px' }} />
+                    <span className={styles.storyboardBadge}>Lesson {lessonNumber}</span>
+                    <h1 className={styles.storyboardTitle}>{currentSlide.title}</h1>
+                    
+                    <div style={{ margin: '30px auto 20px' }}>
+                      <IllustrationSVG name="owl" size={100} />
+                    </div>
+
+                    <p className={styles.storyboardSubtitle}>{currentSlide.subtitle}</p>
+
+                    <div className={styles.objectivesList}>
+                      <h3 style={{ fontSize: '15px', fontWeight: 800, textAlign: 'left', marginBottom: '12px' }}>
+                        By the end of this lesson, you will be able to:
+                      </h3>
+                      {currentSlide.objectives?.map((obj, oIdx) => (
+                        <div key={oIdx} className={styles.objectiveItem}>
+                          <span className={styles.objectiveCheck}>✓</span>
+                          <span>{obj}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      className={styles.finishLessonBtn}
+                      onClick={() => setSlideIndex(1)}
+                      type="button"
+                      style={{ marginTop: '28px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                    >
+                      <span>Start Learning ➔</span>
+                    </button>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'definition') {
+                return (
+                  <motion.div
+                    key="definition"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <div style={{ marginTop: '20px' }} />
+                    <h1 className={styles.storyboardTitle} style={{ fontSize: '26px' }}>{currentSlide.title}</h1>
+                    <p className={styles.storyboardSubtitle} style={{ margin: '16px auto 24px', maxWidth: '480px', lineHeight: 1.5 }}>
+                      {currentSlide.subtitle}
+                    </p>
+
+                    <div
+                      style={{
+                        background: 'var(--bg-cream)',
+                        border: '3px solid var(--color-peach-light)',
+                        borderRadius: '16px',
+                        padding: '24px 16px',
+                        maxWidth: '440px',
+                        margin: '20px auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '12px'
+                      }}
+                    >
+                      <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                        Example:
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                          <IllustrationSVG name={currentSlide.left_emoji || 'default'} size={48} />
+                          <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--text-dark)' }}>{currentSlide.left}</span>
+                        </div>
+                        <span style={{ fontSize: '28px', fontWeight: 900, color: 'var(--color-orange)' }}>+</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                          <IllustrationSVG name={currentSlide.right_emoji || 'default'} size={48} />
+                          <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--text-dark)' }}>{currentSlide.right}</span>
+                        </div>
+                        <span style={{ fontSize: '28px', fontWeight: 900, color: 'var(--color-orange)' }}>=</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                          <IllustrationSVG name={currentSlide.result_emoji || 'default'} size={56} />
+                          <span style={{ fontSize: '22px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>{currentSlide.result}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.bottomNavRow} style={{ justifyContent: 'center' }}>
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        type="button"
+                        style={{ width: 'auto', padding: '12px 48px', fontSize: '16px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                      >
+                        Next ➔
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'examples') {
+                return (
+                  <motion.div
+                    key="examples"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    style={{ maxWidth: '580px' }}
+                  >
+                    <h1 className={styles.storyboardTitle} style={{ fontSize: '26px', marginTop: '10px' }}>{currentSlide.title}</h1>
+                    
+                    {(() => {
+                      const isOpposites = (lesson.title || '').toLowerCase().includes('opposite') || (currentSlide.title || '').toLowerCase().includes('example') || (lesson.concept_intro || '').toLowerCase().includes('opposite');
+                      const isCompounds = (lesson.title || '').toLowerCase().includes('compound') || (lesson.concept_intro || '').toLowerCase().includes('compound');
+                      const isSimilars = (lesson.title || '').toLowerCase().includes('similar') || (lesson.concept_intro || '').toLowerCase().includes('similar');
+
+                      if (isOpposites) {
+                        return (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '440px', margin: '20px auto' }}>
+                            {currentSlide.examples?.map((ex, eIdx) => (
+                              <div key={eIdx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+                                <div
+                                  style={{
+                                    flex: 1,
+                                    background: 'var(--bg-cream)',
+                                    border: '2px solid var(--color-peach-light)',
+                                    borderRadius: '12px',
+                                    padding: '12px 16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    boxShadow: '0 2px 8px rgba(255, 122, 0, 0.03)'
+                                  }}
+                                >
+                                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-dark)' }}>{ex.left}</span>
+                                  <IllustrationSVG name={ex.left_emoji || 'default'} size={24} />
+                                </div>
+                                <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--color-orange)' }}>↔️</span>
+                                <div
+                                  style={{
+                                    flex: 1,
+                                    background: 'var(--bg-cream)',
+                                    border: '2px solid var(--color-peach-light)',
+                                    borderRadius: '12px',
+                                    padding: '12px 16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    boxShadow: '0 2px 8px rgba(255, 122, 0, 0.03)'
+                                  }}
+                                >
+                                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-dark)' }}>{ex.right}</span>
+                                  <IllustrationSVG name={ex.right_emoji || 'default'} size={24} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+
+                      if (isCompounds) {
+                        return (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '480px', margin: '20px auto' }}>
+                            {currentSlide.examples?.map((ex, eIdx) => (
+                              <div
+                                key={eIdx}
+                                style={{
+                                  background: 'var(--bg-cream)',
+                                  border: '2px solid var(--color-peach-light)',
+                                  borderRadius: '12px',
+                                  padding: '12px 16px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: '12px',
+                                  boxShadow: '0 2px 8px rgba(255, 122, 0, 0.03)'
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '30%', justifyContent: 'flex-start' }}>
+                                  <IllustrationSVG name={ex.left_emoji || 'default'} size={24} />
+                                  <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-dark)' }}>{ex.left}</span>
+                                </div>
+                                <span style={{ fontSize: '16px', fontWeight: 900, color: 'var(--color-orange)' }}>+</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '30%', justifyContent: 'center' }}>
+                                  <IllustrationSVG name={ex.right_emoji || 'default'} size={24} />
+                                  <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-dark)' }}>{ex.right}</span>
+                                </div>
+                                <span style={{ fontSize: '16px', fontWeight: 900, color: 'var(--color-orange)' }}>=</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '30%', justifyContent: 'flex-end' }}>
+                                  <span style={{ fontSize: '16px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>{ex.result}</span>
+                                  <IllustrationSVG name={ex.result_emoji || 'default'} size={28} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+
+                      if (isSimilars) {
+                        return (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '440px', margin: '20px auto' }}>
+                            {currentSlide.examples?.map((ex, eIdx) => (
+                              <div key={eIdx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+                                <div
+                                  style={{
+                                    flex: 1,
+                                    background: 'var(--bg-cream)',
+                                    border: '2px solid var(--color-peach-light)',
+                                    borderRadius: '12px',
+                                    padding: '12px 16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    boxShadow: '0 2px 8px rgba(255, 122, 0, 0.03)'
+                                  }}
+                                >
+                                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-dark)' }}>{ex.left}</span>
+                                  <IllustrationSVG name={ex.left_emoji || 'default'} size={24} />
+                                </div>
+                                <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--color-orange)' }}>＝</span>
+                                <div
+                                  style={{
+                                    flex: 1,
+                                    background: 'var(--bg-cream)',
+                                    border: '2px solid var(--color-peach-light)',
+                                    borderRadius: '12px',
+                                    padding: '12px 16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    boxShadow: '0 2px 8px rgba(255, 122, 0, 0.03)'
+                                  }}
+                                >
+                                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-dark)' }}>{ex.right}</span>
+                                  <IllustrationSVG name={ex.right_emoji || 'default'} size={24} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(2, 1fr)',
+                            gap: '16px',
+                            width: '100%',
+                            maxWidth: '440px',
+                            margin: '20px auto'
+                          }}
+                        >
+                          {currentSlide.examples?.map((ex, eIdx) => (
+                            <div
+                              key={eIdx}
+                              style={{
+                                background: 'var(--bg-cream)',
+                                border: '2px solid var(--color-peach-light)',
+                                borderRadius: '12px',
+                                padding: '16px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                boxShadow: '0 2px 8px rgba(255, 122, 0, 0.03)'
+                              }}
+                            >
+                              <IllustrationSVG name={ex.left_emoji || 'default'} size={40} />
+                              <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-dark)' }}>{ex.left}</span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+
+                    <div className={styles.bottomNavRow}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => setSlideIndex(prev => prev - 1)}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        type="button"
+                        style={{ width: 'auto', padding: '12px 32px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                      >
+                        Next ➔
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'listen') {
+                return (
+                  <motion.div
+                    key="listen"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <h1 className={styles.storyboardTitle} style={{ fontSize: '26px' }}>{currentSlide.title}</h1>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', margin: '32px 0 20px 0' }}>
+                      <button
+                        className={styles.bigPinkSpeakerBtn}
+                        onClick={() => speak(currentSlide.target, speechLang, audioSpeed)}
+                        type="button"
+                        style={{ backgroundColor: '#FF7A00', boxShadow: '0 8px 20px rgba(255, 122, 0, 0.3)', margin: 0 }}
+                      >
+                        <Volume2 size={48} />
+                      </button>
+
+                      <div
+                        style={{
+                          border: '2px solid var(--color-peach-light)',
+                          borderRadius: '16px',
+                          padding: '12px 18px',
+                          background: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                      >
+                        <IllustrationSVG name="owl" size={32} />
+                        <div style={{ textAlign: 'left' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-dark)', display: 'block' }}>
+                            {currentSlide.hint}
+                          </span>
+                          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Tap the speaker!</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '24px' }}>
+                      Click the speaker icon to listen to the word pronunciation.
+                    </p>
+
+                    <div className={styles.bottomNavRow}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => setSlideIndex(prev => prev - 1)}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        type="button"
+                        style={{ width: 'auto', padding: '12px 36px', fontSize: '16px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                      >
+                        Next ➔
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'learn_letter') {
+                const meta = currentSlide.meta;
+                const targetText = meta.word;
+                const pronoun = meta.phonetic;
+
+                return (
+                  <motion.div
+                    key={`learn_${currentSlide.letter}`}
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <span className={styles.letterLabelBadge} style={{ backgroundColor: meta.badgeBg, color: meta.color }}>
+                      Letter
+                    </span>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', margin: '20px 0' }}>
+                      <span className={styles.storyboardGiantLetter} style={{ color: meta.color }}>{currentSlide.letter}</span>
+                      <button
+                        className={styles.audioLabelPlayBtn}
+                        onClick={() => speak(currentSlide.letter, speechLang, audioSpeed)}
+                        type="button"
+                        style={{ backgroundColor: meta.color }}
+                      >
+                        <Volume2 size={24} color="#FFFFFF" />
+                      </button>
+                    </div>
+
+                    <p className={styles.pronunciationLabel}>
+                      Pronunciation: "{pronoun}"
+                    </p>
+
+                    <div className={styles.exampleIllustrationCard}>
+                      <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-muted)', display: 'block', textAlign: 'left', marginBottom: '8px' }}>
+                        Example:
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <IllustrationSVG name={meta.illustration} size={64} />
+                        <span style={{ fontSize: '24px', fontWeight: 800, color: '#2C3E50' }}>{targetText}</span>
+                      </div>
+                    </div>
+
+                    <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-muted)', marginTop: '20px' }}>
+                      Tap the speaker to hear {currentSlide.letter}.
+                    </p>
+
+                    <div className={styles.bottomNavRow}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => setSlideIndex(prev => prev - 1)}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+                      
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        type="button"
+                        style={{ width: 'auto', padding: '12px 36px', fontSize: '16px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                      >
+                        {slideIndex === groupLetters.length ? 'Start Practice ➔' : 'Next ➔'}
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'practice_audio') {
+                const isSelected = alphabetAnswer !== null;
+                const isCorrect = alphabetAnswer === currentSlide.target;
+                
+                const getAITip = () => {
+                  const target = currentSlide.target;
+                  const meta = LETTER_META[target] || {};
+                  return `💡 AI Tip: This letter sounds like "${meta.phonetic || target}" as in "${meta.word || 'word'}". Tap the speaker above to listen closely!`;
+                };
+
+                return (
+                  <motion.div
+                    key={`practice_audio_${slideIndex}`}
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <span className={styles.questionIndexLabel}>
+                      Question {currentSlide.questionNumber} of {groupLetters.length * 2}
+                    </span>
+
+                    <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-dark)', marginTop: '12px' }}>
+                      {currentSlide.questionText}
+                    </h2>
+
+                    <button
+                      className={styles.bigPinkSpeakerBtn}
+                      onClick={() => speak(currentSlide.target, speechLang, audioSpeed)}
+                      type="button"
+                      style={{ backgroundColor: '#FF7A00', boxShadow: '0 8px 20px rgba(255, 122, 0, 0.3)' }}
+                    >
+                      <Volume2 size={48} />
+                    </button>
+
+                    <div className={styles.alphabetQuizOptionsRow}>
+                      {currentSlide.options?.map((opt, oIdx) => {
+                        const isOptionSelected = alphabetAnswer === opt;
+                        const isOptionCorrect = opt === currentSlide.target;
+                        const emoji = currentSlide.emojis?.[oIdx];
+                        return (
+                          <button
+                            key={opt}
+                            className={`${styles.storyboardGridOptionBtn} ${
+                              isOptionSelected ? (isOptionCorrect ? styles.correctOption : styles.incorrectOption) : ''
+                            }`}
+                            onClick={() => {
+                              if (alphabetAnswerCorrect) return;
+                              setAlphabetAnswer(opt);
+                              if (isOptionCorrect) {
+                                setAlphabetAnswerCorrect(true);
+                                speak("Correct!", speechLang, audioSpeed);
+                              } else {
+                                setAlphabetAnswerCorrect(false);
+                                speak("Incorrect. Try again.", speechLang, audioSpeed);
+                              }
+                            }}
+                            type="button"
+                            style={emoji ? {
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px',
+                              padding: '12px 6px',
+                              minWidth: '110px'
+                            } : {}}
+                          >
+                            {emoji && (
+                              <div style={{ transform: 'scale(0.9)', marginBottom: '4px' }}>
+                                <IllustrationSVG name={emoji} size={40} />
+                              </div>
+                            )}
+                            <span style={{ fontSize: '15px', fontWeight: 800 }}>{opt}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Feedback Alert Toast */}
+                    {isSelected && (
+                      <div className={`${styles.feedbackAlertCard} ${isCorrect ? styles.feedbackCorrectAlert : styles.feedbackIncorrectAlert}`}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <IllustrationSVG name="owl" size={32} />
+                          <div>
+                            <h4 style={{ fontSize: '15px', fontWeight: 800, margin: 0 }}>
+                              {isCorrect ? 'Brilliant!' : 'Try again.'}
+                            </h4>
+                            <p style={{ fontSize: '13px', margin: '2px 0 0 0', color: isCorrect ? '#107C41' : '#E74C3C', fontWeight: 700 }}>
+                              {isCorrect ? "That's correct." : getAITip()}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {isCorrect && (
+                          <button
+                            className={styles.finishLessonBtn}
+                            onClick={() => {
+                              setAlphabetAnswer(null);
+                              setAlphabetAnswerCorrect(false);
+                              setSlideIndex(prev => prev + 1);
+                            }}
+                            type="button"
+                            style={{ width: 'auto', padding: '10px 24px', fontSize: '14px', backgroundColor: '#FF7A00', boxShadow: '0 4px 12px rgba(255, 122, 0, 0.2)' }}
+                          >
+                            Next ➔
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'practice_missing') {
+                const isSelected = alphabetAnswer !== null;
+                const isCorrect = alphabetAnswer === currentSlide.target;
+
+                const getAITip = () => {
+                  const target = currentSlide.target;
+                  if (currentSlide.equation) {
+                    return `💡 AI Tip: Look closely at the parts of the equation to find the matching word "${target}".`;
+                  }
+                  return `💡 AI Tip: Say the alphabetical order out loud. The missing letter comes right after the previous letter. The sound is "${target}"!`;
+                };
+                
+                return (
+                  <motion.div
+                    key={`practice_missing_${slideIndex}`}
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <span className={styles.questionIndexLabel}>
+                      Question {currentSlide.questionNumber} of {lesson?.difficulty === 'intermediate' ? 4 : (groupLetters.length * 2)}
+                    </span>
+
+                    <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-dark)', marginTop: '12px' }}>
+                      {currentSlide.questionText}
+                    </h2>
+
+                    <div className={styles.missingLetterPromptCard}>
+                      <span>{currentSlide.equation || currentSlide.displaySequence}</span>
+                    </div>
+
+                    <div className={styles.alphabetQuizOptionsRow}>
+                      {currentSlide.options?.map((opt) => {
+                        const isOptionSelected = alphabetAnswer === opt;
+                        const isOptionCorrect = opt === currentSlide.target;
+                        return (
+                          <button
+                            key={opt}
+                            className={`${styles.storyboardGridOptionBtn} ${
+                              isOptionSelected ? (isOptionCorrect ? styles.correctOption : styles.incorrectOption) : ''
+                            }`}
+                            onClick={() => {
+                              if (alphabetAnswerCorrect) return;
+                              setAlphabetAnswer(opt);
+                              if (isOptionCorrect) {
+                                setAlphabetAnswerCorrect(true);
+                                speak("Correct!", speechLang, audioSpeed);
+                              } else {
+                                setAlphabetAnswerCorrect(false);
+                                speak("Incorrect. Try again.", speechLang, audioSpeed);
+                              }
+                            }}
+                            type="button"
+                          >
+                            <span>{opt}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Feedback Alert Toast */}
+                    {isSelected && (
+                      <div className={`${styles.feedbackAlertCard} ${isCorrect ? styles.feedbackCorrectAlert : styles.feedbackIncorrectAlert}`}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <IllustrationSVG name="owl" size={32} />
+                          <div>
+                            <h4 style={{ fontSize: '15px', fontWeight: 800, margin: 0 }}>
+                              {isCorrect ? 'Brilliant!' : 'Try again.'}
+                            </h4>
+                            <p style={{ fontSize: '13px', margin: '2px 0 0 0', color: isCorrect ? '#107C41' : '#E74C3C', fontWeight: 700 }}>
+                              {isCorrect ? "That's correct." : getAITip()}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {isCorrect && (
+                          <button
+                            className={styles.finishLessonBtn}
+                            onClick={() => {
+                              setAlphabetAnswer(null);
+                              setAlphabetAnswerCorrect(false);
+                              setSlideIndex(prev => prev + 1);
+                            }}
+                            type="button"
+                            style={{ width: 'auto', padding: '10px 24px', fontSize: '14px', backgroundColor: '#FF7A00', boxShadow: '0 4px 12px rgba(255, 122, 0, 0.2)' }}
+                          >
+                            Next ➔
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'storyboard_story') {
+                const tabs = Object.keys(currentSlide.tabs || {});
+                const defaultTab = tabs[0] || '';
+                const currentTabKey = activeStoryTab || defaultTab;
+                const tabData = currentSlide.tabs?.[currentTabKey] || {};
+                
+                const allCorrect = tabs.every(tKey => {
+                  const userAns = storyAnswers[tKey];
+                  const correctIdx = currentSlide.tabs[tKey]?.correct_index;
+                  const correctVal = currentSlide.tabs[tKey]?.options[correctIdx];
+                  return userAns === correctVal;
+                });
+
+                return (
+                  <motion.div
+                    key="storyboard_story"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    style={{ maxWidth: '980px', width: '100%', padding: '24px' }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '6px', marginBottom: '4px' }}>
+                      {currentSlide.subtitle}
+                    </h2>
+
+                    <div style={{ display: 'flex', gap: '24px', marginTop: '20px', alignItems: 'stretch' }}>
+                      <div
+                        style={{
+                          flex: 1.1,
+                          background: '#FFFDF9',
+                          borderRadius: '20px',
+                          border: '2px solid var(--color-peach-light)',
+                          padding: '20px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '12px',
+                          textAlign: 'left'
+                        }}
+                      >
+                        <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--color-orange-dark)', margin: 0 }}>
+                          {currentSlide.story_title}
+                        </h3>
+                        <p style={{ fontSize: '14px', lineHeight: '1.6', color: 'var(--text-dark)', margin: 0 }}>
+                          {currentSlide.story_body}
+                        </p>
+                        
+                        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center' }}>
+                          <IllustrationSVG name="farmer" size={120} />
+                        </div>
+                      </div>
+
+                      <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div style={{ display: 'flex', gap: '6px', background: '#F8FAFC', padding: '6px', borderRadius: '14px', overflowX: 'auto' }}>
+                          {tabs.map(tKey => {
+                            const isTabActive = tKey === currentTabKey;
+                            const isTabCorrect = storyAnswers[tKey] === currentSlide.tabs[tKey]?.options[currentSlide.tabs[tKey]?.correct_index];
+                            return (
+                              <button
+                                key={tKey}
+                                onClick={() => setActiveStoryTab(tKey)}
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '10px',
+                                  fontSize: '11px',
+                                  fontWeight: 800,
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  background: isTabActive ? 'var(--color-orange)' : '#FFFFFF',
+                                  color: isTabActive ? '#FFFFFF' : (isTabCorrect ? '#107C41' : '#64748B'),
+                                  whiteSpace: 'nowrap',
+                                  boxShadow: isTabActive ? '0 2px 8px rgba(255, 122, 0, 0.15)' : 'none',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                                type="button"
+                              >
+                                <span>{tKey}</span>
+                                {isTabCorrect && <span>✓</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div
+                          style={{
+                            background: '#FFFFFF',
+                            border: '1.5px solid var(--color-peach-light)',
+                            borderRadius: '20px',
+                            padding: '20px',
+                            textAlign: 'left',
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}
+                        >
+                          <span style={{ fontSize: '11px', color: 'var(--color-orange)', fontWeight: 800 }}>
+                            {currentTabKey.toUpperCase()}
+                          </span>
+                          <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-dark)', margin: '6px 0 16px 0', lineHeight: 1.4 }}>
+                            {tabData.question}
+                          </h4>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto' }}>
+                            {tabData.options?.map((opt, oIdx) => {
+                              const isSelected = storyAnswers[currentTabKey] === opt;
+                              const isCorrect = oIdx === tabData.correct_index;
+                              return (
+                                <button
+                                  key={opt}
+                                  onClick={() => {
+                                    setStoryAnswers({ ...storyAnswers, [currentTabKey]: opt });
+                                    if (isCorrect) {
+                                      speak("Correct!", speechLang, audioSpeed);
+                                    } else {
+                                      speak("Try again.", speechLang, audioSpeed);
+                                    }
+                                  }}
+                                  style={{
+                                    width: '100%',
+                                    padding: '12px 14px',
+                                    borderRadius: '12px',
+                                    border: isSelected ? (isCorrect ? '2px solid #4CAF50' : '2px solid #E74C3C') : '1px solid #E2E8F0',
+                                    background: isSelected ? (isCorrect ? '#E8F5E9' : '#FDF2F2') : '#FFFFFF',
+                                    color: isSelected ? (isCorrect ? '#1B5E20' : '#C62828') : 'var(--text-dark)',
+                                    fontWeight: 700,
+                                    fontSize: '13px',
+                                    textAlign: 'left',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                  }}
+                                  type="button"
+                                >
+                                  <span>{opt}</span>
+                                  {isSelected && (isCorrect ? <span>✓</span> : <span>✗</span>)}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => setSlideIndex(prev => prev - 1)}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+
+                      {allCorrect ? (
+                        <button
+                          className={styles.finishLessonBtn}
+                          onClick={() => {
+                            setStoryAnswers({});
+                            setActiveStoryTab('');
+                            setSlideIndex(prev => prev + 1);
+                          }}
+                          style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#4CAF50', boxShadow: '0 6px 20px rgba(76, 175, 80, 0.2)' }}
+                          type="button"
+                        >
+                          Next ➔
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>
+                          💡 Answer all 4 tabs to continue!
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'conversation_chat') {
+                const activeMsgs = chatMessages.length > 0 ? chatMessages : (currentSlide.messages || []);
+                const userReplied = chatSelectedOption !== null;
+
+                return (
+                  <motion.div
+                    key="conversation_chat"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    style={{ maxWidth: '640px', width: '100%', padding: '24px' }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '6px' }}>
+                      {currentSlide.subtitle}
+                    </h2>
+
+                    <div
+                      style={{
+                        background: '#F1F5F9',
+                        borderRadius: '24px',
+                        border: '2px solid #E2E8F0',
+                        height: '320px',
+                        overflowY: 'auto',
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                        margin: '20px 0',
+                        boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.03)'
+                      }}
+                    >
+                      {activeMsgs.map((msg, mIdx) => {
+                        const isThem = msg.sender === 'them';
+                        return (
+                          <div
+                            key={mIdx}
+                            style={{
+                              display: 'flex',
+                              alignSelf: isThem ? 'flex-start' : 'flex-end',
+                              gap: '8px',
+                              alignItems: 'flex-start',
+                              maxWidth: '80%'
+                            }}
+                          >
+                            {isThem && (
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>
+                                🧑
+                              </div>
+                            )}
+                            <div
+                              style={{
+                                background: isThem ? '#FFFFFF' : 'var(--color-orange)',
+                                color: isThem ? 'var(--text-dark)' : '#FFFFFF',
+                                padding: '10px 14px',
+                                borderRadius: isThem ? '0 16px 16px 16px' : '16px 0 16px 16px',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                textAlign: 'left',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                              }}
+                            >
+                              {msg.text}
+                            </div>
+                            {!isThem && (
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--color-peach-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>
+                                🙋
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {!userReplied ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 800, textAlign: 'left' }}>
+                          SELECT YOUR REPLY:
+                        </span>
+                        {currentSlide.options?.map((opt) => (
+                          <button
+                            key={opt}
+                            onClick={() => {
+                              setChatSelectedOption(opt);
+                              setChatMessages([...activeMsgs, { sender: 'you', text: opt }]);
+                              speak("Excellent reply!", speechLang, audioSpeed);
+                            }}
+                            style={{
+                              padding: '12px 16px',
+                              borderRadius: '16px',
+                              border: '1.5px solid var(--color-peach-light)',
+                              background: '#FFFFFF',
+                              color: 'var(--text-dark)',
+                              fontWeight: 800,
+                              fontSize: '13px',
+                              textAlign: 'left',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+                              width: '100%'
+                            }}
+                            type="button"
+                          >
+                            💬 {opt}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          background: '#E8F5E9',
+                          borderRadius: '16px',
+                          padding: '12px 18px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          border: '2px solid #4CAF50'
+                        }}
+                      >
+                        <span style={{ fontSize: '24px' }}>🏆</span>
+                        <div style={{ textAlign: 'left' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: '#1B5E20', display: 'block' }}>
+                            Conversation Practice Complete!
+                          </span>
+                          <span style={{ fontSize: '11px', color: '#1B5E20', opacity: 0.8 }}>
+                            You expressed yourself perfectly in this dialogue!
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => {
+                          setChatMessages([]);
+                          setChatSelectedOption(null);
+                          setSlideIndex(prev => prev - 1);
+                        }}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+
+                      {userReplied && (
+                        <button
+                          className={styles.finishLessonBtn}
+                          onClick={() => {
+                            setChatMessages([]);
+                            setChatSelectedOption(null);
+                            setSlideIndex(prev => prev + 1);
+                          }}
+                          style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
+                          type="button"
+                        >
+                          Next ➔
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'essay_planning') {
+                return (
+                  <motion.div
+                    key="essay_planning"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    style={{ maxWidth: '820px', width: '100%', padding: '24px' }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '6px' }}>
+                      {currentSlide.subtitle}
+                    </h2>
+
+                    <div style={{ background: 'var(--color-cream-bg)', border: '2px solid var(--color-peach-light)', borderRadius: '16px', padding: '14px 20px', margin: '16px 0', textAlign: 'left' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--color-orange-dark)', fontWeight: 900 }}>ESSAY TOPIC</span>
+                      <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-dark)', margin: '4px 0 0 0' }}>
+                        {currentSlide.topic}
+                      </h3>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '20px', textAlign: 'left' }}>
+                      <div style={{ flex: 1, background: '#FFFFFF', border: '1.5px solid #F1F5F9', borderRadius: '16px', padding: '16px' }}>
+                        <h4 style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', borderBottom: '1px solid #F1F5F9', paddingBottom: '6px' }}>
+                          Plan your essay:
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {currentSlide.plan?.map((step, sIdx) => (
+                            <div key={sIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', fontWeight: 800 }}>
+                              <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#FEEAD2', color: 'var(--color-orange-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>
+                                {sIdx + 1}
+                              </span>
+                              <span>{step}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div style={{ flex: 1, background: '#FFFFFF', border: '1.5px solid #F1F5F9', borderRadius: '16px', padding: '16px' }}>
+                        <h4 style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', borderBottom: '1px solid #F1F5F9', paddingBottom: '6px' }}>
+                          Key Skills:
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {currentSlide.skills?.map((skill, sIdx) => (
+                            <div key={sIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', fontWeight: 700, color: '#1B5E20' }}>
+                              <span>✔️</span>
+                              <span>{skill}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <textarea
+                        value={essayText}
+                        onChange={(e) => setEssayText(e.target.value)}
+                        disabled={essaySubmitted}
+                        placeholder="Type your essay thoughts here..."
+                        style={{
+                          width: '100%',
+                          height: '130px',
+                          borderRadius: '16px',
+                          border: '2px solid var(--color-peach-light)',
+                          padding: '14px',
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          resize: 'none',
+                          outline: 'none',
+                          boxShadow: '0 4px 12px rgba(255, 122, 0, 0.02)'
+                        }}
+                      />
+                      
+                      {!essaySubmitted ? (
+                        <button
+                          onClick={() => {
+                            if (essayText.trim().length < 20) {
+                              speak("Write a bit more to submit your essay!", speechLang, audioSpeed);
+                              return;
+                            }
+                            setEssaySubmitted(true);
+                            speak("Congratulations! Essay submitted and reviewed successfully.", speechLang, audioSpeed);
+                          }}
+                          style={{
+                            padding: '10px 24px',
+                            background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontWeight: 800,
+                            fontSize: '13px',
+                            alignSelf: 'flex-end',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 10px rgba(255, 122, 0, 0.2)'
+                          }}
+                          type="button"
+                        >
+                          Start Writing ➔
+                        </button>
+                      ) : (
+                        <div
+                          style={{
+                            background: '#E8F5E9',
+                            borderRadius: '16px',
+                            padding: '12px 18px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            border: '2px solid #4CAF50',
+                            textAlign: 'left'
+                          }}
+                        >
+                          <span style={{ fontSize: '20px' }}>📝</span>
+                          <div>
+                            <span style={{ fontSize: '13px', fontWeight: 800, color: '#1B5E20', display: 'block' }}>
+                              Essay submitted successfully!
+                            </span>
+                            <span style={{ fontSize: '11px', color: '#1B5E20', opacity: 0.8 }}>
+                              Awesome essay structure! Next lesson unlocked.
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => {
+                          setEssayText('');
+                          setEssaySubmitted(false);
+                          setSlideIndex(prev => prev - 1);
+                        }}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+
+                      {essaySubmitted && (
+                        <button
+                          className={styles.finishLessonBtn}
+                          onClick={() => {
+                            setEssayText('');
+                            setEssaySubmitted(false);
+                            setSlideIndex(prev => prev + 1);
+                          }}
+                          style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
+                          type="button"
+                        >
+                          Next ➔
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'letter_drafting') {
+                const defaultTo = currentSlide.to_label || '';
+                const defaultSubject = currentSlide.subject_label || '';
+                const defaultBody = currentSlide.body_placeholder || '';
+
+                const activeTo = letterTo !== '' ? letterTo : defaultTo;
+                const activeSubject = letterSubject !== '' ? letterSubject : defaultSubject;
+                const activeBody = letterBody !== '' ? letterBody : defaultBody;
+
+                return (
+                  <motion.div
+                    key="letter_drafting"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    style={{ maxWidth: '680px', width: '100%', padding: '24px' }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '6px' }}>
+                      {currentSlide.subtitle}
+                    </h2>
+
+                    <div
+                      style={{
+                        background: '#FFFFFF',
+                        border: '2px solid var(--color-peach-light)',
+                        borderRadius: '24px',
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                        margin: '20px 0',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '10px' }}>
+                        <span style={{ width: '70px', fontSize: '13px', fontWeight: 800, color: 'var(--text-muted)' }}>To:</span>
+                        <input
+                          type="text"
+                          value={activeTo}
+                          onChange={(e) => setLetterTo(e.target.value)}
+                          disabled={letterSubmitted}
+                          style={{
+                            flex: 1,
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: '13px',
+                            fontWeight: 700,
+                            color: 'var(--text-dark)'
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '10px' }}>
+                        <span style={{ width: '70px', fontSize: '13px', fontWeight: 800, color: 'var(--text-muted)' }}>Subject:</span>
+                        <input
+                          type="text"
+                          value={activeSubject}
+                          onChange={(e) => setLetterSubject(e.target.value)}
+                          disabled={letterSubmitted}
+                          style={{
+                            flex: 1,
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: '13px',
+                            fontWeight: 700,
+                            color: 'var(--text-dark)'
+                          }}
+                        />
+                      </div>
+
+                      <textarea
+                        value={activeBody}
+                        onChange={(e) => setLetterBody(e.target.value)}
+                        disabled={letterSubmitted}
+                        style={{
+                          width: '100%',
+                          height: '140px',
+                          border: 'none',
+                          outline: 'none',
+                          resize: 'none',
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          color: 'var(--text-dark)',
+                          lineHeight: '1.6',
+                          paddingTop: '6px'
+                        }}
+                      />
+                    </div>
+
+                    {!letterSubmitted ? (
+                      <button
+                        onClick={() => {
+                          setLetterSubmitted(true);
+                          speak("Email sent successfully!", speechLang, audioSpeed);
+                        }}
+                        style={{
+                          padding: '12px 32px',
+                          background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))',
+                          color: '#FFFFFF',
+                          border: 'none',
+                          borderRadius: '12px',
+                          fontWeight: 800,
+                          fontSize: '13px',
+                          alignSelf: 'flex-end',
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 10px rgba(255, 122, 0, 0.2)'
+                        }}
+                        type="button"
+                      >
+                        Send Email ✉️
+                      </button>
+                    ) : (
+                      <div
+                        style={{
+                          background: '#E8F5E9',
+                          borderRadius: '16px',
+                          padding: '12px 18px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          border: '2px solid #4CAF50',
+                          textAlign: 'left'
+                        }}
+                      >
+                        <span style={{ fontSize: '20px' }}>✉️</span>
+                        <div>
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: '#1B5E20', display: 'block' }}>
+                            Email sent successfully!
+                          </span>
+                          <span style={{ fontSize: '11px', color: '#1B5E20', opacity: 0.8 }}>
+                            You have drafted and delivered this mail template successfully.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => {
+                          setLetterTo('');
+                          setLetterSubject('');
+                          setLetterBody('');
+                          setLetterSubmitted(false);
+                          setSlideIndex(prev => prev - 1);
+                        }}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+
+                      {letterSubmitted && (
+                        <button
+                          className={styles.finishLessonBtn}
+                          onClick={() => {
+                            setLetterTo('');
+                            setLetterSubject('');
+                            setLetterBody('');
+                            setLetterSubmitted(false);
+                            setSlideIndex(prev => prev + 1);
+                          }}
+                          style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
+                          type="button"
+                        >
+                          Next ➔
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'trace_letter') {
+                return (
+                  <motion.div
+                    key="trace_letter"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-dark)', marginTop: '8px' }}>
+                      {currentSlide.subtitle}
+                    </h2>
+
+                    <div style={{ margin: '24px 0' }}>
+                      <TracingCanvas targetText={currentSlide.target} mode="letter" />
+                    </div>
+
+                    <div
+                      style={{
+                        border: '2px solid var(--color-peach-light)',
+                        borderRadius: '16px',
+                        padding: '12px 18px',
+                        background: 'var(--color-cream-bg)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        maxWidth: '380px',
+                        margin: '0 auto 20px auto'
+                      }}
+                    >
+                      <IllustrationSVG name="owl" size={32} />
+                      <div style={{ textAlign: 'left' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-dark)' }}>
+                          {currentSlide.arrows?.[0] || 'Start tracing!'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.bottomNavRow}>
+                      <button className={styles.mutedNavBtn} onClick={() => setSlideIndex(prev => prev - 1)} type="button">
+                        ← Previous
+                      </button>
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        type="button"
+                        style={{ width: 'auto', padding: '12px 32px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                      >
+                        Next ➔
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'write_word') {
+                return (
+                  <motion.div
+                    key="write_word"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-dark)', marginTop: '8px' }}>
+                      {currentSlide.instruction}
+                    </h2>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', margin: '24px 0' }}>
+                      <IllustrationSVG name={currentSlide.image || 'default'} size={80} />
+                      <TracingCanvas targetText={currentSlide.target} mode="word" />
+                    </div>
+
+                    <div className={styles.bottomNavRow}>
+                      <button className={styles.mutedNavBtn} onClick={() => setSlideIndex(prev => prev - 1)} type="button">
+                        ← Previous
+                      </button>
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        type="button"
+                        style={{ width: 'auto', padding: '12px 32px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                      >
+                        Next ➔
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'write_sentence') {
+                return (
+                  <motion.div
+                    key="write_sentence"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    style={{ maxWidth: '620px' }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-dark)', marginTop: '8px' }}>
+                      {currentSlide.instruction}
+                    </h2>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', margin: '24px 0' }}>
+                      <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--color-orange-dark)', background: 'var(--color-cream-bg)', padding: '12px 24px', borderRadius: '16px', border: '2px solid var(--color-peach-light)' }}>
+                        {currentSlide.target}
+                      </div>
+                      <TracingCanvas targetText={currentSlide.target} mode="sentence" />
+                    </div>
+
+                    <div className={styles.bottomNavRow}>
+                      <button className={styles.mutedNavBtn} onClick={() => setSlideIndex(prev => prev - 1)} type="button">
+                        ← Previous
+                      </button>
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        type="button"
+                        style={{ width: 'auto', padding: '12px 32px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                      >
+                        Next ➔
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'unscramble_words') {
+                return (
+                  <motion.div
+                    key="unscramble_words"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    style={{ maxWidth: '780px' }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '8px' }}>
+                      {currentSlide.subtitle}
+                    </h2>
+                    <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: '8px 0 16px' }}>
+                      {currentSlide.instruction}
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '20px 0', width: '100%' }}>
+                      {currentSlide.items?.map((item) => {
+                        const userLetters = unscrambleAnswers[item.id] || [];
+                        const targetLen = item.target.length;
+                        
+                        return (
+                          <div
+                            key={item.id}
+                            style={{
+                              background: '#FFFFFF',
+                              border: '2px solid var(--color-peach-light)',
+                              borderRadius: '16px',
+                              padding: '12px 16px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '12px',
+                              boxShadow: '0 4px 15px rgba(0,0,0,0.01)',
+                              justifyContent: 'space-between'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '150px', textAlign: 'left' }}>
+                              <div
+                                style={{
+                                  width: '24px',
+                                  height: '24px',
+                                  borderRadius: '50%',
+                                  background: 'var(--color-orange)',
+                                  color: '#FFFFFF',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontWeight: 800,
+                                  fontSize: '12px'
+                                }}
+                              >
+                                {item.id}
+                              </div>
+                              <IllustrationSVG name={item.image} size={24} />
+                              <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-dark)' }}>{item.clue}</span>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '6px', flex: 1, justifyContent: 'center' }}>
+                              {Array.from({ length: targetLen }).map((_, bIdx) => {
+                                const letter = userLetters[bIdx];
+                                return (
+                                  <button
+                                    key={bIdx}
+                                    onClick={() => handleAnswerLetterClick(item.id, bIdx)}
+                                    style={{
+                                      width: '32px',
+                                      height: '32px',
+                                      borderRadius: '8px',
+                                      border: letter ? '2px solid var(--color-orange)' : '2px dashed var(--color-peach)',
+                                      background: letter ? 'var(--color-cream-bg)' : 'var(--bg-cream)',
+                                      color: 'var(--color-orange-dark)',
+                                      fontWeight: 900,
+                                      fontSize: '14px',
+                                      cursor: letter ? 'pointer' : 'default',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                    }}
+                                    type="button"
+                                  >
+                                    {letter || ''}
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', width: '180px', justifyContent: 'flex-start' }}>
+                              {item.tokens.map((token, tIdx) => {
+                                const countInAns = userLetters.filter(l => l === token).length;
+                                const countInTokensBefore = item.tokens.slice(0, tIdx).filter(l => l === token).length;
+                                const isUsed = countInTokensBefore < countInAns;
+
+                                return (
+                                  <button
+                                    key={tIdx}
+                                    onClick={() => {
+                                      if (isUsed || userLetters.length >= targetLen) return;
+                                      handleTokenClick(item.id, token);
+                                    }}
+                                    disabled={isUsed || userLetters.length >= targetLen}
+                                    style={{
+                                      width: '28px',
+                                      height: '28px',
+                                      borderRadius: '6px',
+                                      border: '1px solid #E2E8F0',
+                                      background: isUsed ? '#E2E8F0' : '#FFFFFF',
+                                      color: isUsed ? '#94A3B8' : 'var(--text-dark)',
+                                      fontWeight: 700,
+                                      fontSize: '13px',
+                                      cursor: isUsed ? 'default' : 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                    }}
+                                    type="button"
+                                  >
+                                    {token}
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            <button
+                              onClick={() => speak(item.target, speechLang, audioSpeed)}
+                              style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                background: 'var(--color-cream-bg)',
+                                border: '1.5px solid var(--color-peach-light)',
+                                color: 'var(--color-orange)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              type="button"
+                            >
+                              🔊
+                            </button>
+
+                            <button
+                              onClick={() => clearUnscrambleRow(item.id)}
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                background: '#FFF0F0',
+                                border: 'none',
+                                color: '#E74C3C',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                              type="button"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '24px' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => setSlideIndex(prev => prev - 1)}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+
+                      {!unscrambleIsCorrect ? (
+                        <button
+                          className={styles.finishLessonBtn}
+                          onClick={() => checkUnscrambleAnswers(currentSlide.items)}
+                          type="button"
+                          style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                        >
+                          Check Answers ✓
+                        </button>
+                      ) : (
+                        <button
+                          className={styles.finishLessonBtn}
+                          onClick={() => setSlideIndex(prev => prev + 1)}
+                          type="button"
+                          style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#4CAF50', boxShadow: '0 6px 20px rgba(76, 175, 80, 0.25)' }}
+                        >
+                          Next ➔
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'unscramble_sentence') {
+                const checkSentence = () => {
+                  const userStr = sentenceAnswer.join(' ').toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+                  const targetStr = currentSlide.target.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+                  if (userStr === targetStr) {
+                    setSentenceCorrect(true);
+                    speak("Excellent! The sentence is correct.", speechLang, audioSpeed);
+                  } else {
+                    setSentenceCorrect(false);
+                    speak("Incorrect word order. Tap words to remove them and try again.", speechLang, audioSpeed);
+                  }
+                  setSentenceChecked(true);
+                };
+
+                return (
+                  <motion.div
+                    key="unscramble_sentence"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    style={{ maxWidth: '780px', width: '100%' }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '8px' }}>
+                      {currentSlide.subtitle}
+                    </h2>
+                    <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: '8px 0 16px' }}>
+                      {currentSlide.instruction}
+                    </p>
+
+                    {/* Word display slots */}
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', minHeight: '56px', border: '2.5px dashed var(--color-peach)', borderRadius: '16px', padding: '12px', background: '#FFFDFB', flexWrap: 'wrap', margin: '20px 0', alignItems: 'center' }}>
+                      {sentenceAnswer.length === 0 && (
+                        <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 800 }}>Tap scrambled word tokens below to construct your sentence...</span>
+                      )}
+                      {sentenceAnswer.map((word, wIdx) => (
+                        <button
+                          key={wIdx}
+                          onClick={() => {
+                            if (sentenceCorrect) return;
+                            setSentenceAnswer(prev => prev.filter((_, idx) => idx !== wIdx));
+                            setSentenceChecked(false);
+                          }}
+                          style={{
+                            background: 'var(--color-orange)',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '8px 16px',
+                            fontWeight: 800,
+                            cursor: sentenceCorrect ? 'default' : 'pointer',
+                            fontSize: '13px',
+                            boxShadow: '0 4px 10px rgba(255, 122, 0, 0.15)'
+                          }}
+                          type="button"
+                        >
+                          {word}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Scattered tokens */}
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', margin: '24px 0' }}>
+                      {currentSlide.tokens.map((token, tIdx) => {
+                        // Count occurrences in answer vs tokens to allow duplicates if the tokens list has duplicates
+                        const countInAns = sentenceAnswer.filter(w => w === token).length;
+                        const countInTokensBefore = currentSlide.tokens.slice(0, tIdx).filter(w => w === token).length;
+                        const isUsed = countInTokensBefore < countInAns;
+
+                        return (
+                          <button
+                            key={tIdx}
+                            disabled={isUsed || sentenceCorrect}
+                            onClick={() => {
+                              setSentenceAnswer(prev => [...prev, token]);
+                              setSentenceChecked(false);
+                            }}
+                            style={{
+                              background: isUsed ? '#F1F5F9' : '#FFFFFF',
+                              color: isUsed ? '#CBD5E1' : 'var(--text-dark)',
+                              border: '2.5px solid var(--color-peach-light)',
+                              borderRadius: '12px',
+                              padding: '12px 20px',
+                              fontWeight: 900,
+                              fontSize: '14px',
+                              cursor: (isUsed || sentenceCorrect) ? 'default' : 'pointer',
+                              boxShadow: isUsed ? 'none' : '0 4px 10px rgba(0,0,0,0.02)',
+                              transition: 'all 0.15s ease'
+                            }}
+                            type="button"
+                          >
+                            {token}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {sentenceChecked && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', margin: '12px 0' }}>
+                        <span style={{ fontSize: '20px' }}>{sentenceCorrect ? '✅' : '❌'}</span>
+                        <span style={{ fontSize: '13px', fontWeight: 900, color: sentenceCorrect ? '#2E7D32' : '#C62828' }}>
+                          {sentenceCorrect ? 'Excellent unscrambling!' : 'Incorrect word order. Click words to clear.'}
+                        </span>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '24px' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => setSlideIndex(prev => prev - 1)}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+
+                      {!sentenceCorrect ? (
+                        <button
+                          className={styles.finishLessonBtn}
+                          onClick={checkSentence}
+                          type="button"
+                          disabled={sentenceAnswer.length === 0}
+                          style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                        >
+                          Check Sentence ✓
+                        </button>
+                      ) : (
+                        <button
+                          className={styles.finishLessonBtn}
+                          onClick={() => {
+                            setSentenceAnswer([]);
+                            setSentenceChecked(false);
+                            setSentenceCorrect(false);
+                            setSlideIndex(prev => prev + 1);
+                          }}
+                          type="button"
+                          style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#4CAF50', boxShadow: '0 6px 20px rgba(76, 175, 80, 0.25)' }}
+                        >
+                          Next ➔
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'paragraph_writing') {
+                return (
+                  <motion.div
+                    key="paragraph_writing"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    style={{ maxWidth: '780px', width: '100%' }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '8px' }}>
+                      {currentSlide.subtitle}
+                    </h2>
+                    
+                    <div style={{ background: 'var(--color-cream-bg)', border: '2px solid var(--color-peach-light)', borderRadius: '16px', padding: '16px 24px', margin: '20px 0', textAlign: 'left' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--color-orange-dark)', fontWeight: 900, textTransform: 'uppercase' }}>Writing Topic</span>
+                      <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-dark)', margin: '4px 0 0 0' }}>
+                        {currentSlide.topic}
+                      </h3>
+                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '8px 0 0 0', fontWeight: 700 }}>
+                        {currentSlide.instruction}
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <textarea
+                        value={paragraphText}
+                        onChange={(e) => setParagraphText(e.target.value)}
+                        disabled={paragraphSubmitted}
+                        placeholder="Write your paragraph here..."
+                        style={{
+                          width: '100%',
+                          height: '140px',
+                          borderRadius: '16px',
+                          border: '2px solid var(--color-peach-light)',
+                          padding: '14px',
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          resize: 'none',
+                          outline: 'none',
+                          boxShadow: '0 4px 12px rgba(255, 122, 0, 0.02)',
+                          lineHeight: '1.6'
+                        }}
+                      />
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>
+                          Word Count: <strong style={{ color: 'var(--color-orange-dark)' }}>{paragraphText.trim() === '' ? 0 : paragraphText.trim().split(/\s+/).length}</strong>
+                        </span>
+                        
+                        {!paragraphSubmitted ? (
+                          <button
+                            onClick={() => {
+                              const count = paragraphText.trim() === '' ? 0 : paragraphText.trim().split(/\s+/).length;
+                              if (count < 10) {
+                                speak("Write at least 10 words to submit your paragraph!", speechLang, audioSpeed);
+                                return;
+                              }
+                              setParagraphSubmitted(true);
+                              speak("Excellent paragraph submission! Great effort.", speechLang, audioSpeed);
+                            }}
+                            style={{
+                              padding: '10px 24px',
+                              background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: '12px',
+                              fontWeight: 800,
+                              fontSize: '13px',
+                              cursor: 'pointer',
+                              boxShadow: '0 4px 10px rgba(255, 122, 0, 0.2)'
+                            }}
+                            type="button"
+                          >
+                            Submit Writing ✓
+                          </button>
+                        ) : (
+                          <div style={{ background: '#E8F5E9', border: '1.5px solid #2E7D32', borderRadius: '10px', padding: '6px 12px', color: '#2E7D32', fontSize: '12px', fontWeight: 900 }}>
+                            🎉 Submitted & Approved
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '24px' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => setSlideIndex(prev => prev - 1)}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => {
+                          setParagraphText('');
+                          setParagraphSubmitted(false);
+                          setSlideIndex(prev => prev + 1);
+                        }}
+                        type="button"
+                        disabled={!paragraphSubmitted}
+                        style={{ width: 'auto', padding: '12px 36px', backgroundColor: paragraphSubmitted ? '#4CAF50' : '#E2E8F0', color: paragraphSubmitted ? '#FFFFFF' : '#94A3B8', cursor: paragraphSubmitted ? 'pointer' : 'default', boxShadow: paragraphSubmitted ? '0 6px 20px rgba(76, 175, 80, 0.25)' : 'none' }}
+                      >
+                        Next ➔
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'explore') {
+                return (
+                  <motion.div
+                    key="explore"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.instruction || 'Observe'}</span>
+                    <h1 className={styles.storyboardTitle} style={{ fontSize: '28px', marginTop: '10px' }}>
+                      {currentSlide.concept}
+                    </h1>
+
+                    <div
+                      style={{
+                        margin: '24px auto',
+                        width: '140px',
+                        height: '140px',
+                        borderRadius: '50%',
+                        background: 'var(--color-cream-bg)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '72px',
+                        border: '3px solid var(--color-peach-light)',
+                        boxShadow: 'var(--shadow-card)'
+                      }}
+                    >
+                      {currentSlide.visual || '💡'}
+                    </div>
+
+                    <button
+                      onClick={() => speak(currentSlide.audio_narration || currentSlide.concept, speechLang, audioSpeed)}
+                      className={styles.soundPlayCard}
+                      style={{ margin: '12px auto 20px', maxWidth: '240px' }}
+                      type="button"
+                    >
+                      <Volume2 size={24} />
+                      <span>Listen to Pronunciation</span>
+                    </button>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', width: '100%' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => setSlideIndex(prev => prev - 1)}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
+                        type="button"
+                      >
+                        Next ➔
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'learn') {
+                return (
+                  <motion.div
+                    key="learn"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.instruction || 'Learn'}</span>
+                    <h1 className={styles.storyboardTitle} style={{ fontSize: '28px', marginTop: '10px' }}>
+                      {currentSlide.explanation}
+                    </h1>
+
+                    <div
+                      style={{
+                        margin: '24px auto',
+                        width: '120px',
+                        height: '120px',
+                        borderRadius: '50%',
+                        background: 'var(--color-cream-bg)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '60px',
+                        border: '2px solid var(--color-peach-light)'
+                      }}
+                    >
+                      {currentSlide.visual || '💡'}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', width: '100%' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => setSlideIndex(prev => prev - 1)}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
+                        type="button"
+                      >
+                        Next ➔
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'practice') {
+                return (
+                  <motion.div
+                    key="practice"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.instruction || 'Practice'}</span>
+                    
+                    <div style={{ width: '100%', padding: '30px 0' }}>
+                      <div className={styles.voiceRecordArea}>
+                        <button
+                          className={`${styles.voiceBtn} ${listening ? styles.voiceListening : voiceSuccess ? styles.voiceSuccess : ''}`}
+                          onClick={() => {
+                            setShowHandPointer(false);
+                            startListening();
+                          }}
+                          type="button"
+                          style={{
+                            width: '100px',
+                            height: '100px',
+                            borderRadius: '50%',
+                            background: listening ? '#FF4757' : (voiceSuccess ? '#4CAF50' : '#FF7A00'),
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto',
+                            boxShadow: '0 4px 14px rgba(0,0,0,0.1)'
+                          }}
+                        >
+                          <Mic size={40} color="#FFFFFF" />
+                        </button>
+                        
+                        <h3 style={{ fontSize: '24px', fontWeight: 800, marginTop: '24px' }}>
+                          {listening ? 'Listening...' : voiceSuccess ? 'Excellent pronunciation matched!' : `Say aloud: "${currentSlide.voice_target || 'A'}"`}
+                        </h3>
+                        
+                        {userSpokenText && (
+                          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '8px' }}>
+                            You said: <strong style={{ color: 'var(--color-orange-dark)' }}>"{userSpokenText}"</strong>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', width: '100%' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => {
+                          setVoiceSuccess(false);
+                          setUserSpokenText('');
+                          setSlideIndex(prev => prev - 1);
+                        }}
+                        type="button"
+                      >
+                        ← Previous
+                      </button>
+
+                      {voiceSuccess ? (
+                        <button
+                          className={styles.finishLessonBtn}
+                          onClick={() => {
+                            setVoiceSuccess(false);
+                            setUserSpokenText('');
+                            setSlideIndex(prev => prev + 1);
+                          }}
+                          style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#4CAF50' }}
+                          type="button"
+                        >
+                          Next ➔
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>
+                          🎤 Speak to continue!
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'graduation') {
+                return (
+                  <motion.div
+                    key="graduation"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                  >
+                    <div style={{ margin: '20px auto 10px' }}>
+                      <IllustrationSVG name="trophy" size={100} />
+                    </div>
+
+                    <h1 className={styles.storyboardTitle} style={{ fontSize: '32px', color: '#107C41' }}>Great job!</h1>
+                    <p className={styles.storyboardSubtitle}>{currentSlide.subtitle}</p>
+
+                     {currentSlide.letters ? (
+                      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', margin: '24px 0' }}>
+                        {currentSlide.letters?.map((l) => {
+                          const meta = LETTER_META[l] || {};
+                          return (
+                            <div
+                              key={l}
+                              className={styles.graduationLetterCircle}
+                              style={{ borderColor: meta.color }}
+                            >
+                              <span style={{ color: meta.color }}>{l}</span>
+                              <span className={styles.checkedCircleBadge}>✓</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '24px',
+                          background: 'var(--color-cream-bg)',
+                          border: '2px solid var(--color-peach-light)',
+                          borderRadius: '16px',
+                          padding: '16px 24px',
+                          margin: '24px auto',
+                          maxWidth: '320px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '20px' }}>⭐</span>
+                          <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-dark)' }}>
+                            +{currentSlide.xp || 15} XP
+                          </span>
+                        </div>
+                        <div style={{ width: '2px', height: '24px', background: 'var(--color-peach-light)' }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '20px' }}>⏱️</span>
+                          <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-dark)' }}>
+                            {currentSlide.time || '10 min'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <p style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '28px' }}>
+                      You're now ready for Lesson {lessonNumber + 1}!
+                    </p>
+
+                    <button
+                      className={styles.finishLessonBtn}
+                      onClick={() => {
+                        const hasQuiz = (lesson.quiz_bank && lesson.quiz_bank.length > 0) || (lesson.quiz_data && Object.keys(lesson.quiz_data).length > 0);
+                        if (hasQuiz) {
+                          setShowQuiz(true);
+                          setStage(3);
+                          setCurrentQuizIndex(0);
+                          setQuizScore(0);
+                          setQuizFailed(false);
+                          setIncorrectQuizGuesses({});
+                          generateActiveQuiz();
+                        } else {
+                          handleCompleteAndPlayNext();
+                        }
+                      }}
+                      type="button"
+                      disabled={completing}
+                      style={{ backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                    >
+                      {completing ? 'Saving...' : `Continue to Lesson Checkup ➔`}
+                    </button>
+                  </motion.div>
+                );
+              }
+
+              return null;
+            })()
+          ) : (
+            <>
+              {/* STAGE 0: EXPLORE BOARD */}
+              {stage === 0 && (
+                <motion.div
+                  key="stage0"
+                  className={styles.card}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                >
+              {showHandPointer && (
+                <motion.div
+                  className={styles.handPointerOverlay}
+                  animate={{ y: [0, -15, 0], x: [0, 5, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+                >
+                  👆
+                </motion.div>
+              )}
+
+              {isAlphabetLesson ? (
+                <div style={{ width: '100%' }}>
+                  <h2 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-dark)' }}>
+                    {exploreData.question}
+                  </h2>
+
+                  <div className={styles.pillsContainer}>
+                    <button
+                      className={`${styles.pillBtn} ${styles.listenPill}`}
+                      onClick={() => speak(exploreData.target, speechLang, audioSpeed)}
+                      type="button"
+                    >
+                      <Volume2 size={18} />
+                      <span>Listen</span>
+                    </button>
+                    <button
+                      className={`${styles.pillBtn} ${styles.hintPill}`}
+                      onClick={() => speak(exploreData.hint, speechLang, audioSpeed)}
+                      type="button"
+                    >
+                      <HelpCircle size={18} />
+                      <span>Hint</span>
+                    </button>
+                  </div>
+
+                  {/* Big Pink Circular Volume Button */}
+                  <button
+                    className={styles.bigPinkSpeakerBtn}
+                    onClick={() => speak(exploreData.target, speechLang, audioSpeed)}
+                    type="button"
+                  >
+                    <Volume2 size={56} />
+                  </button>
+
+                  {/* Large choices buttons stack */}
+                  <div className={styles.alphabetQuizOptions}>
+                    {(exploreData.options || []).map((opt) => {
+                      const isSelected = alphabetAnswer === opt;
+                      const isOptCorrect = opt === exploreData.target;
+                      return (
+                        <button
+                          key={opt}
+                          className={`${styles.alphabetOptionBtn} ${
+                            isSelected ? (isOptCorrect ? styles.correctOption : styles.incorrectOption) : ''
+                          }`}
+                          onClick={() => {
+                            setAlphabetAnswer(opt);
+                            if (isOptCorrect) {
+                              setAlphabetAnswerCorrect(true);
+                              speak("Correct!", speechLang, audioSpeed);
+                            } else {
+                              setAlphabetAnswerCorrect(false);
+                              speak("Incorrect. Try again.", speechLang, audioSpeed);
+                            }
+                          }}
+                          type="button"
+                        >
+                          <span style={{ fontWeight: 800 }}>{opt}</span>
+                          {isSelected && isOptCorrect && <span className={styles.checkmarkIcon}>✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Continue Button appears when correct */}
+                  <div className={styles.footerRow} style={{ justifyContent: 'center', marginTop: '16px' }}>
+                    <button
+                      className={styles.primaryBtn}
+                      disabled={!alphabetAnswerCorrect}
+                      onClick={() => {
+                        setAlphabetAnswer(null);
+                        setAlphabetAnswerCorrect(false);
+                        setStage(1);
+                      }}
+                      type="button"
+                    >
+                      <span>Continue</span>
+                      <ArrowRight size={22} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* ORIGINAL EXPLORE BOARD */
+                <div style={{ width: '100%' }}>
+                  {lessonNumber === 1 ? (
+                    <div style={{ width: '100%' }}>
+                      <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '20px' }}>Tap any letter to hear sound</h2>
+                      <div className={styles.alphabetGrid}>
+                        {(ALPHABETS[preferredLanguage] || ALPHABETS.en).map((letter) => {
+                          const details = LETTER_DETAILS[preferredLanguage]?.[letter] || LETTER_DETAILS.en[letter] || { name: letter, phonetic: letter, word: letter, emoji: '🔤' };
+                          return (
+                            <div
+                              key={letter}
+                              className={styles.alphabetBlock}
+                              onClick={() => {
+                                setShowHandPointer(false);
+                                speak(details.name, speechLang, audioSpeed);
+                                setTimeout(() => speak(details.phonetic, speechLang, audioSpeed), 900);
+                                setTimeout(() => speak(details.word, speechLang, audioSpeed), 1800);
+                              }}
+                              style={{ minWidth: '80px', padding: '12px' }}
+                            >
+                              <span style={{ fontSize: '32px', fontWeight: 800 }}>{details.name} {details.name.toLowerCase()}</span>
+                              <span style={{ fontSize: '24px' }}>{details.emoji}</span>
+                              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)' }}>{details.word}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    /* LESSONS 2-50: EXPLORE TARGET CARD */
+                    <div style={{ width: '100%' }}>
+                      <div
+                        className={styles.everydayWordRow}
+                        onClick={() => {
+                          setShowHandPointer(false);
+                          speak(exploreData.term || '', speechLang, audioSpeed);
+                          if (exploreData.phonetic) {
+                            setTimeout(() => speak(exploreData.phonetic, speechLang, audioSpeed), 1000);
+                          }
+                        }}
+                        style={{ maxWidth: '400px', margin: '20px auto', padding: '24px' }}
+                      >
+                        <span className={styles.everydayEmoji} style={{ fontSize: '64px' }}>{exploreData.emoji || '🔤'}</span>
+                        <div className={styles.everydayTextGroup}>
+                          <h3 style={{ fontSize: '28px' }}>{exploreData.term || 'Target'}</h3>
+                          <span style={{ fontSize: '15px' }}>Tap to hear sound: {exploreData.phonetic || ''}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className={styles.footerRow}>
+                    <div className={styles.tutorHint}>
+                      <img src={owl} alt="MiGo Mascot" className={styles.owlHelperImg} />
+                      <span>"Tap letters to explore, then click practice!"</span>
+                    </div>
+                    <button className={styles.primaryBtn} onClick={() => setStage(1)}>
+                      <span>Practice Target</span>
+                      <ArrowRight size={22} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* STAGE 1: PRACTICE TARGET (Tracing / Microphone) */}
+          {stage === 1 && (
+            <motion.div
+              key="stage1"
+              className={styles.card}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              {isAlphabetLesson ? (
+                <div style={{ width: '100%' }}>
+                  <h2 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-dark)' }}>
+                    {practiceData.question}
+                  </h2>
+
+                  <div className={styles.pillsContainer}>
+                    <button
+                      className={`${styles.pillBtn} ${styles.listenPill}`}
+                      onClick={() => speak(practiceData.target, speechLang, audioSpeed)}
+                      type="button"
+                    >
+                      <Volume2 size={18} />
+                      <span>Listen</span>
+                    </button>
+                    <button
+                      className={`${styles.pillBtn} ${styles.hintPill}`}
+                      onClick={() => speak(practiceData.hint, speechLang, audioSpeed)}
+                      type="button"
+                    >
+                      <HelpCircle size={18} />
+                      <span>Hint</span>
+                    </button>
+                  </div>
+
+                  {/* Big Pink Circular Volume Button */}
+                  <button
+                    className={styles.bigPinkSpeakerBtn}
+                    onClick={() => speak(practiceData.target, speechLang, audioSpeed)}
+                    type="button"
+                  >
+                    <Volume2 size={56} />
+                  </button>
+
+                  {/* Large choices buttons stack */}
+                  <div className={styles.alphabetQuizOptions}>
+                    {(practiceData.options || []).map((opt) => {
+                      const isSelected = alphabetAnswer === opt;
+                      const isOptCorrect = opt === practiceData.target;
+                      return (
+                        <button
+                          key={opt}
+                          className={`${styles.alphabetOptionBtn} ${
+                            isSelected ? (isOptCorrect ? styles.correctOption : styles.incorrectOption) : ''
+                          }`}
+                          onClick={() => {
+                            setAlphabetAnswer(opt);
+                            if (isOptCorrect) {
+                              setAlphabetAnswerCorrect(true);
+                              speak("Correct!", speechLang, audioSpeed);
+                            } else {
+                              setAlphabetAnswerCorrect(false);
+                              speak("Incorrect. Try again.", speechLang, audioSpeed);
+                            }
+                          }}
+                          type="button"
+                        >
+                          <span style={{ fontWeight: 800 }}>{opt}</span>
+                          {isSelected && isOptCorrect && <span className={styles.checkmarkIcon}>✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Celebration Card Overlay at the bottom */}
+                  {alphabetAnswerCorrect && (
+                    <div className={styles.celebrationPopup}>
+                      <span className={styles.celebrationTitle}>🎉 Brilliant!</span>
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={handleFinishQuest}
+                        type="button"
+                        disabled={completing}
+                      >
+                        {completing ? "Saving..." : "Finish Lesson"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* ORIGINAL STAGE 1: PRACTICE TARGET (Tracing / Microphone) */
+                <div style={{ width: '100%' }}>
+                  {lesson.skill === 'writing' ? (
+                    /* Tracing guide */
+                    <div style={{ width: '100%' }}>
+                      <div className={styles.tracingInterfaceRow}>
+                        <div className={styles.tracingGuideBlock}>
+                          <span className={styles.giantGuideLetter}>{practiceData.voice_target || exploreData.phonetic || 'A'}</span>
+                          <span className={styles.guideSubText}>Trace Guide</span>
+                        </div>
+
+                        <div className={styles.canvasContainer}>
+                          <canvas
+                            ref={canvasRef}
+                            width={280}
+                            height={280}
+                            className={styles.tracingCanvas}
+                            onMouseDown={startDrawing}
+                            onMouseMove={draw}
+                            onMouseUp={stopDrawing}
+                            onMouseLeave={stopDrawing}
+                            onTouchStart={startDrawing}
+                            onTouchMove={draw}
+                            onTouchEnd={stopDrawing}
+                          />
+                          <button className={styles.clearCanvasBtn} onClick={clearCanvas}>
+                            <Trash size={16} />
+                            <span>Clear</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Microphone Speaking repetition */
+                    <div style={{ width: '100%', padding: '40px 0' }}>
+                      <div className={styles.voiceRecordArea}>
+                        <button
+                          className={`${styles.voiceBtn} ${listening ? styles.voiceListening : voiceSuccess ? styles.voiceSuccess : ''}`}
+                          onClick={() => {
+                            setShowHandPointer(false);
+                            startListening();
+                          }}
+                          type="button"
+                        >
+                          <Mic size={32} color="#FFFFFF" />
+                        </button>
+                        <h3 style={{ fontSize: '24px', fontWeight: 800, marginTop: '20px' }}>
+                          {listening ? 'Listening...' : voiceSuccess ? 'Excellent pronunciation matched!' : `Say aloud: "${practiceData.voice_target || exploreData.term || 'A'}"`}
+                        </h3>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className={styles.footerRow}>
+                    <div className={styles.tutorHint}>
+                      <img src={owl} alt="MiGo Mascot" className={styles.owlHelperImg} />
+                      <span>"Great practice! Let's play the visual game."</span>
+                    </div>
+                    <button className={styles.primaryBtn} onClick={() => setStage(2)}>
+                      <span>Play Game</span>
+                      <ArrowRight size={22} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* STAGE 2: GAME ENGINE */}
+          {stage === 2 && (
+            <motion.div
+              key="stage2"
+              className={styles.card}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              {gameData.type === 'tap_grid' && (
+                <div style={{ width: '100%' }}>
+                  <div className={styles.alphabetGrid}>
+                    {(gameData.items || []).map((item) => (
+                      <motion.button
+                        key={item.label}
+                        className={styles.alphabetBlock}
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          setShowHandPointer(false);
+                          speak(item.sound, speechLang, audioSpeed);
+                        }}
+                        type="button"
+                      >
+                        <span style={{ fontSize: '48px' }}>{item.emoji}</span>
+                        <span className={styles.letterTxt}>{item.label}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {gameData.type === 'find_one' && (
+                <div style={{ width: '100%' }}>
+                  <div className={styles.associationGrid}>
+                    {(gameData.options || []).map((item) => {
+                      const isCorrect = item.correct;
+                      return (
+                        <button
+                          key={item.label}
+                          className={styles.assocBox}
+                          onClick={() => {
+                            setShowHandPointer(false);
+                            if (isCorrect) {
+                              setMatchSuccess(true);
+                              speak('Excellent!', speechLang, audioSpeed);
+                            } else {
+                              speak('Try again.', speechLang, audioSpeed);
+                            }
+                          }}
+                          type="button"
+                        >
+                          <span style={{ fontSize: '64px' }}>{item.emoji}</span>
+                          <span style={{ fontWeight: 800, fontSize: '16px' }}>{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {gameData.type === 'match_pairs' && (
+                <div style={{ width: '100%' }}>
+                  <div className={styles.connectPairsContainer}>
+                    <div className={styles.connectPairsColumn}>
+                      {leftMatchItems.map((item) => {
+                        const isCompleted = !!completedMatches[item.id];
+                        const isSelected = selectedLeft === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            className={`${styles.matchGridBlock} ${isCompleted ? styles.matchSuccessBlock : isSelected ? styles.matchActiveBlock : ''}`}
+                            onClick={() => selectLeftItem(item.id)}
+                            type="button"
+                            disabled={isCompleted}
+                          >
+                            <span>{item.text}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className={styles.connectPairsColumn}>
+                      {rightMatchItems.map((item) => {
+                        const isCompleted = Object.values(completedMatches).includes(item.id);
+                        const isSelected = selectedRight === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            className={`${styles.matchGridBlock} ${isCompleted ? styles.matchSuccessBlock : isSelected ? styles.matchActiveBlock : ''}`}
+                            onClick={() => selectRightItem(item.id)}
+                            type="button"
+                            disabled={isCompleted}
+                          >
+                            <span>{item.text}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {gameData.type === 'draw_canvas' && (
+                <div style={{ width: '100%' }}>
+                  <div className={styles.tracingInterfaceRow}>
+                    <div className={styles.tracingGuideBlock}>
+                      <span className={styles.giantGuideLetter}>{gameData.target || 'A'}</span>
+                    </div>
+
+                    <div className={styles.canvasContainer}>
+                      <canvas
+                        ref={canvasRef}
+                        width={280}
+                        height={280}
+                        className={styles.tracingCanvas}
+                        onMouseDown={startDrawing}
+                        onMouseMove={draw}
+                        onMouseUp={stopDrawing}
+                        onMouseLeave={stopDrawing}
+                        onTouchStart={startDrawing}
+                        onTouchMove={draw}
+                        onTouchEnd={stopDrawing}
+                      />
+                      <button className={styles.clearCanvasBtn} onClick={clearCanvas}>
+                        <Trash size={16} />
+                        <span>Clear</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {gameData.type === 'fill_blank' && (
+                <div style={{ width: '100%' }}>
+                  <div className={styles.tracingGuideBlock} style={{ margin: '0 auto 20px', maxWidth: '280px' }}>
+                    <span className={styles.giantGuideLetter} style={{ letterSpacing: '4px' }}>
+                      {matchSuccess ? gameData.masked.replace('_', gameData.target) : gameData.masked}
+                    </span>
+                  </div>
+
+                  <div className={styles.associationGrid}>
+                    {(gameData.options || []).map((letter) => {
+                      const isCorrect = letter === gameData.target;
+                      return (
+                        <button
+                          key={letter}
+                          className={styles.assocBox}
+                          onClick={() => {
+                            setShowHandPointer(false);
+                            if (isCorrect) {
+                              setMatchSuccess(true);
+                              speak('Excellent!', speechLang, audioSpeed);
+                            } else {
+                              speak('Try again.', speechLang, audioSpeed);
+                            }
+                          }}
+                          type="button"
+                        >
+                          <span style={{ fontSize: '32px', fontWeight: 800 }}>{letter}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {gameData.type === 'memory_cards' && (
+                <div style={{ width: '100%' }}>
+                  <div className={styles.associationGrid} style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+                    {memoryCards.map((card, idx) => {
+                      const isFlipped = flippedCards.some(fc => fc.id === card.id) || matchedCardKeys.includes(card.match_key);
+                      return (
+                        <button
+                          key={card.id}
+                          className={`${styles.assocBox} ${isFlipped ? styles.activePhonics : ''}`}
+                          onClick={() => handleCardFlip(card, idx)}
+                          style={{ minHeight: '120px', backgroundColor: isFlipped ? '#FFFFFF' : '#FFF0E5' }}
+                          type="button"
+                        >
+                          <span style={{ fontSize: '28px', fontWeight: 800 }}>
+                            {isFlipped ? card.label : '❓'}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {gameData.type === 'hunt_grid' && (
+                <div style={{ width: '100%' }}>
+                  <div className={styles.tracingGuideBlock} style={{ margin: '0 auto 20px', maxWidth: '280px' }}>
+                    <span className={styles.giantGuideLetter}>{gameData.target}</span>
+                  </div>
+
+                  <div className={styles.associationGrid} style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                    {(gameData.grid || []).map((letter, idx) => (
+                      <button
+                        key={idx}
+                        className={styles.assocBox}
+                        onClick={() => handleHuntTap(letter)}
+                        type="button"
+                      >
+                        <span style={{ fontSize: '28px', fontWeight: 800 }}>{letter}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {gameData.type === 'unscramble' && (
+                <div style={{ width: '100%' }}>
+                  <div className={styles.tracingGuideBlock} style={{ margin: '0 auto 20px', maxWidth: '280px' }}>
+                    <span className={styles.giantGuideLetter}>
+                      {builtSpelling.length > 0 ? builtSpelling.join('') : '___'}
+                    </span>
+                  </div>
+
+                  <div className={styles.associationGrid}>
+                    {shuffledLetters.map((letter, idx) => (
+                      <button
+                        key={idx}
+                        className={styles.assocBox}
+                        onClick={() => handleLetterTap(letter, idx)}
+                        type="button"
+                      >
+                        <span style={{ fontSize: '28px', fontWeight: 800 }}>{letter}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.footerRow}>
+                <div className={styles.tutorHint}>
+                  <img src={owl} alt="MiGo Mascot" className={styles.owlHelperImg} />
+                  <span>"Outstanding! Let's pass the 3-question quiz now!"</span>
+                </div>
+                <button
+                  className={styles.primaryBtn}
+                  disabled={!matchSuccess && gameData.type !== 'tap_grid' && gameData.type !== 'draw_canvas'}
+                  onClick={() => setStage(3)}
+                >
+                  <span>Take Quiz</span>
+                  <ArrowRight size={22} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* STAGE 3: SHORT QUIZ (EXACTLY 3 QUESTIONS) */}
+          {stage === 3 && (
+            <motion.div
+              key="stage3"
+              className={styles.card}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              <div className={styles.tag}>📝 Quiz Checkup ({currentQuizIndex + 1}/{activeQuizQuestions.length})</div>
+
+              {quizFailed ? (
+                <div className={styles.quizFailBlock}>
+                  <XCircle size={64} color="#FF4757" style={{ margin: '0 auto 16px' }} />
+                  <h2>Quiz checkup not passed.</h2>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '12px' }}>
+                    Score: <strong>{quizScore}/{activeQuizQuestions.length}</strong>. At least {activeQuizQuestions.length >= 3 ? 2 : activeQuizQuestions.length} correct answers required to pass.
+                  </p>
+                  <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-orange-dark)', marginBottom: '24px' }}>
+                    💡 Revision Tip: Review the slides and explanations before retrying the checkup!
+                  </p>
+                  <button className={styles.finishBtn} onClick={restartQuiz}>
+                    Retry Quiz Checkup
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <h2 className={styles.sectionHeading} style={{ fontSize: '20px', marginBottom: '20px' }}>
+                    {activeQuizQuestions[currentQuizIndex]?.question || 'Listen and select correct answer:'}
+                  </h2>
+
+                  {/* Speaker sound check */}
+                  <button
+                    className={styles.soundPlayCard}
+                    onClick={() => {
+                      const soundTarget = activeQuizQuestions[currentQuizIndex]?.sound_prompt || activeQuizQuestions[currentQuizIndex]?.correct || 'A';
+                      speak(soundTarget, speechLang, audioSpeed);
+                    }}
+                    style={{ margin: '16px auto 24px', maxWidth: '200px' }}
+                  >
+                    <Volume2 size={32} />
+                    <span>Play Sound Prompt</span>
+                  </button>
+
+                  <div className={styles.everydayWordsGrid}>
+                    {(activeQuizQuestions[currentQuizIndex]?.options || ['Option A', 'Option B', 'Option C']).map((opt) => {
+                      const isSelected = selectedQuizOption === opt;
+                      const isGuessedWrong = (incorrectQuizGuesses[currentQuizIndex] || []).includes(opt);
+                      const q = activeQuizQuestions[currentQuizIndex];
+                      const correct = q?.correct || (q && q.options && q.correct_index !== undefined ? q.options[q.correct_index] : 'Option A');
+                      const isCorrect = opt === correct;
+
+                      return (
+                        <div
+                          key={opt}
+                          className={`${styles.everydayWordRow} ${isSelected ? styles.gateDoneBadge : ''}`}
+                          onClick={() => {
+                            if (selectedQuizOption) return; // Locked once they get correct answer
+                            handleQuizAnswer(opt);
+                          }}
+                          style={{
+                            padding: '14px 20px',
+                            cursor: selectedQuizOption ? 'default' : 'pointer',
+                            border: isSelected ? '2.5px solid #4CAF50' : (isGuessedWrong ? '2.5px solid #E74C3C' : '1.5px solid #E2E8F0'),
+                            background: isSelected ? '#E8F5E9' : (isGuessedWrong ? '#FDF2F2' : '#FFFFFF'),
+                            color: isSelected ? '#1B5E20' : (isGuessedWrong ? '#C62828' : 'var(--text-dark)'),
+                            opacity: isGuessedWrong ? 0.8 : 1,
+                            pointerEvents: selectedQuizOption ? 'none' : 'auto'
+                          }}
+                        >
+                          <span style={{ fontSize: '16px', fontWeight: 800 }}>{opt}</span>
+                          {isSelected && <span style={{ marginLeft: 'auto', color: '#4CAF50', fontWeight: 900 }}>✓</span>}
+                          {isGuessedWrong && <span style={{ marginLeft: 'auto', color: '#E74C3C', fontWeight: 900 }}>✗</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {((incorrectQuizGuesses[currentQuizIndex] || []).length > 0) && (
+                    <div className={`${styles.feedbackAlertCard} ${styles.feedbackIncorrectAlert}`} style={{ margin: '16px auto', maxWidth: '480px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                      <IllustrationSVG name="owl" size={36} />
+                      <div style={{ textAlign: 'left' }}>
+                        <h4 style={{ fontSize: '14px', fontWeight: 800, margin: 0, color: '#C62828' }}>AI Tutor Tip:</h4>
+                        <p style={{ fontSize: '12px', margin: '2px 0 0 0', color: '#C62828', fontWeight: 700 }}>
+                          {activeQuizQuestions[currentQuizIndex]?.explanation || "Keep trying! Look closely at the options."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className={styles.footerRow} style={{ marginTop: '20px' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-muted)' }}>
+                      Quiz Score: {quizScore} / {activeQuizQuestions.length}
+                    </span>
+                    <button
+                      className={styles.primaryBtn}
+                      disabled={!selectedQuizOption}
+                      onClick={handleNextQuizQuestion}
+                    >
+                      <span>{currentQuizIndex < (activeQuizQuestions.length - 1) ? 'Next' : 'Submit Quiz'}</span>
+                      <ArrowRight size={22} />
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          )}
+
+          {/* STAGE 4: REWARD & CELEBRATION */}
+          {(stage === 4 || (isAlphabetLesson && stage === 2)) && (
+            <motion.div
+              key="stage4"
+              className={`${styles.card} ${styles.rewardCard}`}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              {(lesson.lesson_id && lesson.lesson_id.includes('-ASSESS-')) ? (
+                <div className={styles.certificateOuterBorder}>
+                  <div className={styles.certificateInnerBorder}>
+                    <div className={styles.certHeader}>
+                      <span className={styles.certLogo}>🎓 MIGO LITERACY GRADUATE</span>
+                      <h1 className={styles.certMainTitle}>CERTIFICATE OF COMPLETION</h1>
+                    </div>
+                    <div className={styles.certBody}>
+                      <p className={styles.certPresentation}>This certificate is proudly awarded to:</p>
+                      <h2 className={styles.certLearnerName}>{learner?.name || 'LITERACY GRADUATE'}</h2>
+                      <div className={styles.dividerLine} />
+                      <p className={styles.certDetails}>
+                        For successfully graduating the adaptive level assessment, mastering letter sounds, tracing visual guides, and everyday survival vocabulary!
+                      </p>
+                    </div>
+                    <div className={styles.certFooter}>
+                      <div className={styles.certSign}>
+                        <span className={styles.certSignLine}>Antigravity</span>
+                        <span>AI Learning Architect</span>
+                      </div>
+                      <div className={styles.certGoldSeal}>
+                        <span className={styles.sealCircle}>🏆</span>
+                      </div>
+                      <div className={styles.certSign}>
+                        <span className={styles.certSignLine}>MiGo Team</span>
+                        <span>Director</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button className={styles.finishBtn} onClick={() => navigate('/home')} style={{ marginTop: '28px' }}>
+                    Return to Map & Continue 🚀
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <img src={treasure} alt="Treasure" className={styles.chestImgLarge} />
+                  <h1 className={styles.rewardTitle}>Quest Completed!</h1>
+                  <p className={styles.rewardSub}>Awesome progress! You've unlocked the next lesson.</p>
+
+                  <div className={styles.rewardsPanelBox}>
+                    <div className={styles.rewardStatItem}>
+                      <Star size={20} color="#FF9F43" fill="#FF9F43" />
+                      <span>+{lesson.rewards_data?.stars || 3} Stars</span>
+                    </div>
+                    <div className={styles.rewardStatItem}>
+                      <Sparkles size={20} color="#1DD1A1" />
+                      <span>+{lesson.rewards_data?.xp || 10} XP</span>
+                    </div>
+                    <div className={styles.rewardStatItem}>
+                      <span style={{ fontSize: '18px' }}>💵</span>
+                      <span>+{lesson.rewards_data?.coins || 2} Coins</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.actionBtnRow} style={{ margin: '24px auto 0' }}>
+                    <button className={styles.finishBtn} onClick={handlePlayNextLesson} disabled={completing}>
+                      <span>{completing ? 'Loading...' : `Play Lesson ${lessonNumber + 1} ▶`}</span>
+                    </button>
+                    <button className={styles.mapLinkBtn} onClick={() => navigate('/home')}>
+                      Return to Map
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          )}
+          </>
+          )}
+
+        </AnimatePresence>
+        </div>
+      </main>
+    </div>
+  );
+}
