@@ -141,15 +141,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-# CORS settings — allow the React dev server to call this API
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
 # Django REST Framework defaults
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
