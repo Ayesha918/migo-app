@@ -7,7 +7,6 @@ import { useLearner } from '../../services/LearnerContext';
 import owl from '../../assets/images/owl.png';
 import { Search, ArrowLeft, User, Hash, Mic, MicOff } from 'lucide-react';
 import styles from './Login.module.css';
-import useTranslate from '../../services/useTranslate';
 
 const AVATAR_EMOJI = {
   boy: '👦', girl: '👧', grandmother: '👵', grandfather: '👴',
@@ -18,7 +17,6 @@ const AVATAR_EMOJI = {
 function Login() {
   const navigate = useNavigate();
   const { setLearner } = useLearner();
-  const t = useTranslate();
 
   const [mode, setMode] = useState('id'); // 'id' or 'name'
   const [query, setQuery] = useState('');
@@ -116,8 +114,8 @@ function Login() {
 
       <div className={styles.headerBox}>
         <img src={owl} alt="MiGo Owl" className={styles.mascotImg} />
-        <h1 className={styles.title}>{t('whoIsPlaying')}</h1>
-        <p className={styles.subtitle}>{t('enterLearnerId')}</p>
+        <h1 className={styles.title}>Who is playing today?</h1>
+        <p className={styles.subtitle}>Enter your Learner ID or Name to log into your adventure!</p>
       </div>
 
       <div className={styles.modeToggle}>
@@ -127,7 +125,7 @@ function Login() {
           onClick={() => { setMode('id'); setQuery(''); setResults([]); setError(''); }}
         >
           <Hash size={18} />
-          <span>{t('learnerId')}</span>
+          <span>Learner ID</span>
         </button>
         <button
           type="button"
@@ -135,7 +133,7 @@ function Login() {
           onClick={() => { setMode('name'); setQuery(''); setResults([]); setError(''); }}
         >
           <User size={18} />
-          <span>{t('searchByName')}</span>
+          <span>Search by Name</span>
         </button>
       </div>
 
@@ -164,7 +162,7 @@ function Login() {
       </div>
 
       <p className={styles.speakInstruction}>
-        🎙️ {t('micInstruction')}
+        🎙️ Don't know how to write? Tap the microphone and speak your name!
       </p>
 
       {isSearching && <p className={styles.statusText}>Searching for your profile...</p>}

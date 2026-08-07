@@ -420,13 +420,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Updating database curriculum...')
         
-        # Clean up any invalid intermediate/advanced lessons for non-English languages
-        self.stdout.write('Cleaning up invalid intermediate/advanced lessons for non-English languages...')
-        deleted_count, _ = Lesson.objects.filter(
-            language__in=['hi', 'kn', 'ta'],
-            difficulty__in=['intermediate', 'advanced']
-        ).delete()
-        self.stdout.write(f'Deleted {deleted_count} invalid lessons.')
 
         seeded_count = 0
 
@@ -840,6 +833,12 @@ class Command(BaseCommand):
                     'straight': 'सीधा', 'path': 'मार्ग', 'go straight': 'सीधे जाएं',
                     'back': 'पीछे', 'return': 'वापस', 'go back': 'पीछे जाएं',
                     'opposite of left = _____': 'बाएं का विपरीत = _____',
+                    'butter + fly = _____': 'मक्खन + मक्खी = _____',
+                    'hot vs _____ = opposites': 'गर्म बनाम _____ = विपरीत',
+                    'happy = _____': 'खुश = _____',
+                    'cures sickness = _____': 'बीमारी ठीक करती है = _____',
+                    'builds houses = _____': 'घर बनाता है = _____',
+                    'start of day = _____': 'दिन की शुरुआत = _____',
                 },
                 'kn': {
                     'Compound Words': 'ಸಂಯುಕ್ತ ಪದಗಳು',
@@ -938,6 +937,12 @@ class Command(BaseCommand):
                     'straight': 'ನೇರ', 'path': 'ದಾರಿ', 'go straight': 'ನೇರವಾಗಿ ಹೋಗಿ',
                     'back': 'ಹಿಂದೆ', 'return': 'ಹಿಂತಿರುಗು', 'go back': 'ಹಿಂದೆ ಹೋಗಿ',
                     'opposite of left = _____': 'ಎಡದ ವಿರುದ್ಧ = _____',
+                    'butter + fly = _____': 'ಬೆಣ್ಣೆ + ನೊಣ = _____',
+                    'hot vs _____ = opposites': 'ಬಿಸಿ ಮತ್ತು _____ = ವಿರುದ್ಧ',
+                    'happy = _____': 'ಸಂತೋಷ = _____',
+                    'cures sickness = _____': 'ಕಾಯಿಲೆ ಗುಣಪಡಿಸುತ್ತದೆ = _____',
+                    'builds houses = _____': 'ಮನೆಗಳನ್ನು ಕಟ್ಟುತ್ತಾರೆ = _____',
+                    'start of day = _____': 'ದಿನದ ಆರಂಭ = _____',
                 },
                 'ta': {
                     'Compound Words': 'கூட்டுச் சொற்கள்',
@@ -1036,12 +1041,16 @@ class Command(BaseCommand):
                     'straight': 'நேராக', 'path': 'பாதை', 'go straight': 'நேராகச் செல்லுங்கள்',
                     'back': 'பின்னால்', 'return': 'திரும்பு', 'go back': 'பின்னால் செல்லுங்கள்',
                     'opposite of left = _____': 'இடதின் எதிர் = _____',
+                    'butter + fly = _____': 'வெண்ணெய் + ஈ = _____',
+                    'hot vs _____ = opposites': 'சூடு மற்றும் _____ = எதிர்ச்சொல்',
+                    'happy = _____': 'மகிழ்ச்சி = _____',
+                    'cures sickness = _____': 'நோயைக் குணப்படுத்துகிறது = _____',
+                    'builds houses = _____': 'வீடுகளை கட்டுகிறார் = _____',
+                    'start of day = _____': 'நாளின் ಆರಂಭம் = _____',
                 }
             }
 
             for idx, bp in enumerate(INTERMEDIATE_LESSONS_BLUEPRINT, start=1):
-                if lang != 'en':
-                    continue
                 lesson_id = f"INT-{lang.upper()}-{idx:03d}"
                 prereq = f"INT-{lang.upper()}-{idx-1:03d}" if idx > 1 else None
                 trans = INTERMEDIATE_TRANSLATIONS.get(lang, {}) if lang != 'en' else {}
@@ -1118,9 +1127,13 @@ class Command(BaseCommand):
                 }
 
                 eq = bp['q4']['equation']
-                for k, v in trans.items():
-                    if k in eq:
-                        eq = eq.replace(k, v)
+                if eq in trans:
+                    eq = trans[eq]
+                else:
+                    for k in sorted(trans.keys(), key=len, reverse=True):
+                        v = trans[k]
+                        if k in eq:
+                            eq = eq.replace(k, v)
 
                 q4_slide = {
                     'type': 'practice_missing',
@@ -1838,8 +1851,6 @@ class Command(BaseCommand):
             }
 
             for idx, bp in enumerate(BLUEPRINTS['advanced'], start=1):
-                if lang != 'en':
-                    continue
                 lesson_id = f"ADV-{lang.upper()}-{idx:03d}"
                 prereq = f"ADV-{lang.upper()}-{idx-1:03d}" if idx > 1 else None
 
@@ -2329,8 +2340,6 @@ class Command(BaseCommand):
 
             # Intermediate Writing Lessons
             for idx, topic in enumerate(INTERMEDIATE_WRITING_TOPICS, start=1):
-                if lang != 'en':
-                    continue
                 lesson_id = f"WR-INT-{lang.upper()}-{idx:03d}"
                 prereq = f"WR-INT-{lang.upper()}-{idx-1:03d}" if idx > 1 else None
 

@@ -11,7 +11,6 @@ import { registerLearner } from '../../services/api';
 import styles from './Register.module.css';
 import RegistrationSuccess from './RegistrationSuccess';
 import { useLearner } from '../../services/LearnerContext';
-import useTranslate from '../../services/useTranslate';
 
 const TOTAL_STEPS = 4;
 
@@ -25,7 +24,6 @@ function Register() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
   const { setLearner } = useLearner();
-  const t = useTranslate();
 
   const isStepValid = () => {
     switch (currentStep) {
@@ -102,7 +100,7 @@ function Register() {
     <div className={styles.page}>
       <button className={styles.backButton} onClick={handleBack} type="button">‹</button>
 
-      <h1 className={styles.pageTitle}>{t('joinUs')}</h1>
+      <h1 className={styles.pageTitle}>Join Us</h1>
       <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
       <AnimatePresence mode="wait">
@@ -129,8 +127,8 @@ function Register() {
         {isSubmitting
           ? 'Saving...'
           : currentStep === TOTAL_STEPS - 1
-          ? t('finishBtn')
-          : t('nextBtn')}
+          ? 'Finish'
+          : 'Next ➔'}
       </button>
     </div>
   );
