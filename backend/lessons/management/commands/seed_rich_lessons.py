@@ -418,25 +418,15 @@ class Command(BaseCommand):
     help = 'Seeds grouped alphabet lessons and simple CVC word lessons into the database'
 
     def handle(self, *args, **options):
-        if Lesson.objects.exists():
-            self.stdout.write(self.style.SUCCESS('Lessons already seeded. Skipping.'))
-            return
-
-        self.stdout.write('Wiping all user data from database to start fresh...')
-        LearningPath.objects.all().delete()
-        RewardProfile.objects.all().delete()
-        LearnerAchievement.objects.all().delete()
-        Achievement.objects.all().delete()
-        StudySession.objects.all().delete()
-        AssessmentResponse.objects.all().delete()
-        AssessmentAttempt.objects.all().delete()
-        SeenQuestion.objects.all().delete()
-        SkillBreakdown.objects.all().delete()
-        LiteracyProfile.objects.all().delete()
-        Learner.objects.all().delete()
-
-        self.stdout.write('Wiping old rich curriculum database items...')
-        Lesson.objects.all().delete()
+        self.stdout.write('Updating database curriculum...')
+        
+        # Clean up any invalid intermediate/advanced lessons for non-English languages
+        self.stdout.write('Cleaning up invalid intermediate/advanced lessons for non-English languages...')
+        deleted_count, _ = Lesson.objects.filter(
+            language__in=['hi', 'kn', 'ta'],
+            difficulty__in=['intermediate', 'advanced']
+        ).delete()
+        self.stdout.write(f'Deleted {deleted_count} invalid lessons.')
 
         seeded_count = 0
 
@@ -1050,6 +1040,8 @@ class Command(BaseCommand):
             }
 
             for idx, bp in enumerate(INTERMEDIATE_LESSONS_BLUEPRINT, start=1):
+                if lang != 'en':
+                    continue
                 lesson_id = f"INT-{lang.upper()}-{idx:03d}"
                 prereq = f"INT-{lang.upper()}-{idx-1:03d}" if idx > 1 else None
                 trans = INTERMEDIATE_TRANSLATIONS.get(lang, {}) if lang != 'en' else {}
@@ -1846,6 +1838,8 @@ class Command(BaseCommand):
             }
 
             for idx, bp in enumerate(BLUEPRINTS['advanced'], start=1):
+                if lang != 'en':
+                    continue
                 lesson_id = f"ADV-{lang.upper()}-{idx:03d}"
                 prereq = f"ADV-{lang.upper()}-{idx-1:03d}" if idx > 1 else None
 
@@ -2335,6 +2329,8 @@ class Command(BaseCommand):
 
             # Intermediate Writing Lessons
             for idx, topic in enumerate(INTERMEDIATE_WRITING_TOPICS, start=1):
+                if lang != 'en':
+                    continue
                 lesson_id = f"WR-INT-{lang.upper()}-{idx:03d}"
                 prereq = f"WR-INT-{lang.upper()}-{idx-1:03d}" if idx > 1 else None
 

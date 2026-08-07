@@ -2,12 +2,12 @@
 
 .container {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
+  top: 12px;
+  right: 12px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
 }
 
 .toggleTrigger {
@@ -36,8 +36,7 @@
 }
 
 .panel {
-  margin-bottom: 10px;
-  order: -1;
+  margin-top: 10px;
   background-color: var(--bg-cream-card);
   border: 4px solid var(--color-peach);
   border-radius: var(--radius-md);
@@ -180,19 +179,4 @@
 .actionBtn:hover {
   border-color: var(--color-orange);
   background-color: var(--color-peach-light);
-}
-
-@media (max-width: 768px) {
-  .container {
-    bottom: auto;
-    top: 12px;
-    left: auto;
-    right: 12px;
-    align-items: flex-end;
-  }
-  .panel {
-    order: 1;
-    margin-bottom: 0;
-    margin-top: 8px;
-  }
 }
