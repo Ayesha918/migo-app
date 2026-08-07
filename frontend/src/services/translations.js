@@ -51,7 +51,25 @@ const translations = {
     // Lesson player
     clearTracing: 'Clear Tracing 🧹',
     backBtn: '← Previous',
-    migoHelperTitle: 'MiGo Helper'
+    migoHelperTitle: 'MiGo Helper',
+    correctFeedback: 'Correct!',
+    incorrectFeedback: 'Incorrect. Try again.',
+    incorrectAiTip: 'Incorrect. Here is an AI tip: ',
+    excellentFeedback: 'Excellent!',
+    tryAgainFeedback: 'Try again.',
+    matchConnectedFeedback: 'Match connected!',
+    allMatchesFoundFeedback: 'All matches found! Great job!',
+    excellentUnscrambleFeedback: 'Excellent unscrambling! All words are correct!',
+    unscrambleIncorrectFeedback: 'Some words are incorrect. Click Clear and try again.',
+    sentenceCorrectFeedback: 'Excellent! The sentence is correct.',
+    sentenceIncorrectFeedback: 'Incorrect word order. Tap words to remove them and try again.',
+    quizCheckupIntro: "Let's complete the quiz checkup!",
+    writeMoreEssay: 'Write a bit more to submit your essay!',
+    essaySubmitted: 'Congratulations! Essay submitted and reviewed successfully.',
+    emailSent: 'Email sent successfully!',
+    writeParagraphLimit: 'Write at least 10 words to submit your paragraph!',
+    paragraphSubmitted: 'Excellent paragraph submission! Great effort.',
+    completeCurrentLessons: 'Complete current lessons to unlock this writing topic!'
   },
   hi: {
     welcome: 'स्वागत है',
@@ -104,7 +122,25 @@ const translations = {
     // Lesson player
     clearTracing: 'ट्रेसिंग साफ करें 🧹',
     backBtn: '← पिछला',
-    migoHelperTitle: 'MiGo सहायक'
+    migoHelperTitle: 'MiGo सहायक',
+    correctFeedback: 'सही है!',
+    incorrectFeedback: 'गलत है। फिर से प्रयास करें।',
+    incorrectAiTip: 'गलत है। यहाँ एक एआई संकेत है: ',
+    excellentFeedback: 'बहुत बढ़िया!',
+    tryAgainFeedback: 'फिर से प्रयास करें।',
+    matchConnectedFeedback: 'जोड़ी मिल गई!',
+    allMatchesFoundFeedback: 'सभी जोड़ियां मिल गईं! बहुत बढ़िया!',
+    excellentUnscrambleFeedback: 'बहुत बढ़िया! सभी शब्द सही हैं!',
+    unscrambleIncorrectFeedback: 'कुछ शब्द गलत हैं। साफ करें और फिर से प्रयास करें।',
+    sentenceCorrectFeedback: 'बहुत बढ़िया! वाक्य सही है।',
+    sentenceIncorrectFeedback: 'गलत शब्द क्रम। शब्दों को हटाने के लिए उन पर टैप करें और फिर से प्रयास करें।',
+    quizCheckupIntro: 'आइए प्रश्नोत्तरी मूल्यांकन पूरा करें!',
+    writeMoreEssay: 'अपना निबंध सबमिट करने के लिए थोड़ा और लिखें!',
+    essaySubmitted: 'बधाई हो! निबंध सफलतापूर्वक सबमिट और समीक्षा किया गया।',
+    emailSent: 'ईमेल सफलतापूर्वक भेजा गया!',
+    writeParagraphLimit: 'अपना अनुच्छेद सबमिट करने के लिए कम से कम 10 शब्द लिखें!',
+    paragraphSubmitted: 'बहुत बढ़िया अनुच्छेद सबमिशन! शानदार प्रयास।',
+    completeCurrentLessons: 'इस लेखन विषय को अनलॉक करने के लिए वर्तमान पाठ पूरे करें!'
   },
   kn: {
     welcome: 'ಸ್ವಾಗತ',
@@ -157,7 +193,25 @@ const translations = {
     // Lesson player
     clearTracing: 'ಬರಹ ಅಳಿಸಿ 🧹',
     backBtn: '← ಹಿಂದಿನ',
-    migoHelperTitle: 'MiGo ಸಹಾಯಕ'
+    migoHelperTitle: 'MiGo ಸಹಾಯಕ',
+    correctFeedback: 'ಸರಿ!',
+    incorrectFeedback: 'ತಪ್ಪು. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.',
+    incorrectAiTip: 'ತಪ್ಪು. ಇಲ್ಲಿದೆ ಒಂದು ಎಐ ಸಲಹೆ: ',
+    excellentFeedback: 'ಅದ್ಭುತ!',
+    tryAgainFeedback: 'ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.',
+    matchConnectedFeedback: 'ಹೊಂದಾಣಿಕೆ ಯಶಸ್ವಿಯಾಗಿದೆ!',
+    allMatchesFoundFeedback: 'ಎಲ್ಲಾ ಹೊಂದಾಣಿಕೆಗಳು ಪೂರ್ಣಗೊಂಡಿವೆ! ಅದ್ಭುತ ಕೆಲಸ!',
+    excellentUnscrambleFeedback: 'ಅದ್ಭುತ! ಎಲ್ಲಾ ಪದಗಳು ಸರಿಯಾಗಿವೆ!',
+    unscrambleIncorrectFeedback: 'ಕೆಲವು ಪದಗಳು ತಪ್ಪಾಗಿವೆ. ಅಳಿಸಿ ಮತ್ತು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.',
+    sentenceCorrectFeedback: 'ಅದ್ಭುತ! ವಾಕ್ಯವು ಸರಿಯಾಗಿದೆ.',
+    sentenceIncorrectFeedback: 'ಪದಗಳ ಜೋಡಣೆ ತಪ್ಪಾಗಿದೆ. ಪದಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಅವುಗಳ ಮೇಲೆ ಟ್ಯಾಪ್ ಮಾಡಿ ಮತ್ತು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.',
+    quizCheckupIntro: 'ಬನ್ನಿ ರಸಪ್ರಶ್ನೆ ಮೌಲ್ಯಮಾಪನ ಪೂರ್ಣಗೊಳಿಸೋಣ!',
+    writeMoreEssay: 'ನಿಮ್ಮ ಪ್ರಬಂಧವನ್ನು ಸಲ್ಲಿಸಲು ಇನ್ನು ಸ್ವಲ್ಪ ಬರೆಯಿರಿ!',
+    essaySubmitted: 'ಅಭಿನಂದನೆಗಳು! ಪ್ರಬಂಧ ಯಶಸ್ವಿಯಾಗಿ ಸಲ್ಲಿಕೆಯಾಗಿದೆ.',
+    emailSent: 'ಇಮೇಲ್ ಯಶಸ್ವಿಯಾಗಿ ಕಳುಹಿಸಲಾಗಿದೆ!',
+    writeParagraphLimit: 'ನಿಮ್ಮ ಪ್ಯಾರಾಗ್ರಾಫ್ ಸಲ್ಲಿಸಲು ಕನಿಷ್ಠ 10 ಪದಗಳನ್ನು ಬರೆಯಿರಿ!',
+    paragraphSubmitted: 'ಅದ್ಭುತ ಪ್ಯಾರಾಗ್ರಾಫ್ ಸಲ್ಲಿಕೆ! ಉತ್ತಮ ಪ್ರಯತ್ನ.',
+    completeCurrentLessons: 'ಈ ಬರವಣಿಗೆಯ ವಿಷಯವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಪ್ರಸ್ತುತ ಪಾಠಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ!'
   },
   ta: {
     welcome: 'வரவேற்கிறோம்',
@@ -210,7 +264,25 @@ const translations = {
     // Lesson player
     clearTracing: 'அழித்து எழுது 🧹',
     backBtn: '← முந்தைய',
-    migoHelperTitle: 'MiGo உதவியாளர்'
+    migoHelperTitle: 'MiGo உதவியாளர்',
+    correctFeedback: 'சரி!',
+    incorrectFeedback: 'தவறு. மீண்டும் முயற்சிக்கவும்.',
+    incorrectAiTip: 'தவறு. இதோ ஒரு எஐ குறிப்பு: ',
+    excellentFeedback: 'அருமை!',
+    tryAgainFeedback: 'மீண்டும் முயற்சிக்கவும்.',
+    matchConnectedFeedback: 'பொருத்தம் இணைக்கப்பட்டது!',
+    allMatchesFoundFeedback: 'அனைத்து பொருத்தங்களும் கண்டறியப்பட்டன! அருமையான வேலை!',
+    excellentUnscrambleFeedback: 'அருமையான சொற்கள்! அனைத்து சொற்களும் சரி!',
+    unscrambleIncorrectFeedback: 'சில சொற்கள் தவறானவை. அழித்துவிட்டு மீண்டும் முயற்சிக்கவும்.',
+    sentenceCorrectFeedback: 'அருமை! வாக்கியம் சரியானது.',
+    sentenceIncorrectFeedback: 'தவறான சொல் வரிசை. சொற்களை நீக்க அவற்றைத் தட்டி மீண்டும் முயற்சிக்கவும்.',
+    quizCheckupIntro: 'விடைபெறும் வினாடி வினாவை முடிக்கலாம்!',
+    writeMoreEssay: 'உங்கள் கட்டுரையை சமர்ப்பிக்க இன்னும் கொஞ்சம் எழுதுங்கள்!',
+    essaySubmitted: 'வாழ்த்துகள்! கட்டுரை வெற்றிகரமாக சமர்ப்பிக்கப்பட்டு மதிப்பாய்வு செய்யப்பட்டது.',
+    emailSent: 'மின்னஞ்சல் வெற்றிகரமாக அனுப்பப்பட்டது!',
+    writeParagraphLimit: 'உங்கள் பத்தியைச் சமர்ப்பிக்க குறைந்தது 10 சொற்களை எழுதுங்கள்!',
+    paragraphSubmitted: 'அருமையான பத்தி சமர்ப்பிப்பு! சிறந்த முயற்சி.',
+    completeCurrentLessons: 'இந்த எழுத்துத் தலைப்பைத் திறக்க தற்போதைய பாடங்களை முடிக்கவும்!'
   },
 };
 

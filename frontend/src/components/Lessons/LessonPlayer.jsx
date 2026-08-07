@@ -514,6 +514,8 @@ export default function LessonPlayer() {
   const lessonNumber = currentEntry?.day_number || 1;
   const preferredLanguage = learner?.learning_language || lesson.language || 'en';
   const speechLang = SPEECH_LANG_MAP[preferredLanguage] || 'en-US';
+  const knownLanguage = learner?.known_language || 'en';
+  const knownSpeechLang = SPEECH_LANG_MAP[knownLanguage] || 'en-US';
 
   // 5 strict steps:
   // 0: Explore (Alphabet soundboard or target prompter)
@@ -762,7 +764,7 @@ export default function LessonPlayer() {
         setMatchSuccess(false);
       }
     } else if (stage === 3) {
-      speak('Let\'s complete the quiz checkup!', speechLang, audioSpeed);
+      speak(t('quizCheckupIntro'), knownSpeechLang, audioSpeed);
     }
   }
 }, [lesson, stage]);
@@ -775,9 +777,9 @@ export default function LessonPlayer() {
 
     if (spoken.includes(target)) {
       setVoiceSuccess(true);
-      speak('Excellent!', speechLang, audioSpeed);
+      speak(t('excellentFeedback'), knownSpeechLang, audioSpeed);
     } else {
-      speak(`Try again.`, speechLang, audioSpeed);
+      speak(t('tryAgainFeedback'), knownSpeechLang, audioSpeed);
     }
   };
 
@@ -851,16 +853,16 @@ export default function LessonPlayer() {
     if (leftId === rightId) {
       const updated = { ...completedMatches, [leftId]: rightId };
       setCompletedMatches(updated);
-      speak('Match connected!', speechLang, audioSpeed);
+      speak(t('matchConnectedFeedback'), knownSpeechLang, audioSpeed);
       setSelectedLeft(null);
       setSelectedRight(null);
 
       if (Object.keys(updated).length === leftMatchItems.length) {
         setMatchSuccess(true);
-        speak('All matches found! Great job!', speechLang, audioSpeed);
+        speak(t('allMatchesFoundFeedback'), knownSpeechLang, audioSpeed);
       }
     } else {
-      speak('Try again.', speechLang, audioSpeed);
+      speak(t('tryAgainFeedback'), knownSpeechLang, audioSpeed);
       setSelectedLeft(null);
       setSelectedRight(null);
     }
@@ -878,9 +880,10 @@ export default function LessonPlayer() {
 
     if (updatedSpelling.join('').toLowerCase() === targetWord.toLowerCase()) {
       setMatchSuccess(true);
-      speak(`Excellent! You spelled ${targetWord}!`, speechLang, audioSpeed);
+      speak(t('excellentFeedback'), knownSpeechLang, audioSpeed);
+      setTimeout(() => speak(targetWord, speechLang, audioSpeed), 800);
     } else if (updatedSpelling.length >= targetWord.length) {
-      speak('Try again.', speechLang, audioSpeed);
+      speak(t('tryAgainFeedback'), knownSpeechLang, audioSpeed);
       setBuiltSpelling([]);
       setShuffledLetters(gameData.letters || []);
     }
@@ -900,15 +903,15 @@ export default function LessonPlayer() {
       if (newFlipped[0].match_key === newFlipped[1].match_key) {
         setMatchedCardKeys([...matchedCardKeys, newFlipped[0].match_key]);
         setFlippedCards([]);
-        speak('Match connected!', speechLang, audioSpeed);
+        speak(t('matchConnectedFeedback'), knownSpeechLang, audioSpeed);
         if (matchedCardKeys.length + 1 === memoryCards.length / 2) {
           setMatchSuccess(true);
-          speak('Great job!', speechLang, audioSpeed);
+          speak(t('excellentFeedback'), knownSpeechLang, audioSpeed);
         }
       } else {
         setTimeout(() => {
           setFlippedCards([]);
-          speak('Try again.', speechLang, audioSpeed);
+          speak(t('tryAgainFeedback'), knownSpeechLang, audioSpeed);
         }, 1200);
       }
     }
@@ -952,9 +955,9 @@ export default function LessonPlayer() {
     setUnscrambleChecked(true);
     setUnscrambleIsCorrect(allCorrect);
     if (allCorrect) {
-      speak("Excellent unscrambling! All words are correct!", speechLang, audioSpeed);
+      speak(t('excellentUnscrambleFeedback'), knownSpeechLang, audioSpeed);
     } else {
-      speak("Some words are incorrect. Click Clear and try again.", speechLang, audioSpeed);
+      speak(t('unscrambleIncorrectFeedback'), knownSpeechLang, audioSpeed);
     }
   };
 
@@ -963,9 +966,9 @@ export default function LessonPlayer() {
     speak(letter, speechLang, audioSpeed);
     if (letter === gameData.target) {
       setMatchSuccess(true);
-      speak('Excellent!', speechLang, audioSpeed);
+      speak(t('excellentFeedback'), knownSpeechLang, audioSpeed);
     } else {
-      speak('Try again.', speechLang, audioSpeed);
+      speak(t('tryAgainFeedback'), knownSpeechLang, audioSpeed);
     }
   };
 
@@ -979,7 +982,7 @@ export default function LessonPlayer() {
       if (!wasAlreadyGuessedWrong) {
         setQuizScore((prev) => prev + 1);
       }
-      speak('Correct!', speechLang, audioSpeed);
+      speak(t('correctFeedback'), knownSpeechLang, audioSpeed);
     } else {
       const currentWrong = incorrectQuizGuesses[currentQuizIndex] || [];
       if (!currentWrong.includes(option)) {
@@ -988,7 +991,7 @@ export default function LessonPlayer() {
           [currentQuizIndex]: [...currentWrong, option]
         });
       }
-      speak('Incorrect. Here is an AI tip: ' + (q?.explanation || 'Try again!'), speechLang, audioSpeed);
+      speak(t('incorrectAiTip') + (q?.explanation || t('tryAgainFeedback')), knownSpeechLang, audioSpeed);
     }
   };
 
@@ -1681,7 +1684,7 @@ export default function LessonPlayer() {
                         setSlideIndex(0);
                         setStage(0);
                       } else {
-                        speak("Complete current lessons to unlock this writing topic!", speechLang, audioSpeed);
+                        speak(t('completeCurrentLessons'), knownSpeechLang, audioSpeed);
                       }
                     }}
                     style={{
@@ -2234,10 +2237,10 @@ export default function LessonPlayer() {
                               setAlphabetAnswer(opt);
                               if (isOptionCorrect) {
                                 setAlphabetAnswerCorrect(true);
-                                speak("Correct!", speechLang, audioSpeed);
+                                speak(t('correctFeedback'), knownSpeechLang, audioSpeed);
                               } else {
                                 setAlphabetAnswerCorrect(false);
-                                speak("Incorrect. Try again.", speechLang, audioSpeed);
+                                speak(t('incorrectFeedback'), knownSpeechLang, audioSpeed);
                               }
                             }}
                             type="button"
@@ -2344,10 +2347,10 @@ export default function LessonPlayer() {
                               setAlphabetAnswer(opt);
                               if (isOptionCorrect) {
                                 setAlphabetAnswerCorrect(true);
-                                speak("Correct!", speechLang, audioSpeed);
+                                speak(t('correctFeedback'), knownSpeechLang, audioSpeed);
                               } else {
                                 setAlphabetAnswerCorrect(false);
-                                speak("Incorrect. Try again.", speechLang, audioSpeed);
+                                speak(t('incorrectFeedback'), knownSpeechLang, audioSpeed);
                               }
                             }}
                             type="button"
@@ -2508,9 +2511,9 @@ export default function LessonPlayer() {
                                   onClick={() => {
                                     setStoryAnswers({ ...storyAnswers, [currentTabKey]: opt });
                                     if (isCorrect) {
-                                      speak("Correct!", speechLang, audioSpeed);
+                                      speak(t('correctFeedback'), knownSpeechLang, audioSpeed);
                                     } else {
-                                      speak("Try again.", speechLang, audioSpeed);
+                                      speak(t('tryAgainFeedback'), knownSpeechLang, audioSpeed);
                                     }
                                   }}
                                   style={{
@@ -2658,7 +2661,7 @@ export default function LessonPlayer() {
                             onClick={() => {
                               setChatSelectedOption(opt);
                               setChatMessages([...activeMsgs, { sender: 'you', text: opt }]);
-                              speak("Excellent reply!", speechLang, audioSpeed);
+                              speak(t('excellentFeedback'), knownSpeechLang, audioSpeed);
                             }}
                             style={{
                               padding: '12px 16px',
@@ -2813,11 +2816,11 @@ export default function LessonPlayer() {
                         <button
                           onClick={() => {
                             if (essayText.trim().length < 20) {
-                              speak("Write a bit more to submit your essay!", speechLang, audioSpeed);
+                              speak(t('writeMoreEssay'), knownSpeechLang, audioSpeed);
                               return;
                             }
                             setEssaySubmitted(true);
-                            speak("Congratulations! Essay submitted and reviewed successfully.", speechLang, audioSpeed);
+                            speak(t('essaySubmitted'), knownSpeechLang, audioSpeed);
                           }}
                           style={{
                             padding: '10px 24px',
@@ -2988,7 +2991,7 @@ export default function LessonPlayer() {
                       <button
                         onClick={() => {
                           setLetterSubmitted(true);
-                          speak("Email sent successfully!", speechLang, audioSpeed);
+                          speak(t('emailSent'), knownSpeechLang, audioSpeed);
                         }}
                         style={{
                           padding: '12px 32px',
@@ -3401,10 +3404,10 @@ export default function LessonPlayer() {
                   const targetStr = currentSlide.target.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
                   if (userStr === targetStr) {
                     setSentenceCorrect(true);
-                    speak("Excellent! The sentence is correct.", speechLang, audioSpeed);
+                    speak(t('sentenceCorrectFeedback'), knownSpeechLang, audioSpeed);
                   } else {
                     setSentenceCorrect(false);
-                    speak("Incorrect word order. Tap words to remove them and try again.", speechLang, audioSpeed);
+                    speak(t('sentenceIncorrectFeedback'), knownSpeechLang, audioSpeed);
                   }
                   setSentenceChecked(true);
                 };
@@ -3597,11 +3600,11 @@ export default function LessonPlayer() {
                             onClick={() => {
                               const count = paragraphText.trim() === '' ? 0 : paragraphText.trim().split(/\s+/).length;
                               if (count < 10) {
-                                speak("Write at least 10 words to submit your paragraph!", speechLang, audioSpeed);
+                                speak(t('writeParagraphLimit'), knownSpeechLang, audioSpeed);
                                 return;
                               }
                               setParagraphSubmitted(true);
-                              speak("Excellent paragraph submission! Great effort.", speechLang, audioSpeed);
+                              speak(t('paragraphSubmitted'), knownSpeechLang, audioSpeed);
                             }}
                             style={{
                               padding: '10px 24px',
@@ -4020,10 +4023,10 @@ export default function LessonPlayer() {
                             setAlphabetAnswer(opt);
                             if (isOptCorrect) {
                               setAlphabetAnswerCorrect(true);
-                              speak("Correct!", speechLang, audioSpeed);
+                              speak(t('correctFeedback'), knownSpeechLang, audioSpeed);
                             } else {
                               setAlphabetAnswerCorrect(false);
-                              speak("Incorrect. Try again.", speechLang, audioSpeed);
+                              speak(t('incorrectFeedback'), knownSpeechLang, audioSpeed);
                             }
                           }}
                           type="button"
@@ -4177,10 +4180,10 @@ export default function LessonPlayer() {
                             setAlphabetAnswer(opt);
                             if (isOptCorrect) {
                               setAlphabetAnswerCorrect(true);
-                              speak("Correct!", speechLang, audioSpeed);
+                              speak(t('correctFeedback'), knownSpeechLang, audioSpeed);
                             } else {
                               setAlphabetAnswerCorrect(false);
-                              speak("Incorrect. Try again.", speechLang, audioSpeed);
+                              speak(t('incorrectFeedback'), knownSpeechLang, audioSpeed);
                             }
                           }}
                           type="button"

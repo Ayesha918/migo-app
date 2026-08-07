@@ -8,8 +8,7 @@ import { translate } from './translations';
  */
 function useTranslate() {
   const { learner } = useLearner();
-  const storedLang = localStorage.getItem('migo_ui_language') || 'en';
-  const langCode = learner?.known_language || storedLang;
+  const langCode = learner?.known_language || 'en';
   return (key) => translate(key, langCode);
 }
 export default useTranslate;
