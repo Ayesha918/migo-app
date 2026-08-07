@@ -20,6 +20,7 @@ import VoiceAssistant from './VoiceAssistant';
 import owl from '../../assets/images/owl.png';
 
 import styles from './Home.module.css';
+import useTranslate from '../../services/useTranslate';
 
 const SPEECH_LANG_MAP = {
   en: 'en-US',
@@ -31,6 +32,7 @@ const SPEECH_LANG_MAP = {
 function Home() {
   const navigate = useNavigate();
   const { learner, logout } = useLearner();
+  const t = useTranslate();
 
   const [path, setPath] = useState([]);
   const [rewards, setRewards] = useState(null);
@@ -144,9 +146,9 @@ function Home() {
           <div className={styles.centerContainer} style={{ minHeight: '80vh' }}>
             <div className={styles.emptyPathCard} style={{ maxWidth: '600px', width: '100%' }}>
               <img src={owl} alt="Owl Mascot" className={styles.owlImgLarge} />
-              <h2>👋 Welcome to MiGo!</h2>
+              <h2>👋 {t('welcomeToMigo')}</h2>
               <p style={{ fontSize: '17px', color: 'var(--text-muted)', marginBottom: '24px' }}>
-                Before starting lessons, you must complete your initial placement checks. This helps us recommend the best progressive lessons for you!
+                {t('placementIntro')}
               </p>
 
               <div className={styles.gateAssessmentsList}>
@@ -154,14 +156,14 @@ function Home() {
                 <div className={styles.gateAssessmentItem}>
                   <div className={styles.gateIcon}>📖</div>
                   <div className={styles.gateDetails}>
-                    <h3>Reading Assessment</h3>
+                    <h3>{t('readingAssessment')}</h3>
                     <span>Familiarity with alphabet, words, and pronunciation</span>
                   </div>
                   {dashboard?.assessment_status?.reading ? (
-                    <span className={styles.gateDoneBadge}>Completed ✅</span>
+                    <span className={styles.gateDoneBadge}>{t('completedBadge')}</span>
                   ) : (
                     <button className={styles.gatePlayBtn} onClick={() => navigate('/assessment/reading')}>
-                      Start Check ➔
+                      {t('startCheck')}
                     </button>
                   )}
                 </div>
@@ -170,14 +172,14 @@ function Home() {
                 <div className={styles.gateAssessmentItem}>
                   <div className={styles.gateIcon}>✍️</div>
                   <div className={styles.gateDetails}>
-                    <h3>Writing Assessment</h3>
+                    <h3>{t('writingAssessment')}</h3>
                     <span>Familiarity with letter tracing and spellings</span>
                   </div>
                   {dashboard?.assessment_status?.writing ? (
-                    <span className={styles.gateDoneBadge}>Completed ✅</span>
+                    <span className={styles.gateDoneBadge}>{t('completedBadge')}</span>
                   ) : (
                     <button className={styles.gatePlayBtn} onClick={() => navigate('/assessment/writing')}>
-                      Start Check ➔
+                      {t('startCheck')}
                     </button>
                   )}
                 </div>
@@ -186,14 +188,14 @@ function Home() {
                 <div className={styles.gateAssessmentItem}>
                   <div className={styles.gateIcon}>🧠</div>
                   <div className={styles.gateDetails}>
-                    <h3>Comprehension Assessment</h3>
+                    <h3>{t('comprehensionAssessment')}</h3>
                     <span>Understanding short stories and picture clues</span>
                   </div>
                   {dashboard?.assessment_status?.comprehension ? (
-                    <span className={styles.gateDoneBadge}>Completed ✅</span>
+                    <span className={styles.gateDoneBadge}>{t('completedBadge')}</span>
                   ) : (
                     <button className={styles.gatePlayBtn} onClick={() => navigate('/assessment/comprehension')}>
-                      Start Check ➔
+                      {t('startCheck')}
                     </button>
                   )}
                 </div>

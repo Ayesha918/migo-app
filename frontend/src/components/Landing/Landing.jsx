@@ -13,7 +13,7 @@ export default function Landing() {
   const navigate = useNavigate();
   
   // Interactive features states
-  const [activeLang, setActiveLang] = useState('en');
+  const [activeLang, setActiveLang] = useState(() => localStorage.getItem('migo_ui_language') || 'en');
   const [selectedToolTab, setSelectedToolTab] = useState('dictation');
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   
@@ -100,10 +100,10 @@ export default function Landing() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                 >
-                  <button onClick={() => { setActiveLang('en'); setShowLanguageDropdown(false); }}>English</button>
-                  <button onClick={() => { setActiveLang('hi'); setShowLanguageDropdown(false); }}>हिन्दी (Hindi)</button>
-                  <button onClick={() => { setActiveLang('kn'); setShowLanguageDropdown(false); }}>ಕನ್ನಡ (Kannada)</button>
-                  <button onClick={() => { setActiveLang('ta'); setShowLanguageDropdown(false); }}>தமிழ் (Tamil)</button>
+                  <button onClick={() => { setActiveLang('en'); localStorage.setItem('migo_ui_language', 'en'); setShowLanguageDropdown(false); }}>English</button>
+                  <button onClick={() => { setActiveLang('hi'); localStorage.setItem('migo_ui_language', 'hi'); setShowLanguageDropdown(false); }}>हिन्दी (Hindi)</button>
+                  <button onClick={() => { setActiveLang('kn'); localStorage.setItem('migo_ui_language', 'kn'); setShowLanguageDropdown(false); }}>ಕನ್ನಡ (Kannada)</button>
+                  <button onClick={() => { setActiveLang('ta'); localStorage.setItem('migo_ui_language', 'ta'); setShowLanguageDropdown(false); }}>தமிழ் (Tamil)</button>
                 </motion.div>
               )}
             </AnimatePresence>

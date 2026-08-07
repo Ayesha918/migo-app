@@ -7,6 +7,7 @@ import {
   Award, Sparkles, RefreshCw, Play, Info, Eye, Type, Trash, HelpCircle, FileText, XCircle
 } from 'lucide-react';
 import { useLearner } from '../../services/LearnerContext';
+import useTranslate from '../../services/useTranslate';
 import speak from '../../services/speak';
 import useVoiceInput from '../../services/useVoiceInput';
 import { completeLessonDay, fetchLearningPath, generateLearningPath, startSession, endSession } from '../../services/api';
@@ -280,6 +281,7 @@ const LETTER_META = {
 const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
 function TracingCanvas({ targetText = 'A', mode = 'letter' }) {
+  const t = useTranslate();
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
 
@@ -396,7 +398,7 @@ function TracingCanvas({ targetText = 'A', mode = 'letter' }) {
           boxShadow: '0 2px 6px rgba(231, 76, 60, 0.1)'
         }}
       >
-        Clear Tracing 🧹
+        {t('clearTracing')}
       </button>
     </div>
   );
@@ -485,6 +487,7 @@ export default function LessonPlayer() {
   const location = useLocation();
   const navigate = useNavigate();
   const { learner } = useLearner();
+  const t = useTranslate();
 
   const [currentEntry, setCurrentEntry] = useState(location.state?.entry);
   const [learningPath, setLearningPath] = useState(location.state?.path || []);
@@ -1490,7 +1493,7 @@ export default function LessonPlayer() {
                     }}
                     type="button"
                   >
-                    ← Previous
+                    {t('backBtn')}
                   </button>
 
                   {currentQuizIndex < 9 ? (
@@ -1834,7 +1837,7 @@ export default function LessonPlayer() {
                         type="button"
                         style={{ width: 'auto', padding: '12px 48px', fontSize: '16px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
                       >
-                        Next ➔
+                        {t('nextBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -2029,7 +2032,7 @@ export default function LessonPlayer() {
                         onClick={() => setSlideIndex(prev => prev - 1)}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
                       <button
                         className={styles.finishLessonBtn}
@@ -2037,7 +2040,7 @@ export default function LessonPlayer() {
                         type="button"
                         style={{ width: 'auto', padding: '12px 32px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
                       >
-                        Next ➔
+                        {t('nextBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -2096,7 +2099,7 @@ export default function LessonPlayer() {
                         onClick={() => setSlideIndex(prev => prev - 1)}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
                       <button
                         className={styles.finishLessonBtn}
@@ -2104,7 +2107,7 @@ export default function LessonPlayer() {
                         type="button"
                         style={{ width: 'auto', padding: '12px 36px', fontSize: '16px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
                       >
-                        Next ➔
+                        {t('nextBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -2164,7 +2167,7 @@ export default function LessonPlayer() {
                         onClick={() => setSlideIndex(prev => prev - 1)}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
                       
                       <button
@@ -2173,7 +2176,7 @@ export default function LessonPlayer() {
                         type="button"
                         style={{ width: 'auto', padding: '12px 36px', fontSize: '16px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
                       >
-                        {slideIndex === groupLetters.length ? 'Start Practice ➔' : 'Next ➔'}
+                        {slideIndex === groupLetters.length ? 'Start Practice ➔' : t('nextBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -2285,7 +2288,7 @@ export default function LessonPlayer() {
                             type="button"
                             style={{ width: 'auto', padding: '10px 24px', fontSize: '14px', backgroundColor: '#FF7A00', boxShadow: '0 4px 12px rgba(255, 122, 0, 0.2)' }}
                           >
-                            Next ➔
+                            {t('nextBtn')}
                           </button>
                         )}
                       </div>
@@ -2381,7 +2384,7 @@ export default function LessonPlayer() {
                             type="button"
                             style={{ width: 'auto', padding: '10px 24px', fontSize: '14px', backgroundColor: '#FF7A00', boxShadow: '0 4px 12px rgba(255, 122, 0, 0.2)' }}
                           >
-                            Next ➔
+                            {t('nextBtn')}
                           </button>
                         )}
                       </div>
@@ -2543,7 +2546,7 @@ export default function LessonPlayer() {
                         onClick={() => setSlideIndex(prev => prev - 1)}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
 
                       {allCorrect ? (
@@ -2557,7 +2560,7 @@ export default function LessonPlayer() {
                           style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#4CAF50', boxShadow: '0 6px 20px rgba(76, 175, 80, 0.2)' }}
                           type="button"
                         >
-                          Next ➔
+                          {t('nextBtn')}
                         </button>
                       ) : (
                         <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>
@@ -2710,7 +2713,7 @@ export default function LessonPlayer() {
                         }}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
 
                       {userReplied && (
@@ -2724,7 +2727,7 @@ export default function LessonPlayer() {
                           style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
                           type="button"
                         >
-                          Next ➔
+                          {t('nextBtn')}
                         </button>
                       )}
                     </div>
@@ -2868,7 +2871,7 @@ export default function LessonPlayer() {
                         }}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
 
                       {essaySubmitted && (
@@ -2882,7 +2885,7 @@ export default function LessonPlayer() {
                           style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
                           type="button"
                         >
-                          Next ➔
+                          {t('nextBtn')}
                         </button>
                       )}
                     </div>
@@ -3040,7 +3043,7 @@ export default function LessonPlayer() {
                         }}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
 
                       {letterSubmitted && (
@@ -3056,7 +3059,7 @@ export default function LessonPlayer() {
                           style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
                           type="button"
                         >
-                          Next ➔
+                          {t('nextBtn')}
                         </button>
                       )}
                     </div>
@@ -3105,7 +3108,7 @@ export default function LessonPlayer() {
 
                     <div className={styles.bottomNavRow}>
                       <button className={styles.mutedNavBtn} onClick={() => setSlideIndex(prev => prev - 1)} type="button">
-                        ← Previous
+                        {t('backBtn')}
                       </button>
                       <button
                         className={styles.finishLessonBtn}
@@ -3113,7 +3116,7 @@ export default function LessonPlayer() {
                         type="button"
                         style={{ width: 'auto', padding: '12px 32px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
                       >
-                        Next ➔
+                        {t('nextBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -3141,7 +3144,7 @@ export default function LessonPlayer() {
 
                     <div className={styles.bottomNavRow}>
                       <button className={styles.mutedNavBtn} onClick={() => setSlideIndex(prev => prev - 1)} type="button">
-                        ← Previous
+                        {t('backBtn')}
                       </button>
                       <button
                         className={styles.finishLessonBtn}
@@ -3149,7 +3152,7 @@ export default function LessonPlayer() {
                         type="button"
                         style={{ width: 'auto', padding: '12px 32px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
                       >
-                        Next ➔
+                        {t('nextBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -3180,7 +3183,7 @@ export default function LessonPlayer() {
 
                     <div className={styles.bottomNavRow}>
                       <button className={styles.mutedNavBtn} onClick={() => setSlideIndex(prev => prev - 1)} type="button">
-                        ← Previous
+                        {t('backBtn')}
                       </button>
                       <button
                         className={styles.finishLessonBtn}
@@ -3188,7 +3191,7 @@ export default function LessonPlayer() {
                         type="button"
                         style={{ width: 'auto', padding: '12px 32px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
                       >
-                        Next ➔
+                        {t('nextBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -3365,7 +3368,7 @@ export default function LessonPlayer() {
                         onClick={() => setSlideIndex(prev => prev - 1)}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
 
                       {!unscrambleIsCorrect ? (
@@ -3384,7 +3387,7 @@ export default function LessonPlayer() {
                           type="button"
                           style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#4CAF50', boxShadow: '0 6px 20px rgba(76, 175, 80, 0.25)' }}
                         >
-                          Next ➔
+                          {t('nextBtn')}
                         </button>
                       )}
                     </div>
@@ -3505,7 +3508,7 @@ export default function LessonPlayer() {
                         onClick={() => setSlideIndex(prev => prev - 1)}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
 
                       {!sentenceCorrect ? (
@@ -3530,7 +3533,7 @@ export default function LessonPlayer() {
                           type="button"
                           style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#4CAF50', boxShadow: '0 6px 20px rgba(76, 175, 80, 0.25)' }}
                         >
-                          Next ➔
+                          {t('nextBtn')}
                         </button>
                       )}
                     </div>
@@ -3629,7 +3632,7 @@ export default function LessonPlayer() {
                         onClick={() => setSlideIndex(prev => prev - 1)}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
 
                       <button
@@ -3643,7 +3646,7 @@ export default function LessonPlayer() {
                         disabled={!paragraphSubmitted}
                         style={{ width: 'auto', padding: '12px 36px', backgroundColor: paragraphSubmitted ? '#4CAF50' : '#E2E8F0', color: paragraphSubmitted ? '#FFFFFF' : '#94A3B8', cursor: paragraphSubmitted ? 'pointer' : 'default', boxShadow: paragraphSubmitted ? '0 6px 20px rgba(76, 175, 80, 0.25)' : 'none' }}
                       >
-                        Next ➔
+                        {t('nextBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -3698,7 +3701,7 @@ export default function LessonPlayer() {
                         onClick={() => setSlideIndex(prev => prev - 1)}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
 
                       <button
@@ -3707,7 +3710,7 @@ export default function LessonPlayer() {
                         style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
                         type="button"
                       >
-                        Next ➔
+                        {t('nextBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -3751,7 +3754,7 @@ export default function LessonPlayer() {
                         onClick={() => setSlideIndex(prev => prev - 1)}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
 
                       <button
@@ -3760,7 +3763,7 @@ export default function LessonPlayer() {
                         style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
                         type="button"
                       >
-                        Next ➔
+                        {t('nextBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -3826,7 +3829,7 @@ export default function LessonPlayer() {
                         }}
                         type="button"
                       >
-                        ← Previous
+                        {t('backBtn')}
                       </button>
 
                       {voiceSuccess ? (
@@ -3840,7 +3843,7 @@ export default function LessonPlayer() {
                           style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#4CAF50' }}
                           type="button"
                         >
-                          Next ➔
+                          {t('nextBtn')}
                         </button>
                       ) : (
                         <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>
