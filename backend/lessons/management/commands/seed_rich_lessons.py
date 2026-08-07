@@ -7,6 +7,11 @@ from assessments.models import LiteracyProfile, AssessmentAttempt, AssessmentRes
 from lessons.models import LearningPath
 import random
 
+def create_lesson(**kwargs):
+    lesson_id = kwargs.pop('lesson_id')
+    lesson, _ = Lesson.objects.update_or_create(lesson_id=lesson_id, defaults=kwargs)
+    return lesson
+
 LANGS = ['en', 'hi', 'kn', 'ta']
 LEVELS = ['beginner', 'intermediate', 'advanced']
 
@@ -461,7 +466,7 @@ class Command(BaseCommand):
                 }
 
                 # We store them in activities array for frontend mapping
-                Lesson.objects.create(
+                create_lesson(
                     lesson_id=lesson_id,
                     title=item['title'],
                     module='Alphabet Basics',
@@ -556,7 +561,7 @@ class Command(BaseCommand):
                     }
                 ]
 
-                Lesson.objects.create(
+                create_lesson(
                     lesson_id=lesson_id,
                     title=f"Beginner Lesson {idx}: {concept_name}",
                     module='Simple Words',
@@ -1154,7 +1159,7 @@ class Command(BaseCommand):
                     grad_slide
                 ]
 
-                Lesson.objects.create(
+                create_lesson(
                     lesson_id=lesson_id,
                     title=t(bp['title']),
                     module='Language Concepts',
@@ -2000,7 +2005,7 @@ class Command(BaseCommand):
                     }
                 ]
 
-                Lesson.objects.create(
+                create_lesson(
                     lesson_id=lesson_id,
                     title=t_adv(bp['concept']),
                     module='Advanced Literacy',
@@ -2034,7 +2039,7 @@ class Command(BaseCommand):
                 prefix = 'BEG' if level == 'beginner' else 'INT' if level == 'intermediate' else 'ADV'
                 lesson_id = f"{prefix}-ASSESS-{lang.upper()}"
                 if not Lesson.objects.filter(lesson_id=lesson_id).exists():
-                    Lesson.objects.create(
+                    create_lesson(
                         lesson_id=lesson_id,
                         title=f'{level.capitalize()} Level Graduation Assessment',
                         module='Level Assessment & Certification',
@@ -2081,57 +2086,90 @@ class Command(BaseCommand):
         WRITING_TRANSLATIONS = {
             'hi': {
                 'Writing the Alphabet': 'वर्णमाला लिखना',
-                'Writing Small Letters': 'छोटे अक्षर लिखना',
+                'Learn to write A to Z': 'वर्णमाला लिखना सीखें',
+                'Writing Small Letters': 'स्वर अक्षर लिखना',
+                'Learn to write a to z': 'स्वर लिखना सीखें',
                 'Writing Numbers': 'संख्याएँ लिखना',
+                'Learn to write 1 to 10': 'संख्याएँ लिखना सीखें',
                 'Simple Words': 'सरल शब्द',
+                'Write easy 3-letter words': 'सरल तीन अक्षर वाले शब्द लिखें',
                 'Naming Words': 'नामकरण शब्द',
+                'Write names of things around us': 'अपने आस-पास की चीजों के नाम लिखें',
                 'Action Words': 'क्रिया शब्द',
+                'Write words for actions': 'क्रियाओं के लिए शब्द लिखें',
                 'Small Sentences': 'छोटे वाक्य',
+                'Write short and simple sentences': 'छोटे और सरल वाक्य लिखें',
                 'Fun with Practice': 'अभ्यास का मज़ा',
-                'Word Building': 'शब्द निर्माण',
-                'Sentence Building': 'वाक्य निर्माण',
-                'Paragraph Writing': 'अनुच्छेद लेखन',
-                'Punctuation': 'विराम चिन्ह',
-                'Capitalization': 'बड़े अक्षर',
-                'Creative Writing': 'रचनात्मक लेखन',
-                'Letter Writing': 'पत्र लेखन',
-                'Practice Test': 'अभ्यास परीक्षा',
+                "Let's write what you know!": 'आइए लिखें जो आप जानते हैं!',
+                'Learn step by step and become a great writer!': 'कदम दर कदम सीखें और एक महान लेखक बनें!',
+                'Trace letters and write words': 'अक्षरों को ट्रेस करें और शब्द लिखें',
+                'Complete practice exercises': 'अभ्यास अभ्यास पूरा करें',
+                'Start from 1, follow the arrows and trace the letter.': '१ से शुरू करें, तीरों का अनुसरण करें और अक्षर को ट्रेस करें।',
+                'Write the missing letter.': 'लुप्त अक्षर लिखें।',
+                'Write the word': 'शब्द लिखें',
+                'Look at the word. Say it aloud. Then trace each letter.': 'शब्द को देखें। इसे जोर से बोलें। फिर प्रत्येक अक्षर को ट्रेस करें।',
+                'Write the sentence': 'वाक्य लिखें',
+                'Read the sentence. Then write it neatly on the lines below.': 'वाक्य पढ़ें। फिर इसे नीचे की पंक्तियों पर सफाई से लिखें।',
+                'Great job!': 'बहुत बढ़िया!',
+                'You finished the writing lesson!': 'आपने लिखने का पाठ पूरा कर लिया!',
             },
             'kn': {
                 'Writing the Alphabet': 'ಅಕ್ಷರಮಾಲೆ ಬರೆಯುವುದು',
-                'Writing Small Letters': 'ಚಿಕ್ಕ ಅಕ್ಷರಗಳನ್ನು ಬರೆಯುವುದು',
+                'Learn to write A to Z': 'ಅಕ್ಷರಮಾಲೆ ಬರೆಯಲು ಕಲಿಯಿರಿ',
+                'Writing Small Letters': 'ಸ್ವರಗಳನ್ನು ಬರೆಯುವುದು',
+                'Learn to write a to z': 'ಸ್ವರ ಬರೆಯಲು ಕಲಿಯಿರಿ',
                 'Writing Numbers': 'ಸಂಖ್ಯೆಗಳನ್ನು ಬರೆಯುವುದು',
+                'Learn to write 1 to 10': 'ಸಂಖ್ಯೆ ಬರೆಯಲು ಕಲಿಯಿರಿ',
                 'Simple Words': 'ಸರಳ ಪದಗಳು',
+                'Write easy 3-letter words': 'ಸರಳ ಮೂರು ಅಕ್ಷರದ ಪದಗಳನ್ನು ಬರೆಯಿರಿ',
                 'Naming Words': 'ಹೆಸರಿಸುವ ಪದಗಳು',
+                'Write names of things around us': 'ನಮ್ಮ ಸುತ್ತಮುತ್ತಲಿನ ವಸ್ತುಗಳ ಹೆಸರುಗಳನ್ನು ಬರೆಯಿರಿ',
                 'Action Words': 'ಕ್ರಿಯಾ ಪದಗಳು',
+                'Write words for actions': 'ಕ್ರಿಯೆಗಳ ಪದಗಳನ್ನು ಬರೆಯಿರಿ',
                 'Small Sentences': 'ಸಣ್ಣ ವಾಕ್ಯಗಳು',
+                'Write short and simple sentences': 'ಸಣ್ಣ ಮತ್ತು ಸರಳ ವಾಕ್ಯಗಳನ್ನು ಬರೆಯಿರಿ',
                 'Fun with Practice': 'ಅಭ್ಯಾಸದ ಆಟ',
-                'Word Building': 'ಪದ ರಚನೆ',
-                'Sentence Building': 'ವಾಕ್ಯ ರಚನೆ',
-                'Paragraph Writing': 'ಪ್ಯಾರಾಗ್ರಾಫ್ ಬರೆಯುವುದು',
-                'Punctuation': 'ವಿರಾಮ ಚಿಹ್ನೆಗಳು',
-                'Capitalization': 'ದೊಡ್ಡ ಅಕ್ಷರಗಳು',
-                'Creative Writing': 'ಸೃಜನಶೀಲ ಬರವಣಿಗೆ',
-                'Letter Writing': 'ಪತ್ರ ಬರವಣಿಗೆ',
-                'Practice Test': 'ಅಭ್ಯಾಸ ಪರೀಕ್ಷೆ',
+                "Let's write what you know!": 'ನಿಮಗೆ ತಿಳಿದಿರುವುದನ್ನು ಬರೆಯಿರಿ!',
+                'Learn step by step and become a great writer!': 'ಹಂತ ಹಂತವಾಗಿ ಕಲಿಯಿರಿ ಮತ್ತು ಉತ್ತಮ ಬರಹಗಾರರಾಗಿ!',
+                'Trace letters and write words': 'ಅಕ್ಷರಗಳನ್ನು ಪತ್ತೆಹಚ್ಚಿ ಮತ್ತು ಪದಗಳನ್ನು ಬರೆಯಿರಿ',
+                'Complete practice exercises': 'ಅಭ್ಯಾಸ ವ್ಯಾಯಾಮಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ',
+                'Start from 1, follow the arrows and trace the letter.': '೧ ರಿಂದ ಪ್ರಾರಂಭಿಸಿ, ಬಾಣಗಳನ್ನು ಅನುಸರಿಸಿ ಮತ್ತು ಅಕ್ಷರವನ್ನು ಪತ್ತೆಹಚ್ಚಿ.',
+                'Write the missing letter.': 'ಬಿಟ್ಟುಹೋದ ಅಕ್ಷರವನ್ನು ಬರೆಯಿರಿ.',
+                'Write the word': 'ಪದವನ್ನು ಬರೆಯಿರಿ',
+                'Look at the word. Say it aloud. Then trace each letter.': 'ಪದವನ್ನು ನೋಡಿ. ಜೋರಾಗಿ ಹೇಳಿ. ನಂತರ ಪ್ರತಿ ಅಕ್ಷರವನ್ನು ಪತ್ತೆಹಚ್ಚಿ.',
+                'Write the sentence': 'ವಾಕ್ಯವನ್ನು ಬರೆಯಿರಿ',
+                'Read the sentence. Then write it neatly on the lines below.': 'ವಾಕ್ಯವನ್ನು ಓದಿ. ನಂತರ ಕೆಳಗಿನ ಸಾಲುಗಳಲ್ಲಿ ಅಂದವಾಗಿ ಬರೆಯಿರಿ.',
+                'Great job!': 'ಅದ್ಭುತ ಕೆಲಸ!',
+                'You finished the writing lesson!': 'ನೀವು ಬರವಣಿಗೆಯ ಪಾಠವನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ!',
             },
             'ta': {
                 'Writing the Alphabet': 'நெடுங்கணக்கு எழுதுதல்',
+                'Learn to write A to Z': 'நெடுங்கணக்கு எழுதக் கற்றுக்கொள்ளுங்கள்',
                 'Writing Small Letters': 'சிறிய எழுத்துக்களை எழுதுதல்',
+                'Learn to write a to z': 'சிறிய எழுத்துக்களை எழுதக் கற்றுக்கொள்ளுங்கள்',
                 'Writing Numbers': 'எண்களை எழுதுதல்',
+                'Learn to write 1 to 10': 'எண் எழுதக் கற்றுக்கொள்ளுங்கள்',
                 'Simple Words': 'எளிய சொற்கள்',
+                'Write easy 3-letter words': 'எளிய மூன்று எழுத்து சொற்களை எழுதுங்கள்',
                 'Naming Words': 'பெயர்ச்சொற்கள்',
+                'Write names of things around us': 'நம்மைச் சுற்றியுள்ள பொருட்களின் பெயர்களை எழுதுங்கள்',
                 'Action Words': 'வினைச்சொற்கள்',
+                'Write words for actions': 'செயல்களுக்கான சொற்களை எழுதுங்கள்',
                 'Small Sentences': 'சிறு வாக்கியங்கள்',
+                'Write short and simple sentences': 'சிறு மற்றும் எளிய வாக்கியங்களை எழுதுங்கள்',
                 'Fun with Practice': 'பயிற்சி விளையாட்டு',
-                'Word Building': 'சொல் உருவாக்கம்',
-                'Sentence Building': 'வாக்கிய உருவாக்கம்',
-                'Paragraph Writing': 'பத்தி எழுதுதல்',
-                'Punctuation': 'நிறுத்தற்குறிகள்',
-                'Capitalization': 'பெரிய எழுத்துக்கள்',
-                'Creative Writing': 'படைப்பாற்றல் எழுத்து',
-                'Letter Writing': 'கடிதம் எழுதுதல்',
-                'Practice Test': 'பயிற்சி தேர்வு',
+                "Let's write what you know!": 'உங்களுக்குத் தெரிந்ததை எழுதுங்கள்!',
+                'Learn step by step and become a great writer!': 'படிப்படியாகக் கற்றுக்கொண்டு சிறந்த எழுத்தாளராகுங்கள்!',
+                'Trace letters and write words': 'எழுத்துக்களை வரைந்து சொற்களை எழுதுங்கள்',
+                'Complete practice exercises': 'பயிற்சிகளை முடிக்கவும்',
+                'Start from 1, follow the arrows and trace the letter.': '௧ இலிருந்து தொடங்கி, அம்புக்குறிகளைப் பின்பற்றி எழுத்தை வரையவும்.',
+                'Write the missing letter.': 'விடுபட்ட எழுத்தை எழுதவும்.',
+                'Write the word': 'சொல்லை எழுதவும்',
+                'Look at the word. Say it aloud. Then trace each letter.': 'சொல்லைப் பாருங்கள். சத்தமாகச் சொல்லுங்கள். பின்னர் ஒவ்வொரு எழுத்தையும் வரையவும்.',
+                'Write the sentence': 'வாக்கியத்தை எழுதவும்',
+                'Read the sentence. Then write it neatly on the lines below.': 'வாக்கியத்தைப் படியுங்கள். பின்னர் கீழே உள்ள வரிகளில் அழகாக எழுதுங்கள்.',
+                'Great job!': 'அருமையான வேலை!',
+                'You finished the writing lesson!': 'நீங்கள் எழுத்துப் பயிற்சியை முடித்துவிட்டீர்கள்!',
             }
         }
 
@@ -2143,7 +2181,7 @@ class Command(BaseCommand):
             {'title': 'Naming Words', 'desc': 'Write names of things around us'},
             {'title': 'Action Words', 'desc': 'Write words for actions'},
             {'title': 'Small Sentences', 'desc': 'Write short and simple sentences'},
-            {'title': 'Fun with Practice', 'desc': 'Let\'s write what you know!'}
+            {'title': 'Fun with Practice', 'desc': "Let's write what you know!"}
         ]
 
         INTERMEDIATE_WRITING_TOPICS = [
@@ -2157,54 +2195,46 @@ class Command(BaseCommand):
             {'title': 'Practice Test', 'desc': 'Test your writing skills'}
         ]
 
-        BEGINNER_TOPIC_DATA = {
-            1: {
-                'trace': 'A', 'trace_sub': "Let's learn to write the letter A.",
-                'missing_eq': 'b _ t', 'missing_target': 'a', 'missing_opts': ['a', 'e', 'i'],
-                'word': 'cat', 'word_image': 'cat',
-                'sentence': 'The cat is fat.'
+        LANGUAGE_TOPIC_DATA = {
+            'en': {
+                1: {'trace': 'A', 'trace_sub': "Let's learn to write the letter A.", 'missing_eq': 'b _ t', 'missing_target': 'a', 'missing_opts': ['a', 'e', 'i'], 'word': 'cat', 'word_image': 'cat', 'sentence': 'The cat is fat.'},
+                2: {'trace': 'a', 'trace_sub': "Let's learn to write the small letter a.", 'missing_eq': 'h _ n', 'missing_target': 'e', 'missing_opts': ['a', 'e', 'o'], 'word': 'hen', 'word_image': 'food', 'sentence': 'I have a pen.'},
+                3: {'trace': '1', 'trace_sub': "Let's learn to write the number 1.", 'missing_eq': '1 _ 3', 'missing_target': '2', 'missing_opts': ['2', '4', '5'], 'word': 'one', 'word_image': 'number', 'sentence': 'There are three apples.'},
+                4: {'trace': 'O', 'trace_sub': "Let's learn to write the letter O.", 'missing_eq': 's _ n', 'missing_target': 'u', 'missing_opts': ['a', 'e', 'u'], 'word': 'sun', 'word_image': 'sun', 'sentence': 'The sun is hot.'},
+                5: {'trace': 'B', 'trace_sub': "Let's learn to write the letter B.", 'missing_eq': 'b _ ok', 'missing_target': 'o', 'missing_opts': ['a', 'e', 'o'], 'word': 'book', 'word_image': 'book', 'sentence': 'This is my book.'},
+                6: {'trace': 'R', 'trace_sub': "Let's learn to write the letter R.", 'missing_eq': 'r _ n', 'missing_target': 'u', 'missing_opts': ['a', 'o', 'u'], 'word': 'run', 'word_image': 'walk', 'sentence': 'The children play.'},
+                7: {'trace': 'S', 'trace_sub': "Let's learn to write the letter S.", 'missing_eq': 'I a _ happy', 'missing_target': 'm', 'missing_opts': ['m', 'n', 't'], 'word': 'happy', 'word_image': 'happy', 'sentence': 'I like to smile.'},
+                8: {'trace': 'W', 'trace_sub': "Let's learn to write the letter W.", 'missing_eq': 'M _ Go', 'missing_target': 'i', 'missing_opts': ['a', 'e', 'i'], 'word': 'write', 'word_image': 'pencil', 'sentence': 'We love to read.'}
             },
-            2: {
-                'trace': 'a', 'trace_sub': "Let's learn to write the small letter a.",
-                'missing_eq': 'h _ n', 'missing_target': 'e', 'missing_opts': ['a', 'e', 'o'],
-                'word': 'hen', 'word_image': 'food',
-                'sentence': 'I have a pen.'
+            'hi': {
+                1: {'trace': 'अ', 'trace_sub': "आइए स्वर 'अ' लिखना सीखें।", 'missing_eq': 'अ _ ार', 'missing_target': 'न', 'missing_opts': ['न', 'म', 'त'], 'word': 'अनार', 'word_image': 'fruit', 'sentence': 'अनार बहुत मीठा है।'},
+                2: {'trace': 'आ', 'trace_sub': "आइए स्वर 'आ' लिखना सीखें।", 'missing_eq': 'आ _', 'missing_target': 'म', 'missing_opts': ['म', 'न', 'क'], 'word': 'आम', 'word_image': 'fruit', 'sentence': 'आम मीठा फल है।'},
+                3: {'trace': '१', 'trace_sub': "आइए संख्या '१' लिखना सीखें।", 'missing_eq': '१ _ ३', 'missing_target': '२', 'missing_opts': ['२', '४', '५'], 'word': 'एक', 'word_image': 'number', 'sentence': 'यहाँ एक किताब है।'},
+                4: {'trace': 'क', 'trace_sub': "आइए व्यंजन 'क' लिखना सीखें।", 'missing_eq': 'क _ ल', 'missing_target': 'म', 'missing_opts': ['म', 'न', 'त'], 'word': 'कमल', 'word_image': 'flower', 'sentence': 'कमल पानी में खिलता है।'},
+                5: {'trace': 'म', 'trace_sub': "आइए व्यंजन 'म' लिखना सीखें।", 'missing_eq': 'म _ र', 'missing_target': 'ग', 'missing_opts': ['ग', 'च', 'त'], 'word': 'मगर', 'word_image': 'animal', 'sentence': 'मगर बड़ा जानवर है।'},
+                6: {'trace': 'र', 'trace_sub': "आइए व्यंजन 'र' लिखना सीखें।", 'missing_eq': 'र _ थ', 'missing_target': 'थ', 'missing_opts': ['थ', 'त', 'म'], 'word': 'रथ', 'word_image': 'vehicle', 'sentence': 'रथ पुराना है।'},
+                7: {'trace': 'स', 'trace_sub': "आइए व्यंजन 'स' लिखना सीखें।", 'missing_eq': 'स _ क', 'missing_target': 'ड़', 'missing_opts': ['ड़', 'क', 'न'], 'word': 'सड़क', 'word_image': 'road', 'sentence': 'सड़क साफ है।'},
+                8: {'trace': 'ह', 'trace_sub': "आइए व्यंजन 'ह' लिखना सीखें।", 'missing_eq': 'ह _ ार', 'missing_target': 'ल', 'missing_opts': ['ल', 'न', 'म'], 'word': 'हल', 'word_image': 'tool', 'sentence': 'हल मजबूत है।'}
             },
-            3: {
-                'trace': '1', 'trace_sub': "Let's learn to write the number 1.",
-                'missing_eq': '1 _ 3', 'missing_target': '2', 'missing_opts': ['2', '4', '5'],
-                'word': 'one', 'word_image': 'number',
-                'sentence': 'There are three apples.'
+            'kn': {
+                1: {'trace': 'ಅ', 'trace_sub': "ಬನ್ನಿ, ಸ್ವರ 'ಅ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ಅ _ ತ', 'missing_target': 'ರ', 'missing_opts': ['ರ', 'ಮ', 'ನ'], 'word': 'ಅರಸ', 'word_image': 'person', 'sentence': 'ಅರಸನು ತುಂಬಾ ಒಳ್ಳೆಯವನು.'},
+                2: {'trace': 'ಆ', 'trace_sub': "ಬನ್ನಿ, ಸ್ವರ 'ಆ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ಆ _ ೆ', 'missing_target': 'ನ', 'missing_opts': ['ನೆ', 'ಮೆ', 'ಕೆ'], 'word': 'ಆನೆ', 'word_image': 'animal', 'sentence': 'ಆನೆಯು ಕಾಡಿನಲ್ಲಿದೆ.'},
+                3: {'trace': '೧', 'trace_sub': "ಬನ್ನಿ, ಸಂಖ್ಯೆ '೧' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': '೧ _ ೩', 'missing_target': '೨', 'missing_opts': ['೨', '೪', '೫'], 'word': 'ಒಂದು', 'word_image': 'number', 'sentence': 'ನನ್ನ ಹತ್ತಿರ ಒಂದು ಹಣ್ಣು ಇದೆ.'},
+                4: {'trace': 'ಕ', 'trace_sub': "ಬನ್ನಿ, ವ್ಯಂಜನ 'ಕ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ಕ _ ಲ', 'missing_target': 'ಮ', 'missing_opts': ['ಮ', 'ನ', 'ತ'], 'word': 'ಕಮಲ', 'word_image': 'flower', 'sentence': 'ಕಮಲ ಕೆರೆಯಲ್ಲಿ ಅರಳುತ್ತದೆ.'},
+                5: {'trace': 'ಮ', 'trace_sub': "ಬನ್ನಿ, ವ್ಯಂಜನ 'ಮ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ಮ _ ೆ', 'missing_target': 'ನ', 'missing_opts': ['ನೆ', 'ಗೆ', 'ಚೆ'], 'word': 'ಮನೆ', 'word_image': 'home', 'sentence': 'ನನ್ನ ಮನೆ ದೊಡ್ಡದಾಗಿದೆ.'},
+                6: {'trace': 'ರ', 'trace_sub': "ಬನ್ನಿ, ವ್ಯಂಜನ 'ರ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ರ _ ಿ', 'missing_target': 'ವ', 'missing_opts': ['ವಿ', 'ಕಿ', 'ನಿ'], 'word': 'ರವಿ', 'word_image': 'sun', 'sentence': 'ರವಿ ಬೆಳಕು ನೀಡುತ್ತಾನೆ.'},
+                7: {'trace': 'ಸ', 'trace_sub': "ಬನ್ನಿ, ವ್ಯಂಜನ 'ಸ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ಸ _ ಿ', 'missing_target': 'ಭ', 'missing_opts': ['ಭೆ', 'ಹೆ', 'ಕೆ'], 'word': 'ಸಭೆ', 'word_image': 'meeting', 'sentence': 'ಸಭೆಯು ಮುಕ್ತಾಯವಾಯಿತು.'},
+                8: {'trace': 'ಹ', 'trace_sub': "ಬನ್ನಿ, ವ್ಯಂಜನ 'ಹ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ಹ _ ು', 'missing_target': 'ಣ್ಣ', 'missing_opts': ['ಣ್ಣು', 'ನ್ನು', 'ಮ್ಮು'], 'word': 'ಹಣ್ಣು', 'word_image': 'fruit', 'sentence': 'ಹಣ್ಣು ತಿನ್ನಲು ರುಚಿಯಾಗಿದೆ.'}
             },
-            4: {
-                'trace': 'O', 'trace_sub': "Let's learn to write the letter O.",
-                'missing_eq': 's _ n', 'missing_target': 'u', 'missing_opts': ['a', 'e', 'u'],
-                'word': 'sun', 'word_image': 'sun',
-                'sentence': 'The sun is hot.'
-            },
-            5: {
-                'trace': 'B', 'trace_sub': "Let's learn to write the letter B.",
-                'missing_eq': 'b _ ok', 'missing_target': 'o', 'missing_opts': ['a', 'e', 'o'],
-                'word': 'book', 'word_image': 'book',
-                'sentence': 'This is my book.'
-            },
-            6: {
-                'trace': 'R', 'trace_sub': "Let's learn to write the letter R.",
-                'missing_eq': 'r _ n', 'missing_target': 'u', 'missing_opts': ['a', 'o', 'u'],
-                'word': 'run', 'word_image': 'walk',
-                'sentence': 'The children play.'
-            },
-            7: {
-                'trace': 'S', 'trace_sub': "Let's learn to write the letter S.",
-                'missing_eq': 'I a _ happy', 'missing_target': 'm', 'missing_opts': ['m', 'n', 't'],
-                'word': 'happy', 'word_image': 'happy',
-                'sentence': 'I like to smile.'
-            },
-            8: {
-                'trace': 'W', 'trace_sub': "Let's learn to write the letter W.",
-                'missing_eq': 'M _ Go', 'missing_target': 'i', 'missing_opts': ['a', 'e', 'i'],
-                'word': 'write', 'word_image': 'pencil',
-                'sentence': 'We love to read.'
+            'ta': {
+                1: {'trace': 'அ', 'trace_sub': "வாருங்கள், 'அ' எழுதக் கற்றுக்கொள்வோம்.", 'missing_eq': 'அ _ ்மா', 'missing_target': 'ம', 'missing_opts': ['ம', 'த', 'ந'], 'word': 'அம்மா', 'word_image': 'mother', 'sentence': 'அம்மா என் தெய்வம்.'},
+                2: {'trace': 'ஆ', 'trace_sub': "வாருங்கள், 'ஆ' எழுதக் கற்றுக்கொள்வோம்.", 'missing_eq': 'ஆ _ ு', 'missing_target': 'டு', 'missing_opts': ['டு', 'மு', 'கு'], 'word': 'ஆடு', 'word_image': 'animal', 'sentence': 'ஆடு புல் திண்ணும்.'},
+                3: {'trace': '௧', 'trace_sub': "வாருங்கள், எண் '௧' எழுதக் கற்றுக்கொள்வோம்.", 'missing_eq': '௧ _ ௨', 'missing_target': 'உ', 'missing_opts': ['உ', 'ங', 'ச'], 'word': 'ஒன்று', 'word_image': 'number', 'sentence': 'என்னிடம் ஒரு பேனா உள்ளது.'},
+                4: {'trace': 'க', 'trace_sub': "வாருங்கள், 'க' எழுதக் கற்றுக்கொள்வோம்.", 'missing_eq': 'க _ ்', 'missing_target': 'ல்', 'missing_opts': ['ல்', 'ண்', 'ம்'], 'word': 'கல்', 'word_image': 'stone', 'sentence': 'கல் பெரியதாக உள்ளது.'},
+                5: {'trace': 'ம', 'trace_sub': "வாருங்கள், 'ம' எழுதக் கற்றுக்கொள்வோம்.", 'missing_eq': 'ம _ ம்', 'missing_target': 'ர', 'missing_opts': ['ர', 'ன', 'ல'], 'word': 'மரம்', 'word_image': 'tree', 'sentence': 'மரம் காற்று தரும்.'},
+                6: {'trace': 'வ', 'trace_sub': "வாருங்கள், 'வ' எழுதக் கற்றுக்கொள்வோம்.", 'missing_eq': 'வ _ ி', 'missing_target': 'ழ', 'missing_opts': ['ழி', 'டி', 'லி'], 'word': 'வழி', 'word_image': 'road', 'sentence': 'இது நல்ல வழி.'},
+                7: {'trace': 'ப', 'trace_sub': "வாருங்கள், 'ப' எழுதக் கற்றுக்கொள்வோம்.", 'missing_eq': 'ப _ ்', 'missing_target': 'ல்', 'missing_opts': ['ல்', 'ண்', 'ம்'], 'word': 'பல்', 'word_image': 'tooth', 'sentence': 'பற்களை தினம் விளக்கு.'},
+                8: {'trace': 'அ', 'trace_sub': "வாருங்கள், 'அ' எழுதக் கற்றுக்கொள்வோம்.", 'missing_eq': 'அ _ ்', 'missing_target': 'ன்பு', 'missing_opts': ['ன்பு', 'றிவை', 'ழகை'], 'word': 'அன்பு', 'word_image': 'heart', 'sentence': 'அன்பு காட்ட வேண்டும்.'}
             }
         }
 
@@ -2214,6 +2244,8 @@ class Command(BaseCommand):
             def translate_str(text):
                 return trans.get(text, text)
 
+            lang_writing_data = LANGUAGE_TOPIC_DATA.get(lang, LANGUAGE_TOPIC_DATA['en'])
+
             # Beginner Writing Lessons
             for idx, topic in enumerate(BEGINNER_WRITING_TOPICS, start=1):
                 lesson_id = f"WR-BEG-{lang.upper()}-{idx:03d}"
@@ -2221,7 +2253,7 @@ class Command(BaseCommand):
 
                 t_title = translate_str(topic['title'])
                 t_desc = translate_str(topic['desc'])
-                data = BEGINNER_TOPIC_DATA[idx]
+                data = lang_writing_data[idx]
 
                 welcome_slide = {
                     'type': 'welcome',
@@ -2275,7 +2307,7 @@ class Command(BaseCommand):
                     'time': '10 min'
                 }
 
-                Lesson.objects.create(
+                create_lesson(
                     lesson_id=lesson_id,
                     title=t_title,
                     module='Writing Skills',
@@ -2506,7 +2538,7 @@ class Command(BaseCommand):
                 }
                 activities.append(grad_slide)
 
-                Lesson.objects.create(
+                create_lesson(
                     lesson_id=lesson_id,
                     title=t_title,
                     module='Writing Skills',
