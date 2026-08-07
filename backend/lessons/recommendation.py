@@ -81,8 +81,8 @@ def get_llm_recommendations(learner):
         assessment_id = f"{level.upper()}-ASSESSMENT-{language.upper()}"
         result_ids.append(assessment_id)
 
-    # Fallback to English if not enough lessons in selected language
-    if len(result_ids) < 10 and not all_regular_completed:
+    # Fallback to English if not enough lessons in selected language (only for English learners)
+    if language == 'en' and len(result_ids) < 10 and not all_regular_completed:
         needed = 10 - len(result_ids)
         fallback_lessons = Lesson.objects.filter(
             language='en', difficulty=level

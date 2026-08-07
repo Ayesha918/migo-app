@@ -181,3 +181,18 @@
   border-color: var(--color-orange);
   background-color: var(--color-peach-light);
 }
+
+@media (max-width: 768px) {
+  .container {
+    bottom: auto;
+    top: 12px;
+    left: auto;
+    right: 12px;
+    align-items: flex-end;
+  }
+  .panel {
+    order: 1;
+    margin-bottom: 0;
+    margin-top: 8px;
+  }
+}
