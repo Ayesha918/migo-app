@@ -418,8 +418,15 @@ class Command(BaseCommand):
     help = 'Seeds grouped alphabet lessons and simple CVC word lessons into the database'
 
     def handle(self, *args, **options):
-        self.stdout.write('Updating database curriculum...')
-        
+        # Clean up any invalid beginner word lessons (Lesson 10 onwards) for non-English languages
+        self.stdout.write('Cleaning up invalid beginner word lessons for non-English languages...')
+        deleted_beg, _ = Lesson.objects.filter(
+            language__in=['hi', 'kn', 'ta'],
+            difficulty='beginner'
+        ).exclude(
+            lesson_id__in=[f"BEG-{l.upper()}-{i:03d}" for l in ['hi', 'kn', 'ta'] for i in range(1, 10)]
+        ).delete()
+        self.stdout.write(f'Deleted {deleted_beg} invalid beginner lessons.')
 
         seeded_count = 0
 
@@ -477,6 +484,8 @@ class Command(BaseCommand):
 
             # 10 to 30: 2-Letter and 3-Letter Words
             for idx, bp in enumerate(BEG_WORD_BLUEPRINTS, start=10):
+                if lang != 'en':
+                    continue
                 lesson_id = f"BEG-{lang.upper()}-{idx:03d}"
                 prereq = f"BEG-{lang.upper()}-{idx-1:03d}"
 
@@ -2117,6 +2126,22 @@ class Command(BaseCommand):
                 'Read the sentence. Then write it neatly on the lines below.': 'वाक्य पढ़ें। फिर इसे नीचे की पंक्तियों पर सफाई से लिखें।',
                 'Great job!': 'बहुत बढ़िया!',
                 'You finished the writing lesson!': 'आपने लिखने का पाठ पूरा कर लिया!',
+                'Word Building': 'शब्द निर्माण',
+                'Unscramble the letters': 'अक्षरों को सुलझाएं',
+                'Sentence Building': 'वाक्य निर्माण',
+                'Create meaningful sentences': 'सार्थक वाक्य बनाएं',
+                'Paragraph Writing': 'अनुच्छेद लेखन',
+                'Write short paragraphs': 'छोटे अनुच्छेद लिखें',
+                'Punctuation': 'विराम चिन्ह',
+                'Use punctuation correctly': 'विराम चिन्हों का सही प्रयोग करें',
+                'Capitalization': 'बड़े अक्षर',
+                'Use capital letters': 'बड़े अक्षरों का प्रयोग करें',
+                'Creative Writing': 'सृजनात्मक लेखन',
+                'Write your own ideas': 'अपने स्वयं के विचार लिखें',
+                'Letter Writing': 'पत्र लेखन',
+                'Write friendly letters': 'अनौपचारिक पत्र लिखें',
+                'Practice Test': 'अभ्यास परीक्षण',
+                'Test your writing skills': 'अपने लेखन कौशल का परीक्षण करें',
             },
             'kn': {
                 'Writing the Alphabet': 'ಅಕ್ಷರಮಾಲೆ ಬರೆಯುವುದು',
@@ -2146,6 +2171,22 @@ class Command(BaseCommand):
                 'Read the sentence. Then write it neatly on the lines below.': 'ವಾಕ್ಯವನ್ನು ಓದಿ. ನಂತರ ಕೆಳಗಿನ ಸಾಲುಗಳಲ್ಲಿ ಅಂದವಾಗಿ ಬರೆಯಿರಿ.',
                 'Great job!': 'ಅದ್ಭುತ ಕೆಲಸ!',
                 'You finished the writing lesson!': 'ನೀವು ಬರವಣಿಗೆಯ ಪಾಠವನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ!',
+                'Word Building': 'ಪದ ರಚನೆ',
+                'Unscramble the letters': 'ಅಕ್ಷರಗಳನ್ನು ಜೋಡಿಸಿ ಪದ ರಚಿಸಿ',
+                'Sentence Building': 'ವಾಕ್ಯ ರಚನೆ',
+                'Create meaningful sentences': 'ಅರ್ಥಪೂರ್ಣ ವಾಕ್ยಗಳನ್ನು ರಚಿಸಿ',
+                'Paragraph Writing': 'ಪ್ಯಾರಾಗ್ರಾಫ್ ಬರೆಯುವುದು',
+                'Write short paragraphs': 'ಸಣ್ಣ ಪ್ಯಾರಾಗ್ರಾಫ್‌ಗಳನ್ನು ಬರೆಯಿರಿ',
+                'Punctuation': 'ವಿರಾಮ ಚಿಹ್ನೆಗಳು',
+                'Use punctuation correctly': 'ವಿರಾಮ ಚಿಹ್ನೆಗಳನ್ನು ಸರಿಯಾಗಿ ಬಳಸಿ',
+                'Capitalization': 'ದೊಡ್ಡಕ್ಷರ ಬಳಕೆ',
+                'Use capital letters': 'ದೊಡ್ಡಕ್ಷರಗಳನ್ನು ಸರಿಯಾಗಿ ಬಳಸಿ',
+                'Creative Writing': 'ಸೃಜನಾತ್ಮಕ ಬರವಣಿಗೆ',
+                'Write your own ideas': 'ನಿಮ್ಮ ಸ್ವಂತ ಆಲೋಚನೆಗಳನ್ನು ಬರೆಯಿರಿ',
+                'Letter Writing': 'ಪತ್ರ ಬರವಣಿಗೆ',
+                'Write friendly letters': 'ಸ್ನೇಹಪೂರ್ವಕ ಪತ್ರಗಳನ್ನು ಬರೆಯಿರಿ',
+                'Practice Test': 'ಅಭ್ಯಾಸ ಪರೀಕ್ಷೆ',
+                'Test your writing skills': 'ನಿಮ್ಮ ಬರವಣಿಗೆಯ ಕೌಶಲ್ಯವನ್ನು ಪರೀಕ್ಷಿಸಿ',
             },
             'ta': {
                 'Writing the Alphabet': 'நெடுங்கணக்கு எழுதுதல்',
@@ -2175,6 +2216,22 @@ class Command(BaseCommand):
                 'Read the sentence. Then write it neatly on the lines below.': 'வாக்கியத்தைப் படியுங்கள். பின்னர் கீழே உள்ள வரிகளில் அழகாக எழுதுங்கள்.',
                 'Great job!': 'அருமையான வேலை!',
                 'You finished the writing lesson!': 'நீங்கள் எழுத்துப் பயிற்சியை முடித்துவிட்டீர்கள்!',
+                'Word Building': 'சொல் உருவாக்கம்',
+                'Unscramble the letters': 'எழுத்துக்களை முறைப்படுத்தி சொல் உருவாக்குங்கள்',
+                'Sentence Building': 'வாக்கிய உருவாக்கம்',
+                'Create meaningful sentences': 'அர்த்தமுள்ள வாக்கியங்களை உருவாக்குங்கள்',
+                'Paragraph Writing': 'பத்தி எழுதுதல்',
+                'Write short paragraphs': 'குறுகிய பத்திகளை எழுதுங்கள்',
+                'Punctuation': 'நிறுத்தற்குறிகள்',
+                'Use punctuation correctly': 'நிறுத்தற்குறிகளை சரியாகப் பயன்படுத்துங்கள்',
+                'Capitalization': 'பெரிய எழுத்துக்கள்',
+                'Use capital letters': 'பெரிய எழுத்துக்களைப் பயன்படுத்துங்கள்',
+                'Creative Writing': 'படைப்பாற்றல் எழுத்து',
+                'Write your own ideas': 'உங்கள் சொந்த யோசனைகளை எழுதுங்கள்',
+                'Letter Writing': 'கடிதம் எழுதுதல்',
+                'Write friendly letters': 'நட்பு கடிதங்களை எழுதுங்கள்',
+                'Practice Test': 'பயிற்சித் தேர்வு',
+                'Test your writing skills': 'உங்கள் எழுத்துத் திறனை சோதியுங்கள்',
             }
         }
 

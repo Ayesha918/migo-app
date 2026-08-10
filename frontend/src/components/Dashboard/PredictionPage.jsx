@@ -143,7 +143,7 @@ export default function PredictionPage() {
 
   const recommendationsList = getAIRecommendations();
 
-  // Progress scores mapping for the timeline milestones (completely based on study Hours)
+  // Progress scores mapping for the timeline milestones (based on lessons completed)
   const milestones = [
     {
       level: 'Current Level',
@@ -153,21 +153,21 @@ export default function PredictionPage() {
       isCompleted: true
     },
     {
-      level: 'After 2 Hours of Study',
+      level: 'After 20 Lessons',
       reading: predData.predicted_reading_2h || 55,
       writing: predData.predicted_writing_2h || 45,
-      date: 'Step 2',
+      date: 'Milestone 1',
       isCompleted: false
     },
     {
-      level: 'After 5 Hours of Study',
+      level: 'After 50 Lessons',
       reading: predData.predicted_reading_5h || 70,
       writing: predData.predicted_writing_5h || 60,
-      date: 'Step 3',
+      date: 'Milestone 2',
       isCompleted: false
     },
     {
-      level: 'Expected Final Level',
+      level: 'After 100 Lessons',
       reading: predData.predicted_reading_10h || 85,
       writing: predData.predicted_writing_10h || 75,
       date: predData.expected_completion_date,

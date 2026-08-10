@@ -512,7 +512,7 @@ export default function LessonPlayer() {
   };
 
   const lessonNumber = currentEntry?.day_number || 1;
-  const preferredLanguage = learner?.learning_language || lesson.language || 'en';
+  const preferredLanguage = lesson.language || learner?.learning_language || 'en';
   const speechLang = SPEECH_LANG_MAP[preferredLanguage] || 'en-US';
   const knownLanguage = learner?.known_language || 'en';
   const knownSpeechLang = SPEECH_LANG_MAP[knownLanguage] || 'en-US';
@@ -598,6 +598,9 @@ export default function LessonPlayer() {
   const [alphabetAnswer, setAlphabetAnswer] = useState(null);
   const [alphabetAnswerCorrect, setAlphabetAnswerCorrect] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
+  const [jumbledSelectedIndices, setJumbledSelectedIndices] = useState([]);
+  const [jumbledPoolIndices, setJumbledPoolIndices] = useState([]);
+  const [jumbledInitialPool, setJumbledInitialPool] = useState([]);
 
   const exploreData = (lesson.activities && lesson.activities.length > 0) ? lesson.activities[0] : (lesson.activities_data?.[0] || {});
   const practiceData = (lesson.activities && lesson.activities.length > 1) ? lesson.activities[1] : (lesson.activities_data?.[1] || {});
@@ -698,6 +701,25 @@ export default function LessonPlayer() {
     generateActiveQuiz();
     setAssessmentTimeLeft(900);
   }, [lesson]);
+
+  useEffect(() => {
+    if (isAlphabetLesson && slides[slideIndex]?.type === 'write_sentence') {
+      const targetStr = slides[slideIndex].target || '';
+      const words = targetStr.trim().split(/\s+/).filter(Boolean);
+      const indices = words.map((_, idx) => idx);
+      
+      // Shuffle indices
+      const shuffled = [...indices];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      
+      setJumbledPoolIndices(shuffled);
+      setJumbledInitialPool(shuffled);
+      setJumbledSelectedIndices([]);
+    }
+  }, [slideIndex, lesson, isAlphabetLesson]);
 
   useEffect(() => {
     if (!lesson.lesson_id || !lesson.lesson_id.includes('-ASSESS-') || assessmentFinished) return;
@@ -3163,6 +3185,26 @@ export default function LessonPlayer() {
               }
 
               if (currentSlide.type === 'write_sentence') {
+                const targetSentence = currentSlide.target || '';
+                const sentenceWords = targetSentence.trim().split(/\s+/).filter(Boolean);
+                const hasSelectedAll = jumbledSelectedIndices.length === sentenceWords.length;
+                const isCorrectOrder = hasSelectedAll && jumbledSelectedIndices.every((val, idx) => val === idx);
+
+                const handleSelectWord = (idx) => {
+                  if (jumbledSelectedIndices.includes(idx)) return;
+                  setJumbledSelectedIndices(prev => [...prev, idx]);
+                  setJumbledPoolIndices(prev => prev.filter(pIdx => pIdx !== idx));
+                };
+
+                const handleRemoveWord = (idx) => {
+                  setJumbledSelectedIndices(prev => prev.filter(sIdx => sIdx !== idx));
+                  setJumbledPoolIndices(prev => {
+                    const newPool = [...prev, idx];
+                    // keep initial shuffled order
+                    return jumbledInitialPool.filter(pIdx => newPool.includes(pIdx));
+                  });
+                };
+
                 return (
                   <motion.div
                     key="write_sentence"
@@ -3173,16 +3215,125 @@ export default function LessonPlayer() {
                     style={{ maxWidth: '620px' }}
                   >
                     <span className={styles.storyboardBadge}>{currentSlide.title}</span>
-                    <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-dark)', marginTop: '8px' }}>
-                      {currentSlide.instruction}
+                    <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-dark)', marginTop: '8px', marginBottom: '16px' }}>
+                      Arrange the jumbled words in the correct order:
                     </h2>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', margin: '24px 0' }}>
-                      <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--color-orange-dark)', background: 'var(--color-cream-bg)', padding: '12px 24px', borderRadius: '16px', border: '2px solid var(--color-peach-light)' }}>
-                        {currentSlide.target}
-                      </div>
-                      <TracingCanvas targetText={currentSlide.target} mode="sentence" />
+                    {/* Target Sentence Display */}
+                    <div style={{
+                      background: 'var(--color-cream-bg)',
+                      border: '2px solid var(--color-peach-light)',
+                      borderRadius: '16px',
+                      padding: '12px 20px',
+                      fontSize: '22px',
+                      fontWeight: 900,
+                      color: 'var(--color-orange-dark)',
+                      textAlign: 'center',
+                      marginBottom: '20px'
+                    }}>
+                      {targetSentence}
                     </div>
+
+                    {/* Answer Area (selected words order) */}
+                    <div style={{
+                      minHeight: '60px',
+                      width: '100%',
+                      background: '#F9F6F0',
+                      border: '2px dashed #D5CBB9',
+                      borderRadius: '16px',
+                      padding: '12px',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '20px'
+                    }}>
+                      {jumbledSelectedIndices.length === 0 ? (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: 600 }}>
+                          Tap words below to arrange them...
+                        </span>
+                      ) : (
+                        jumbledSelectedIndices.map((wordIdx) => (
+                          <motion.button
+                            key={wordIdx}
+                            onClick={() => handleRemoveWord(wordIdx)}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            style={{
+                              padding: '8px 16px',
+                              borderRadius: '12px',
+                              background: '#FFFFFF',
+                              border: '2px solid var(--color-orange)',
+                              color: 'var(--text-dark)',
+                              fontWeight: 700,
+                              fontSize: '16px',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
+                            }}
+                          >
+                            {sentenceWords[wordIdx]}
+                          </motion.button>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Pool Area (shuffled remaining words) */}
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                      justifyContent: 'center',
+                      marginBottom: '24px',
+                      minHeight: '44px'
+                    }}>
+                      {jumbledPoolIndices.map((wordIdx) => (
+                        <motion.button
+                          key={wordIdx}
+                          onClick={() => handleSelectWord(wordIdx)}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '12px',
+                            background: 'var(--color-cream-bg)',
+                            border: '2px solid var(--color-peach-light)',
+                            color: 'var(--text-dark)',
+                            fontWeight: 700,
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                          }}
+                        >
+                          {sentenceWords[wordIdx]}
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    {/* Feedback message showing if they are doing wrong */}
+                    {hasSelectedAll && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{
+                          padding: '12px',
+                          borderRadius: '12px',
+                          background: isCorrectOrder ? '#E8F8F0' : '#FCE8E6',
+                          border: `2px solid ${isCorrectOrder ? '#27AE60' : '#EB5757'}`,
+                          color: isCorrectOrder ? '#27AE60' : '#EB5757',
+                          fontWeight: 800,
+                          fontSize: '15px',
+                          textAlign: 'center',
+                          marginBottom: '20px'
+                        }}
+                      >
+                        {isCorrectOrder ? (
+                          <span>🎉 Perfect! The sentence is correctly arranged.</span>
+                        ) : (
+                          <span>❌ Incorrect word order! Click words to remove and try again.</span>
+                        )}
+                      </motion.div>
+                    )}
 
                     <div className={styles.bottomNavRow}>
                       <button className={styles.mutedNavBtn} onClick={() => setSlideIndex(prev => prev - 1)} type="button">
@@ -3190,9 +3341,20 @@ export default function LessonPlayer() {
                       </button>
                       <button
                         className={styles.finishLessonBtn}
-                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        onClick={() => {
+                          if (hasSelectedAll && isCorrectOrder) {
+                            setSlideIndex(prev => prev + 1);
+                          }
+                        }}
+                        disabled={!isCorrectOrder}
                         type="button"
-                        style={{ width: 'auto', padding: '12px 32px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
+                        style={{
+                          width: 'auto',
+                          padding: '12px 32px',
+                          backgroundColor: isCorrectOrder ? '#FF7A00' : '#CCCCCC',
+                          cursor: isCorrectOrder ? 'pointer' : 'not-allowed',
+                          boxShadow: isCorrectOrder ? '0 6px 20px rgba(255, 122, 0, 0.25)' : 'none'
+                        }}
                       >
                         {t('nextBtn')}
                       </button>
