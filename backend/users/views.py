@@ -92,8 +92,15 @@ def send_otp(request):
     
     normalized = normalize_phone_number(phone_number)
     try:
-        send_real_otp(normalized)
-        return Response({'message': 'OTP sent successfully.'}, status=status.HTTP_200_OK)
+        res = send_real_otp(normalized)
+        is_mock = False
+        if res and "mock" in res.get("message", "").lower():
+            is_mock = True
+        return Response({
+            'message': 'OTP sent successfully.',
+            'is_mock': is_mock,
+            'mock_code': '123456' if is_mock else None
+        }, status=status.HTTP_200_OK)
     except ValueError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

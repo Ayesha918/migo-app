@@ -38,6 +38,7 @@ function Login() {
   const [otpArray, setOtpArray] = useState(['', '', '', '', '', '']);
   const [isSubmittingOtp, setIsSubmittingOtp] = useState(false);
   const [timerCount, setTimerCount] = useState(25);
+  const [isMockOtp, setIsMockOtp] = useState(false);
   const timerRef = useRef(null);
 
   // Input refs for OTP fields auto-focus
@@ -165,7 +166,8 @@ function Login() {
     }
     setError('');
     try {
-      await sendOtp(phoneNumber.trim());
+      const res = await sendOtp(phoneNumber.trim());
+      setIsMockOtp(!!res.data?.is_mock);
       setTimerCount(25);
       setSubStage('otp_input');
     } catch (err) {
@@ -375,6 +377,12 @@ function Login() {
           <p className={styles.verifyText}>
             We sent a verification code to +91 {phoneNumber.replace(/(\d{5})(\d{5})/, 'XXXXX $2')}
           </p>
+
+          {isMockOtp && (
+            <div style={{ backgroundColor: 'var(--color-peach-light)', color: 'var(--color-orange-dark)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', fontSize: '13.5px', fontWeight: 800, margin: '6px 0', border: '1.5px solid var(--color-peach)', lineHeight: 1.4 }}>
+              ⚠️ Twilio SMS credentials not detected in your backend .env file. Falling back to development mock mode. Use verification code: <strong>123456</strong>
+            </div>
+          )}
 
           <div className={styles.otpGrid}>
             {otpArray.map((digit, idx) => (

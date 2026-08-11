@@ -38,6 +38,7 @@ function Register() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [registeredLearner, setRegisteredLearner] = useState(null);
+  const [isMockOtp, setIsMockOtp] = useState(false);
 
   const timerRef = useRef(null);
   const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
@@ -76,7 +77,8 @@ function Register() {
     }
     setSubmitError('');
     try {
-      await sendOtp(phoneNumber.trim());
+      const res = await sendOtp(phoneNumber.trim());
+      setIsMockOtp(!!res.data?.is_mock);
       setTimerCount(25);
       setStage('otp_input');
     } catch (err) {
@@ -272,6 +274,12 @@ function Register() {
           <p style={{ fontSize: '15px', color: 'var(--text-muted)', fontWeight: 700 }}>
             We sent a verification code to +91 {phoneNumber.replace(/(\d{5})(\d{5})/, 'XXXXX $2')}
           </p>
+
+          {isMockOtp && (
+            <div style={{ backgroundColor: 'var(--color-peach-light)', color: 'var(--color-orange-dark)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', fontSize: '13.5px', fontWeight: 800, margin: '6px 0', border: '1.5px solid var(--color-peach)', lineHeight: 1.4, width: '100%' }}>
+              ⚠️ Twilio SMS credentials not detected in your backend .env file. Falling back to development mock mode. Use verification code: <strong>123456</strong>
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', width: '100%', margin: '10px 0' }}>
             {otpArray.map((digit, idx) => (
