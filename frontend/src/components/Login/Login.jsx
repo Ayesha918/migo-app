@@ -1,11 +1,17 @@
 // src/components/Login/Login.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { searchLearnerById, searchLearnerByName } from '../../services/api';
+import {
+  searchLearnerById, searchLearnerByName,
+  sendOtp, verifyOtp, checkDevice
+} from '../../services/api';
 import { useLearner } from '../../services/LearnerContext';
 import owl from '../../assets/images/owl.png';
-import { Search, ArrowLeft, User, Hash, Mic, MicOff } from 'lucide-react';
+import {
+  Search, ArrowLeft, User, Hash, Mic, MicOff,
+  ShieldAlert, Smartphone, Check, HelpCircle
+} from 'lucide-react';
 import styles from './Login.module.css';
 
 const AVATAR_EMOJI = {
@@ -25,6 +31,18 @@ function Login() {
   const [error, setError] = useState('');
   const [isListening, setIsListening] = useState(false);
 
+  // OTP Device Verification flow states
+  const [subStage, setSubStage] = useState('search'); // 'search', 'new_device_warning', 'phone_input', 'otp_input', 'welcome_back'
+  const [selectedLearnerItem, setSelectedLearnerItem] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otpArray, setOtpArray] = useState(['', '', '', '', '', '']);
+  const [isSubmittingOtp, setIsSubmittingOtp] = useState(false);
+  const [timerCount, setTimerCount] = useState(25);
+  const timerRef = useRef(null);
+
+  // Input refs for OTP fields auto-focus
+  const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
+
   // Auto-fill simulated ID from landing page onboarding wizard
   useEffect(() => {
     const autofill = localStorage.getItem('migo_simulated_id');
@@ -35,6 +53,26 @@ function Login() {
     }
   }, []);
 
+  // Set up local device ID
+  const getDeviceId = () => {
+    let devId = localStorage.getItem('migo_device_id');
+    if (!devId) {
+      devId = 'migo_device_' + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('migo_device_id', devId);
+    }
+    return devId;
+  };
+
+  // Timer countdown for Resend code
+  useEffect(() => {
+    if (subStage === 'otp_input' && timerCount > 0) {
+      timerRef.current = setTimeout(() => {
+        setTimerCount(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timerRef.current);
+  }, [subStage, timerCount]);
+
   const startVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       alert('Speech recognition is not supported in this browser. Please use Chrome.');
@@ -44,8 +82,7 @@ function Login() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     
-    // Set speech language to match search mode context (e.g. multi-locale support)
-    recognition.lang = mode === 'id' ? 'en-US' : 'en-US'; 
+    recognition.lang = 'en-US'; 
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -66,7 +103,7 @@ function Login() {
 
     recognition.onresult = (event) => {
       const speechToText = event.results[0][0].transcript;
-      const cleanText = speechToText.replace(/\.$/g, ''); // strip punctuation
+      const cleanText = speechToText.replace(/\.$/g, ''); 
       setQuery(cleanText);
       
       // Auto-trigger search
@@ -101,9 +138,90 @@ function Login() {
     }
   };
 
-  const handleSelectLearner = (learner) => {
-    setLearner(learner);
-    navigate('/home');
+  const handleSelectLearner = async (learnerItem) => {
+    setError('');
+    setSelectedLearnerItem(learnerItem);
+    const deviceId = getDeviceId();
+
+    try {
+      const response = await checkDevice(learnerItem.learner_id, deviceId);
+      if (response.data.verified) {
+        // Skip OTP verification, device is trusted or legacy single-user
+        setSubStage('welcome_back');
+      } else {
+        // Unverified phone account -> Show Warning card
+        setSubStage('new_device_warning');
+      }
+    } catch (err) {
+      // In case of error (e.g. learner not found), fallback to warning to keep secure
+      setSubStage('new_device_warning');
+    }
+  };
+
+  const handleSendPhoneOtp = async () => {
+    if (!phoneNumber.trim()) {
+      setError('Please enter your mobile number.');
+      return;
+    }
+    setError('');
+    try {
+      await sendOtp(phoneNumber.trim());
+      setTimerCount(25);
+      setSubStage('otp_input');
+    } catch (err) {
+      setError('Could not send code. Try again.');
+    }
+  };
+
+  const handleOtpBoxChange = (val, idx) => {
+    if (!/^\d*$/.test(val)) return; // Allow numbers only
+    const newOtp = [...otpArray];
+    newOtp[idx] = val.substring(val.length - 1);
+    setOtpArray(newOtp);
+
+    // Auto-focus next field
+    if (val && idx < 5) {
+      otpRefs[idx + 1].current.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e, idx) => {
+    if (e.key === 'Backspace' && !otpArray[idx] && idx > 0) {
+      otpRefs[idx - 1].current.focus();
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    const fullOtp = otpArray.join('');
+    if (fullOtp.length < 6) {
+      setError('Please enter all 6 digits of the OTP.');
+      return;
+    }
+    setError('');
+    setIsSubmittingOtp(true);
+    const deviceId = getDeviceId();
+
+    try {
+      const response = await verifyOtp(phoneNumber.trim(), fullOtp, deviceId);
+      if (response.data.verified) {
+        // Link this learner account in Django to this verified phone account
+        // and register this device session. (This linking occurs implicitly on views verify_otp)
+        // Set the active session and open.
+        setLearner(selectedLearnerItem);
+        navigate('/home');
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Verification code is incorrect.');
+    } finally {
+      setIsSubmittingOtp(false);
+    }
+  };
+
+  const handleBackToSearch = () => {
+    setSubStage('search');
+    setPhoneNumber('');
+    setOtpArray(['', '', '', '', '', '']);
+    setError('');
   };
 
   return (
@@ -112,84 +230,227 @@ function Login() {
         <ArrowLeft size={22} />
       </button>
 
-      <div className={styles.headerBox}>
-        <img src={owl} alt="MiGo Owl" className={styles.mascotImg} />
-        <h1 className={styles.title}>Who is playing today?</h1>
-        <p className={styles.subtitle}>Enter your Learner ID or Name to log into your adventure!</p>
-      </div>
+      {subStage === 'search' && (
+        <>
+          <div className={styles.headerBox}>
+            <img src={owl} alt="MiGo Owl" className={styles.mascotImg} />
+            <h1 className={styles.title}>Who is playing today?</h1>
+            <p className={styles.subtitle}>Enter your Learner ID or Name to log into your adventure!</p>
+          </div>
 
-      <div className={styles.modeToggle}>
-        <button
-          type="button"
-          className={`${styles.modeButton} ${mode === 'id' ? styles.modeActive : ''}`}
-          onClick={() => { setMode('id'); setQuery(''); setResults([]); setError(''); }}
-        >
-          <Hash size={18} />
-          <span>Learner ID</span>
-        </button>
-        <button
-          type="button"
-          className={`${styles.modeButton} ${mode === 'name' ? styles.modeActive : ''}`}
-          onClick={() => { setMode('name'); setQuery(''); setResults([]); setError(''); }}
-        >
-          <User size={18} />
-          <span>Search by Name</span>
-        </button>
-      </div>
+          <div className={styles.modeToggle}>
+            <button
+              type="button"
+              className={`${styles.modeButton} ${mode === 'id' ? styles.modeActive : ''}`}
+              onClick={() => { setMode('id'); setQuery(''); setResults([]); setError(''); }}
+            >
+              <Hash size={18} />
+              <span>Learner ID</span>
+            </button>
+            <button
+              type="button"
+              className={`${styles.modeButton} ${mode === 'name' ? styles.modeActive : ''}`}
+              onClick={() => { setMode('name'); setQuery(''); setResults([]); setError(''); }}
+            >
+              <User size={18} />
+              <span>Search by Name</span>
+            </button>
+          </div>
 
-      <div className={styles.searchRow}>
-        <input
-          type="text"
-          className={`${styles.searchInput} ${isListening ? styles.listeningInput : ''}`}
-          placeholder={isListening ? 'Listening...' : mode === 'id' ? 'e.g. MG000001' : 'Enter your name'}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        />
-        
-        <button
-          className={`${styles.micButton} ${isListening ? styles.micActive : ''}`}
-          type="button"
-          onClick={startVoiceSearch}
-          title="Speak your name/ID"
-        >
-          {isListening ? <MicOff size={22} className={styles.pulse} /> : <Mic size={22} />}
-        </button>
+          <div className={styles.searchRow}>
+            <input
+              type="text"
+              className={`${styles.searchInput} ${isListening ? styles.listeningInput : ''}`}
+              placeholder={isListening ? 'Listening...' : mode === 'id' ? 'e.g. MG000001' : 'Enter your name'}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            
+            <button
+              className={`${styles.micButton} ${isListening ? styles.micActive : ''}`}
+              type="button"
+              onClick={startVoiceSearch}
+              title="Speak your name/ID"
+            >
+              {isListening ? <MicOff size={22} className={styles.pulse} /> : <Mic size={22} />}
+            </button>
 
-        <button className={styles.searchButton} type="button" onClick={handleSearch}>
-          <Search size={22} />
-        </button>
-      </div>
+            <button className={styles.searchButton} type="button" onClick={handleSearch}>
+              <Search size={22} />
+            </button>
+          </div>
 
-      <p className={styles.speakInstruction}>
-        🎙️ Don't know how to write? Tap the microphone and speak your name!
-      </p>
+          <p className={styles.speakInstruction}>
+            🎙️ Don't know how to write? Tap the microphone and speak your name!
+          </p>
 
-      {isSearching && <p className={styles.statusText}>Searching for your profile...</p>}
-      {error && <p className={styles.errorText}>{error}</p>}
+          {isSearching && <p className={styles.statusText}>Searching for your profile...</p>}
+          {error && <p className={styles.errorText}>{error}</p>}
 
-      <div className={styles.resultsGrid}>
-        {results.map((learnerItem) => (
-          <motion.button
-            key={learnerItem.id || learnerItem.learner_id}
-            type="button"
-            className={styles.resultCard}
-            onClick={() => handleSelectLearner(learnerItem)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.96 }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <span className={styles.resultAvatar}>
-              {AVATAR_EMOJI[learnerItem.avatar] || '⭐'}
-            </span>
-            <div className={styles.resultInfo}>
-              <span className={styles.resultName}>{learnerItem.name}</span>
-              <span className={styles.resultId}>{learnerItem.learner_id}</span>
+          <div className={styles.resultsGrid}>
+            {results.map((learnerItem) => (
+              <motion.button
+                key={learnerItem.id || learnerItem.learner_id}
+                type="button"
+                className={styles.resultCard}
+                onClick={() => handleSelectLearner(learnerItem)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.96 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <span className={styles.resultAvatar}>
+                  {AVATAR_EMOJI[learnerItem.avatar] || '⭐'}
+                </span>
+                <div className={styles.resultInfo}>
+                  <span className={styles.resultName}>{learnerItem.name}</span>
+                  <span className={styles.resultId}>{learnerItem.learner_id}</span>
+                </div>
+                <span className={styles.playBadge}>Play ▶</span>
+              </motion.button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Screen 2: New Phone/Device Detected */}
+      {subStage === 'new_device_warning' && (
+        <div className={styles.verifyCard}>
+          <Smartphone size={56} color="var(--color-orange)" />
+          <h2 className={styles.verifyTitle}>Is this your first time on this phone?</h2>
+          <p className={styles.verifyText}>
+            Let's verify your phone number to secure your learning data and make recovery simple.
+          </p>
+          <button className={styles.verifyBtn} onClick={() => setSubStage('phone_input')}>
+            Yes, let's verify
+          </button>
+          <button className={styles.verifyBtnSecondary} onClick={handleBackToSearch}>
+            Back to search
+          </button>
+        </div>
+      )}
+
+      {/* Screen 3: Verify Your Phone */}
+      {subStage === 'phone_input' && (
+        <div className={styles.verifyCard}>
+          <Smartphone size={56} color="var(--color-orange)" />
+          <h2 className={styles.verifyTitle}>Verify Your Phone</h2>
+          <p className={styles.verifyText}>
+            We will send a 6-digit code to verify your phone number.
+          </p>
+          
+          <div className={styles.mobileRow}>
+            <div className={styles.countryCode}>
+              <span style={{ fontSize: '18px' }}>🇮🇳</span>
+              <span>+91</span>
             </div>
-            <span className={styles.playBadge}>Play ▶</span>
-          </motion.button>
-        ))}
+            <input
+              type="tel"
+              className={styles.mobileInput}
+              placeholder="Enter your mobile number"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSendPhoneOtp()}
+              maxLength={10}
+            />
+          </div>
+
+          {error && <p className={styles.errorText}>{error}</p>}
+
+          <button className={styles.verifyBtn} onClick={handleSendPhoneOtp}>
+            Send OTP
+          </button>
+          <button className={styles.verifyBtnSecondary} onClick={handleBackToSearch}>
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Screen 4: Enter the 6-digit code */}
+      {subStage === 'otp_input' && (
+        <div className={styles.verifyCard}>
+          <HelpCircle size={56} color="var(--color-orange)" />
+          <h2 className={styles.verifyTitle}>Enter the 6-digit code</h2>
+          <p className={styles.verifyText}>
+            We sent a verification code to +91 {phoneNumber.replace(/(\d{5})(\d{5})/, 'XXXXX $2')}
+          </p>
+
+          <div className={styles.otpGrid}>
+            {otpArray.map((digit, idx) => (
+              <input
+                key={idx}
+                ref={otpRefs[idx]}
+                type="text"
+                className={styles.otpBox}
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleOtpBoxChange(e.target.value, idx)}
+                onKeyDown={(e) => handleOtpKeyDown(e, idx)}
+              />
+            ))}
+          </div>
+
+          <div className={styles.resendRow}>
+            {timerCount > 0 ? (
+              <span>Didn't get the code? Resend in 0:{timerCount < 10 ? '0' : ''}{timerCount}</span>
+            ) : (
+              <span>Didn't get the code? <button className={styles.resendBtn} onClick={handleSendPhoneOtp}>Resend Now</button></span>
+            )}
+          </div>
+
+          {error && <p className={styles.errorText}>{error}</p>}
+
+          <button className={styles.verifyBtn} onClick={handleVerifyCode} disabled={isSubmittingOtp}>
+            {isSubmittingOtp ? 'Verifying...' : 'Verify OTP'}
+          </button>
+          <button className={styles.verifyBtnSecondary} onClick={() => setSubStage('phone_input')}>
+            Change phone number
+          </button>
+        </div>
+      )}
+
+      {/* Subsequent Login Welcome Back Card (Trusted Device, No OTP) */}
+      {subStage === 'welcome_back' && (
+        <div className={styles.verifyCard}>
+          <img src={owl} alt="Mascot Welcome" className={styles.mascotImg} />
+          <h2 className={styles.verifyTitle}>Welcome back, {selectedLearnerItem?.name}!</h2>
+          <p className={styles.verifyText}>
+            Let's continue your learning adventure!
+          </p>
+          <button
+            className={styles.verifyBtn}
+            onClick={() => {
+              setLearner(selectedLearnerItem);
+              navigate('/home');
+            }}
+          >
+            Continue
+          </button>
+        </div>
+      )}
+
+      {/* Explanations Footer Notice */}
+      <div className={styles.footerExplanation}>
+        <h4>Why we do this?</h4>
+        <div className={styles.explItem}>
+          <Check size={18} className={styles.explIcon} />
+          <div className={styles.explText}>
+            <strong>Your learning is safe</strong>: We secure your data to prevent unauthorized access.
+          </div>
+        </div>
+        <div className={styles.explItem}>
+          <Check size={18} className={styles.explIcon} />
+          <div className={styles.explText}>
+            <strong>No passwords to remember</strong>: Easily log back in with one SMS recovery code.
+          </div>
+        </div>
+        <div className={styles.explItem}>
+          <Check size={18} className={styles.explIcon} />
+          <div className={styles.explText}>
+            <strong>Easy and simple for everyone</strong>: Minimal taps required so children and elderly users can play without friction.
+          </div>
+        </div>
       </div>
     </div>
   );

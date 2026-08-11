@@ -315,3 +315,185 @@
     font-size: 17px;
   }
 }
+
+/* New device & OTP verification styles */
+.verifyCard {
+  background-color: #FFFFFF;
+  border: 3px solid var(--color-peach-light);
+  border-radius: var(--radius-md);
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.verifyTitle {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-orange-dark);
+}
+
+.verifyText {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.verifyBtn {
+  background: linear-gradient(135deg, var(--color-orange), #FF9F43);
+  color: #FFFFFF;
+  border: none;
+  width: 100%;
+  padding: 14px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 900;
+  box-shadow: var(--shadow-button-orange);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.verifyBtn:hover {
+  transform: translateY(-1px);
+}
+
+.verifyBtnSecondary {
+  background-color: transparent;
+  color: var(--text-muted);
+  border: none;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.verifyBtnSecondary:hover {
+  text-decoration: underline;
+}
+
+.mobileRow {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.countryCode {
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 800;
+  background-color: var(--bg-cream-card);
+  border: 2px solid var(--color-peach);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dark);
+}
+
+.mobileInput {
+  flex: 1;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 800;
+  border: 2px solid var(--color-peach);
+  border-radius: var(--radius-sm);
+  outline: none;
+  background-color: #FFFFFF;
+  color: var(--text-dark);
+}
+
+.mobileInput:focus {
+  border-color: var(--color-orange);
+}
+
+/* OTP Code Box Grid */
+.otpGrid {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+  margin: 12px 0;
+}
+
+.otpBox {
+  width: 46px;
+  height: 52px;
+  font-size: 22px;
+  font-weight: 900;
+  text-align: center;
+  border: 3.5px solid var(--color-peach);
+  border-radius: var(--radius-sm);
+  outline: none;
+  background-color: #FFFFFF;
+  color: var(--text-dark);
+}
+
+.otpBox:focus {
+  border-color: var(--color-orange);
+}
+
+/* Explanations footer notice */
+.footerExplanation {
+  margin-top: 36px;
+  width: 100%;
+  max-width: 480px;
+  border-top: 2px dashed var(--color-peach);
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.footerExplanation h4 {
+  font-size: 16px;
+  font-weight: 850;
+  color: var(--color-orange-dark);
+  margin-bottom: 2px;
+  text-align: left;
+}
+
+.explItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+}
+
+.explIcon {
+  color: #27AE60;
+  flex-shrink: 0;
+}
+
+.explText {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.resendRow {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-muted);
+  margin-top: -6px;
+  margin-bottom: 8px;
+}
+
+.resendBtn {
+  color: var(--color-orange);
+  background: none;
+  border: none;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.resendBtn:hover {
+  text-decoration: underline;
+}

@@ -16,6 +16,18 @@ export const searchLearnerById = (learnerId) =>
 export const searchLearnerByName = (name) =>
   api.get('/users/search', { params: { name } });
 
+export const sendOtp = (phoneNumber) =>
+  api.post('/users/otp/send', { phone_number: phoneNumber });
+
+export const verifyOtp = (phoneNumber, otp, deviceId) =>
+  api.post('/users/otp/verify', { phone_number: phoneNumber, otp, device_id: deviceId });
+
+export const checkDevice = (learnerId, deviceId) =>
+  api.get('/users/check-device', { params: { learner_id: learnerId, device_id: deviceId } });
+
+export const fetchPhoneLearners = (phoneNumber) =>
+  api.get('/users/phone-learners', { params: { phone_number: phoneNumber } });
+
 export default api;
 
 export const submitAssessment = (payload) =>

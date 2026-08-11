@@ -2,6 +2,26 @@
 from django.db import models
 
 
+class PhoneAccount(models.Model):
+    phone_number = models.CharField(max_length=20, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.phone_number
+
+
+class DeviceSession(models.Model):
+    phone_account = models.ForeignKey(PhoneAccount, on_delete=models.CASCADE, related_name='devices')
+    device_id = models.CharField(max_length=255)
+    verified_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('phone_account', 'device_id')
+
+    def __str__(self):
+        return f"{self.phone_account.phone_number} - {self.device_id}"
+
+
 class Learner(models.Model):
     LANGUAGE_CHOICES = [
         ('en', 'English'), ('hi', 'Hindi'), ('kn', 'Kannada'), ('ta', 'Tamil'),
@@ -31,6 +51,7 @@ class Learner(models.Model):
     preferred_language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES)
     avatar = models.CharField(max_length=20, choices=AVATAR_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
+    phone_account = models.ForeignKey(PhoneAccount, on_delete=models.SET_NULL, null=True, blank=True, related_name='learners')
 
     def save(self, *args, **kwargs):
         if not self.learner_id:
