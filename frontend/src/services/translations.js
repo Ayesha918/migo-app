@@ -39,6 +39,19 @@ const translations = {
     startCheck: 'Start Check ➔',
     completedBadge: 'Completed ✅',
 
+    // Assessment keys
+    preparingAssessment: 'Preparing your custom placement assessment...',
+    readingCheck: 'READING CHECK',
+    writingCheck: 'WRITING CHECK',
+    comprehensionCheck: 'COMPREHENSION CHECK',
+    whichPictureMatches: 'Which picture matches:',
+    assessmentComplete: 'Assessment Complete!',
+    placedInLevel: 'Based on your reading and writing accuracy checks, we have placed you in:',
+    enterAdventureWorld: 'Enter Adventure World 🚀',
+    calculatingLevel: 'Calculating Level...',
+    writeShortResponse: 'Please write a short response.',
+    typeResponsePlaceholder: 'Type your response here...',
+
     // Registration screen
     joinUs: 'Join Us',
     comfortableWith: 'I am comfortable with...',
@@ -111,6 +124,19 @@ const translations = {
     placementIntro: 'पाठ शुरू करने से पहले, आपको अपना प्रारंभिक प्लेसमेंट मूल्यांकन पूरा करना होगा। यह हमें आपके लिए सर्वोत्तम प्रगतिशील पाठों की सिफारिश करने में मदद करता है!',
     startCheck: 'मूल्यांकन शुरू करें ➔',
     completedBadge: 'पूर्ण ✅',
+
+    // Assessment keys
+    preparingAssessment: 'आपके लिए प्रारंभिक मूल्यांकन तैयार किया जा रहा है...',
+    readingCheck: 'पठन जाँच',
+    writingCheck: 'लेखन जाँच',
+    comprehensionCheck: 'समझ जाँच',
+    whichPictureMatches: 'कौन सा चित्र मेल खाता है:',
+    assessmentComplete: 'मूल्यांकन पूरा हुआ!',
+    placedInLevel: 'आपकी पठन और लेखन सटीकता के आधार पर, हमने आपको इस स्तर पर रखा है:',
+    enterAdventureWorld: 'रोमांच की दुनिया में प्रवेश करें 🚀',
+    calculatingLevel: 'स्तर की गणना की जा रही है...',
+    writeShortResponse: 'कृपया एक संक्षिप्त उत्तर लिखें।',
+    typeResponsePlaceholder: 'अपना उत्तर यहाँ लिखें...',
 
     // Registration screen
     joinUs: 'हमारे साथ जुड़ें',
@@ -185,6 +211,19 @@ const translations = {
     startCheck: 'ಮೌಲ್ಯಮಾಪನ ಪ್ರಾರಂಭಿಸಿ ➔',
     completedBadge: 'ಪೂರ್ಣಗೊಂಡಿದೆ ✅',
 
+    // Assessment keys
+    preparingAssessment: 'ನಿಮ್ಮ ಕಸ್ಟಮ್ ನಿಯೋಜನೆ ಮೌಲ್ಯಮಾಪನವನ್ನು ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ...',
+    readingCheck: 'ಓದುವಿಕೆ ತಪಾಸಣೆ',
+    writingCheck: 'ಬರವಣಿಗೆ ತಪಾಸಣೆ',
+    comprehensionCheck: 'ಗ್ರಹಿಕಾ ತಪಾಸಣೆ',
+    whichPictureMatches: 'ಯಾವ ಚಿತ್ರವು ಹೊಂದಿಕೆಯಾಗುತ್ತದೆ:',
+    assessmentComplete: 'ಮೌಲ್ಯಮಾಪನ ಪೂರ್ಣಗೊಂಡಿದೆ!',
+    placedInLevel: 'ನಿಮ್ಮ ಓದುವಿಕೆ ಮತ್ತು ಬರವಣಿಗೆಯ ನಿಖರತೆಯ ಆಧಾರದ ಮೇಲೆ, ನಾವು ನಿಮ್ಮನ್ನು ಈ ಮಟ್ಟದಲ್ಲಿರಿಸಿದ್ದೇವೆ:',
+    enterAdventureWorld: 'ಸಾಹಸ ಜಗತ್ತನ್ನು ಪ್ರವೇಶಿಸಿ 🚀',
+    calculatingLevel: 'ಮಟ್ಟವನ್ನು ಲೆಕ್ಕಹಾಕಲಾಗುತ್ತಿದೆ...',
+    writeShortResponse: 'ದಯವಿಟ್ಟು ಒಂದು ಸಣ್ಣ ಉತ್ತರವನ್ನು ಬರೆಯಿರಿ.',
+    typeResponsePlaceholder: 'ನಿಮ್ಮ ಉತ್ತರವನ್ನು ಇಲ್ಲಿ ಬರೆಯಿರಿ...',
+
     // Registration screen
     joinUs: 'ನಮ್ಮೊಂದಿಗೆ ಸೇರಿ',
     comfortableWith: 'ನಾನು ಇದರಲ್ಲಿ ಆರಾಮದಾಯಕವಾಗಿದ್ದೇನೆ...',
@@ -257,6 +296,19 @@ const translations = {
     placementIntro: 'பாடங்களைத் தொடங்குவதற்கு முன், உங்கள் ஆரம்ப நிலை மதிப்பீடுகளை நீங்கள் முடிக்க வேண்டும். இது உங்களுக்கான சிறந்த முற்போக்கான பாடங்களை பரிந்துரைக்க உதவுகிறது!',
     startCheck: 'மதிப்பீட்டைத் தொடங்கு ➔',
     completedBadge: 'முடிந்தது ✅',
+
+    // Assessment keys
+    preparingAssessment: 'உங்களுக்கான ஆரம்ப நிலை மதிப்பீடு தயார் செய்யப்படுகிறது...',
+    readingCheck: 'வாசிப்பு சோதனை',
+    writingCheck: 'எழுத்து சோதனை',
+    comprehensionCheck: 'புரிதல் சோதனை',
+    whichPictureMatches: 'எந்தப் படம் பொருந்துகிறது:',
+    assessmentComplete: 'மதிப்பீடு முடிந்தது!',
+    placedInLevel: 'உங்கள் வாசிப்பு மற்றும் எழுத்து துல்லிய சோதனைகளின் அடிப்படையில், நாங்கள் உங்களை இந்த நிலையில் வைத்துள்ளோம்:',
+    enterAdventureWorld: 'சாகச உலகிற்குள் நுழையுங்கள் 🚀',
+    calculatingLevel: 'நிலையைக் கணக்கிடுகிறது...',
+    writeShortResponse: 'தயவுசெய்து ஒரு சிறிய பதிலை எழுதுங்கள்.',
+    typeResponsePlaceholder: 'உங்கள் பதிலை இங்கே தட்டச்சு செய்க...',
 
     // Registration screen
     joinUs: 'எங்களுடன் இணையுங்கள்',

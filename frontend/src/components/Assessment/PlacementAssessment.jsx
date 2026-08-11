@@ -7,6 +7,7 @@ import speak from '../../services/speak';
 import VirtualKeyboard from './VirtualKeyboard';
 import owl from '../../assets/images/owl.png';
 import styles from './PlacementAssessment.module.css';
+import useTranslate from '../../services/useTranslate';
 
 const LANG_SPEECH_CODES = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN' };
 
@@ -14,6 +15,7 @@ export default function PlacementAssessment() {
   const location = useLocation();
   const navigate = useNavigate();
   const learner = location.state?.learner;
+  const t = useTranslate();
 
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0); // 0-6 are questions, 7 is celebration
@@ -24,7 +26,18 @@ export default function PlacementAssessment() {
   const [assignedLevel, setAssignedLevel] = useState('beginner');
 
   const preferredLang = learner?.learning_language || 'en';
+  const knownLang = learner?.known_language || 'en';
   const speechLang = LANG_SPEECH_CODES[preferredLang] || 'en-US';
+  const knownSpeechLang = LANG_SPEECH_CODES[knownLang] || 'en-US';
+
+  const formatQuestionText = (text) => {
+    if (!text) return "";
+    if (text.startsWith("Which picture matches:")) {
+      const word = text.replace("Which picture matches:", "").trim();
+      return `${t('whichPictureMatches')} ${word}`;
+    }
+    return text;
+  };
 
   useEffect(() => {
     if (!learner) return;
@@ -59,13 +72,14 @@ export default function PlacementAssessment() {
 
     let speakText = "";
     if (currentQ.assessment_type === 'reading') {
-      speakText = `Reading Check, question ${currentIndex + 1}. ${currentQ.question_text}`;
+      const qText = formatQuestionText(currentQ.question_text);
+      speakText = `${t('readingCheck')}, ${currentIndex + 1}. ${qText}`;
     } else if (currentQ.assessment_type === 'writing') {
-      speakText = `Writing Check. ${currentQ.question_text}`;
+      speakText = `${t('writingCheck')}. ${currentQ.question_text}`;
     } else {
-      speakText = `Comprehension Check. ${currentQ.passage_text ? 'Read the story and answer: ' : ''}${currentQ.question_text}`;
+      speakText = `${t('comprehensionCheck')}. ${currentQ.passage_text ? 'Read the story and answer: ' : ''}${currentQ.question_text}`;
     }
-    speak(speakText, speechLang);
+    speak(speakText, knownSpeechLang);
   }, [currentIndex, loading, questions]);
 
   if (!learner) {
@@ -83,7 +97,7 @@ export default function PlacementAssessment() {
     return (
       <div className={styles.center}>
         <img src={owl} alt="MiGo Mascot" className={styles.loadingOwl} />
-        <h2>Preparing your custom placement assessment...</h2>
+        <h2>{t('preparingAssessment')}</h2>
       </div>
     );
   }
@@ -93,7 +107,7 @@ export default function PlacementAssessment() {
   const handleNextStep = async () => {
     const currentAnswer = answers[currentQuestion.id] || '';
     if (!currentAnswer.trim() && currentQuestion.assessment_type === 'writing') {
-      speak("Please write a short response.", speechLang);
+      speak(t('writeShortResponse'), knownSpeechLang);
       return;
     }
 
@@ -146,7 +160,7 @@ export default function PlacementAssessment() {
         const updatedLevel = summary.data?.level || 'beginner';
         setAssignedLevel(updatedLevel);
 
-        speak(`Awesome! Based on your check, you have been placed in the ${updatedLevel} level!`, speechLang);
+        speak(`Awesome! Based on your check, you have been placed in the ${updatedLevel} level!`, knownSpeechLang);
         setCurrentIndex(questions.length); // Trigger celebration step
       } catch (err) {
         console.error('Submitting placement checks failed:', err);
@@ -165,6 +179,12 @@ export default function PlacementAssessment() {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
+  const getCheckHeader = (type) => {
+    if (type === 'reading') return t('readingCheck');
+    if (type === 'writing') return t('writingCheck');
+    return t('comprehensionCheck');
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.card}>
@@ -178,14 +198,14 @@ export default function PlacementAssessment() {
               transition={{ duration: 0.2 }}
             >
               <div className={styles.stepHeader}>
-                {currentQuestion.assessment_type.toUpperCase()} CHECK ({currentIndex + 1}/{questions.length})
+                {getCheckHeader(currentQuestion.assessment_type)} ({currentIndex + 1}/{questions.length})
               </div>
 
               {currentQuestion.passage_text && (
                 <p className={styles.passageText}>{currentQuestion.passage_text}</p>
               )}
 
-              <p className={styles.questionText}>{currentQuestion.question_text}</p>
+              <p className={styles.questionText}>{formatQuestionText(currentQuestion.question_text)}</p>
 
               {currentQuestion.question_type === 'mcq' ? (
                 <div className={styles.optionsGrid}>
@@ -209,7 +229,7 @@ export default function PlacementAssessment() {
                 <div style={{ marginBottom: '20px' }}>
                   <textarea
                     className={styles.textInput}
-                    placeholder="Type your response here..."
+                    placeholder={t('typeResponsePlaceholder')}
                     value={answers[currentQuestion.id] || ''}
                     onChange={(e) => setAnswer(currentQuestion.id, e.target.value)}
                     rows={3}
@@ -232,11 +252,11 @@ export default function PlacementAssessment() {
               animate={{ opacity: 1, scale: 1 }}
             >
               <div className={styles.emoji}>🌱</div>
-              <h2>Assessment Complete!</h2>
-              <p>Based on your reading and writing accuracy checks, we have placed you in:</p>
+              <h2>{t('assessmentComplete')}</h2>
+              <p>{t('placedInLevel')}</p>
               <div className={styles.levelBadge}>{assignedLevel.toUpperCase()} LEVEL</div>
               <button className={styles.primaryBtn} onClick={handleFinish} type="button">
-                Enter Adventure World 🚀
+                {t('enterAdventureWorld')}
               </button>
             </motion.div>
           )}
@@ -249,7 +269,7 @@ export default function PlacementAssessment() {
             disabled={submitting || !answers[currentQuestion.id]}
             type="button"
           >
-            {submitting ? 'Calculating Level...' : 'Continue'}
+            {submitting ? t('calculatingLevel') : t('continueBtn')}
           </button>
         )}
       </div>
