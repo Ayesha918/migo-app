@@ -5,6 +5,18 @@ from rest_framework import status
 from django.db.models import Q
 from .models import Learner, PhoneAccount, DeviceSession
 from .serializers import LearnerSerializer
+from .otp_service import send_real_otp, verify_real_otp
+
+
+def normalize_phone_number(phone):
+    """
+    Cleans and normalizes phone number to E.164 format.
+    E.g. '9876543210' -> '+919876543210'
+    """
+    cleaned = ''.join(c for c in phone if c.isdigit() or c == '+')
+    if not cleaned.startswith('+'):
+        cleaned = f"+91{cleaned}"
+    return cleaned
 
 
 @api_view(['POST'])
@@ -22,7 +34,8 @@ def register_learner(request):
         learner = serializer.save()
 
         if phone_number:
-            phone_account, _ = PhoneAccount.objects.get_or_create(phone_number=phone_number)
+            normalized = normalize_phone_number(phone_number)
+            phone_account, _ = PhoneAccount.objects.get_or_create(phone_number=normalized)
             learner.phone_account = phone_account
             learner.save()
 
@@ -71,13 +84,18 @@ def send_otp(request):
     """
     POST /api/users/otp/send
     Body: { phone_number }
-    Simulates sending a 6-digit OTP code to the given phone.
+    Sends a 6-digit OTP code to the actual phone number via Twilio Verify API.
     """
     phone_number = request.data.get('phone_number')
     if not phone_number:
         return Response({'error': 'Phone number is required.'}, status=status.HTTP_400_BAD_REQUEST)
-    print(f"[OTP] Sending mock OTP '123456' to {phone_number}")
-    return Response({'message': 'OTP sent successfully.'}, status=status.HTTP_200_OK)
+    
+    normalized = normalize_phone_number(phone_number)
+    try:
+        send_real_otp(normalized)
+        return Response({'message': 'OTP sent successfully.'}, status=status.HTTP_200_OK)
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -85,7 +103,7 @@ def verify_otp(request):
     """
     POST /api/users/otp/verify
     Body: { phone_number, otp, device_id }
-    Verifies the OTP (123456) and creates PhoneAccount/DeviceSession.
+    Verifies the OTP via Twilio Verify API and creates PhoneAccount/DeviceSession.
     """
     phone_number = request.data.get('phone_number')
     otp = request.data.get('otp')
@@ -94,17 +112,22 @@ def verify_otp(request):
     if not phone_number or not otp:
         return Response({'error': 'Phone number and OTP are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    if otp != '123456':
-        return Response({'error': 'Invalid OTP code.'}, status=status.HTTP_400_BAD_REQUEST)
+    normalized = normalize_phone_number(phone_number)
+    try:
+        check_res = verify_real_otp(normalized, otp)
+        if check_res.get('status') == 'approved':
+            # Success: Get or create phone account
+            phone_account, _ = PhoneAccount.objects.get_or_create(phone_number=normalized)
 
-    # Success: Get or create phone account
-    phone_account, _ = PhoneAccount.objects.get_or_create(phone_number=phone_number)
+            # Register device session if device_id is provided
+            if device_id:
+                DeviceSession.objects.get_or_create(phone_account=phone_account, device_id=device_id)
 
-    # Register device session if device_id is provided
-    if device_id:
-        DeviceSession.objects.get_or_create(phone_account=phone_account, device_id=device_id)
-
-    return Response({'verified': True, 'phone_number': phone_number}, status=status.HTTP_200_OK)
+            return Response({'verified': True, 'phone_number': normalized}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Verification code is incorrect or expired.'}, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -143,8 +166,9 @@ def get_phone_learners(request):
     if not phone_number:
         return Response({'error': 'Phone number is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    normalized = normalize_phone_number(phone_number)
     try:
-        phone_account = PhoneAccount.objects.get(phone_number=phone_number)
+        phone_account = PhoneAccount.objects.get(phone_number=normalized)
         learners = phone_account.learners.all()
     except PhoneAccount.DoesNotExist:
         learners = Learner.objects.none()
