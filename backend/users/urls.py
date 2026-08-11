@@ -9,4 +9,11 @@ urlpatterns = [
     path('otp/verify', views.verify_otp, name='verify_otp'),
     path('check-device', views.check_device, name='check_device'),
     path('phone-learners', views.get_phone_learners, name='get_phone_learners'),
+    path('books', views.list_books, name='list_books'),
+    path('support/ticket', views.create_support_ticket, name='create_support_ticket'),
+    path('community/posts', views.community_posts, name='community_posts'),
+    path('community/posts/<int:post_id>/like', views.like_post, name='like_post'),
+    path('notifications', views.manage_notifications, name='manage_notifications'),
+    path('notifications/read-all', views.manage_notifications, name='read_all_notifications'),
+    path('subscription/upgrade', views.upgrade_subscription, name='upgrade_subscription'),
 ]

@@ -1,21 +1,36 @@
 // src/components/Extra/Subscription.jsx
 import { useState } from 'react';
 import { useLearner } from '../../services/LearnerContext';
+import { upgradeSubscriptionPlan } from '../../services/api';
 import Sidebar from '../Home/Sidebar';
 import Header from '../Home/Header';
 import { Check, ShieldCheck } from 'lucide-react';
 import styles from './Extra.module.css';
 
 export default function Subscription() {
-  const { logout } = useLearner();
-  const [activePlan, setActivePlan] = useState('Free');
+  const { learner, setLearner, logout } = useLearner();
   const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const activePlan = learner?.subscription_tier || 'Free';
 
   const handleUpgrade = (planName) => {
-    if (planName === activePlan) return;
-    setSuccess(`Successfully subscribed to ${planName} Plan! Sandbox checkout completed via Stripe.`);
-    setActivePlan(planName);
-    setTimeout(() => setSuccess(''), 5000);
+    if (planName === activePlan || !learner) return;
+
+    setSubmitting(true);
+    upgradeSubscriptionPlan(learner.learner_id, planName)
+      .then(res => {
+        setSuccess(`Successfully upgraded to the ${planName} Plan! Test payment completed successfully via Stripe.`);
+        // Update context & local storage
+        const updated = { ...learner, subscription_tier: planName };
+        setLearner(updated);
+        setTimeout(() => setSuccess(''), 5000);
+      })
+      .catch(err => {
+        console.error('Failed to upgrade subscription:', err);
+        setSuccess('Upgrade payment failed. Please check backend connection.');
+      })
+      .finally(() => setSubmitting(false));
   };
 
   return (
@@ -33,7 +48,7 @@ export default function Subscription() {
         </div>
 
         {success && (
-          <div style={{ padding: '12px 16px', backgroundColor: '#E8FAEF', color: '#27AE60', borderRadius: 'var(--radius-sm)', fontWeight: 800, fontSize: '14px' }}>
+          <div style={{ padding: '12px 16px', backgroundColor: success.includes('failed') ? '#FFEAEB' : '#E8FAEF', color: success.includes('failed') ? '#FF4757' : '#27AE60', borderRadius: 'var(--radius-sm)', fontWeight: 800, fontSize: '14px', marginBottom: '16px' }}>
             {success}
           </div>
         )}
@@ -72,7 +87,7 @@ export default function Subscription() {
             <button
               className={`${styles.subBtn} ${activePlan === 'Free' ? styles.subBtnActive : ''}`}
               onClick={() => handleUpgrade('Free')}
-              disabled={activePlan === 'Free'}
+              disabled={activePlan === 'Free' || submitting}
               type="button"
             >
               {activePlan === 'Free' ? 'Current Plan' : 'Select Free'}
@@ -117,9 +132,10 @@ export default function Subscription() {
             <button
               className={`${styles.subBtn} ${activePlan === 'Pro' ? styles.subBtnActive : ''}`}
               onClick={() => handleUpgrade('Pro')}
+              disabled={submitting}
               type="button"
             >
-              {activePlan === 'Pro' ? 'Current Plan ✓' : 'Upgrade to Pro'}
+              {activePlan === 'Pro' ? 'Current Plan ✓' : submitting ? 'Upgrading...' : 'Upgrade to Pro'}
             </button>
           </div>
 
@@ -160,9 +176,10 @@ export default function Subscription() {
             <button
               className={`${styles.subBtn} ${activePlan === 'Premium' ? styles.subBtnActive : ''}`}
               onClick={() => handleUpgrade('Premium')}
+              disabled={submitting}
               type="button"
             >
-              {activePlan === 'Premium' ? 'Current Plan ✓' : 'Upgrade to Premium'}
+              {activePlan === 'Premium' ? 'Current Plan ✓' : submitting ? 'Upgrading...' : 'Upgrade to Premium'}
             </button>
           </div>
         </div>

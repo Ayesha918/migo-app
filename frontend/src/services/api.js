@@ -80,3 +80,12 @@ export const fetchSpeechHistory = (learnerId) =>
 
 export const fetchLessonsByLevel = (learnerId, level) =>
   api.get('/lessons/by-level', { params: { learner_id: learnerId, level: level } });
+
+export const fetchBooks = () => api.get('/users/books');
+export const submitSupportTicket = (payload) => api.post('/users/support/ticket', payload);
+export const fetchCommunityPosts = (learnerId) => api.get('/users/community/posts', { params: { learner_id: learnerId } });
+export const createCommunityPost = (payload) => api.post('/users/community/posts', payload);
+export const toggleLikePost = (postId, learnerId) => api.post(`/users/community/posts/${postId}/like`, { learner_id: learnerId });
+export const fetchNotifications = (learnerId) => api.get('/users/notifications', { params: { learner_id: learnerId } });
+export const markNotificationsRead = (learnerId) => api.post('/users/notifications/read-all', { learner_id: learnerId });
+export const upgradeSubscriptionPlan = (learnerId, planName) => api.post('/users/subscription/upgrade', { learner_id: learnerId, plan_name: planName });

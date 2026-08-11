@@ -1,6 +1,7 @@
 // src/components/Extra/Support.jsx
 import { useState } from 'react';
 import { useLearner } from '../../services/LearnerContext';
+import { submitSupportTicket } from '../../services/api';
 import Sidebar from '../Home/Sidebar';
 import Header from '../Home/Header';
 import styles from './Extra.module.css';
@@ -15,11 +16,12 @@ const FAQS = [
 ];
 
 export default function Support() {
-  const { logout } = useLearner();
+  const { learner, logout } = useLearner();
   const [openIndex, setOpenIndex] = useState(null);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const toggleFaq = (idx) => {
     setOpenIndex(openIndex === idx ? null : idx);
@@ -28,10 +30,24 @@ export default function Support() {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!subject.trim() || !message.trim()) return;
-    setSuccess('Thank you! Your message has been sent successfully. We will get back to you within 24 hours.');
-    setSubject('');
-    setMessage('');
-    setTimeout(() => setSuccess(''), 5000);
+
+    setSubmitting(true);
+    submitSupportTicket({
+      learner_id: learner?.learner_id,
+      subject: subject.trim(),
+      message: message.trim()
+    })
+      .then(() => {
+        setSuccess('Thank you! Your ticket has been logged in our database. We will get back to you within 24 hours.');
+        setSubject('');
+        setMessage('');
+        setTimeout(() => setSuccess(''), 5000);
+      })
+      .catch(err => {
+        console.error('Failed to submit ticket:', err);
+        setSuccess('Failed to submit ticket. Please check backend connection.');
+      })
+      .finally(() => setSubmitting(false));
   };
 
   return (
@@ -86,7 +102,7 @@ export default function Support() {
                       <span>{isOpen ? '▲' : '▼'}</span>
                     </button>
                     {isOpen && (
-                      <div className={faq.q === FAQS[1].q ? `${styles.faqAnswer} faq-voice` : styles.faqAnswer}>
+                      <div className={styles.faqAnswer}>
                         {faq.a}
                       </div>
                     )}
@@ -100,7 +116,7 @@ export default function Support() {
           <div className={styles.sectionBox}>
             <h3>✉️ Contact Support</h3>
             {success && (
-              <div style={{ padding: '12px 16px', backgroundColor: '#E8FAEF', color: '#27AE60', borderRadius: 'var(--radius-sm)', fontWeight: 800, fontSize: '14px', marginBottom: '16px' }}>
+              <div style={{ padding: '12px 16px', backgroundColor: success.includes('Failed') ? '#FFEAEB' : '#E8FAEF', color: success.includes('Failed') ? '#FF4757' : '#27AE60', borderRadius: 'var(--radius-sm)', fontWeight: 800, fontSize: '14px', marginBottom: '16px' }}>
                 {success}
               </div>
             )}
@@ -127,8 +143,8 @@ export default function Support() {
                   required
                 />
               </div>
-              <button className={styles.submitBtn} type="submit">
-                Send Message
+              <button className={styles.submitBtn} type="submit" disabled={submitting}>
+                {submitting ? 'Sending...' : 'Send Message'}
               </button>
             </form>
           </div>

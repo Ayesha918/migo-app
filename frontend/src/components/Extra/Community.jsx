@@ -1,41 +1,55 @@
 // src/components/Extra/Community.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLearner } from '../../services/LearnerContext';
+import { fetchCommunityPosts, createCommunityPost, toggleLikePost } from '../../services/api';
 import Sidebar from '../Home/Sidebar';
 import Header from '../Home/Header';
 import styles from './Extra.module.css';
-
-const MOCK_POSTS = [
-  { id: 1, author: 'nithya', avatar: '👧', time: '21h ago', content: 'im struggling in communication, any tips on intermediate dialogues?', likes: 2, comments: 0 },
-  { id: 2, author: 'Priya S.', avatar: '👵', time: '3d ago', content: 'Just hit a 42-day streak! Who else is starting fresh on MiGo today?', likes: 32, comments: 8 }
-];
 
 export default function Community() {
   const { learner, logout } = useLearner();
   const [activeTab, setActiveTab] = useState('Discussions');
   const [postText, setPostText] = useState('');
-  const [posts, setPosts] = useState(MOCK_POSTS);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadPosts = () => {
+    if (!learner) return;
+    setLoading(true);
+    fetchCommunityPosts(learner.learner_id)
+      .then(res => {
+        setPosts(res.data || []);
+      })
+      .catch(err => console.error('Failed to fetch posts:', err))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadPosts();
+  }, [learner]);
 
   const handleCreatePost = (e) => {
     e.preventDefault();
     if (!postText.trim()) return;
 
-    const newPost = {
-      id: posts.length + 1,
-      author: learner?.name || 'You',
-      avatar: learner?.avatar === 'boy' ? '👦' : learner?.avatar === 'girl' ? '👧' : '🦊',
-      time: 'Just now',
-      content: postText.trim(),
-      likes: 0,
-      comments: 0
-    };
-
-    setPosts([newPost, ...posts]);
-    setPostText('');
+    createCommunityPost({
+      learner_id: learner?.learner_id,
+      content: postText.trim()
+    })
+      .then(res => {
+        setPosts([res.data, ...posts]);
+        setPostText('');
+      })
+      .catch(err => console.error('Failed to create post:', err));
   };
 
-  const handleLikePost = (id) => {
-    setPosts(posts.map(p => p.id === id ? { ...p, likes: p.likes + 1 } : p));
+  const handleLikePost = (postId) => {
+    if (!learner) return;
+    toggleLikePost(postId, learner.learner_id)
+      .then(res => {
+        setPosts(posts.map(p => p.id === postId ? { ...p, likes: res.data.likes, liked: res.data.liked } : p));
+      })
+      .catch(err => console.error('Failed to like post:', err));
   };
 
   return (
@@ -89,26 +103,43 @@ export default function Community() {
             </form>
 
             {/* feed */}
-            {posts.map(post => (
-              <div key={post.id} className={styles.postCard}>
-                <div className={styles.postHeader}>
-                  <span className={styles.composerAvatar}>{post.avatar}</span>
-                  <div className={styles.postMeta}>
-                    <h5>{post.author}</h5>
-                    <span>{post.time}</span>
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <p>Loading posts...</p>
+              </div>
+            ) : posts.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <p>No community posts yet. Be the first to write one!</p>
+              </div>
+            ) : (
+              posts.map(post => (
+                <div key={post.id} className={styles.postCard}>
+                  <div className={styles.postHeader}>
+                    <span className={styles.composerAvatar}>
+                      {post.avatar === 'boy' ? '👦' : post.avatar === 'girl' ? '👧' : '🦊'}
+                    </span>
+                    <div className={styles.postMeta}>
+                      <h5>{post.author}</h5>
+                      <span>{post.time}</span>
+                    </div>
+                  </div>
+                  <p className={styles.postText}>{post.content}</p>
+                  <div className={styles.postActions}>
+                    <button
+                      className={styles.postActionBtn}
+                      onClick={() => handleLikePost(post.id)}
+                      style={{ color: post.liked ? 'var(--color-orange)' : 'var(--text-muted)' }}
+                      type="button"
+                    >
+                      {post.liked ? '❤️' : '🤍'} {post.likes} Likes
+                    </button>
+                    <button className={styles.postActionBtn} type="button">
+                      💬 {post.comments} Comments
+                    </button>
                   </div>
                 </div>
-                <p className={styles.postText}>{post.content}</p>
-                <div className={styles.postActions}>
-                  <button className={styles.postActionBtn} onClick={() => handleLikePost(post.id)} type="button">
-                    ❤️ {post.likes} Likes
-                  </button>
-                  <button className={styles.postActionBtn} type="button">
-                    💬 {post.comments} Comments
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         ) : activeTab === 'Leaderboard' ? (
           <div className={styles.sectionBox} style={{ maxWidth: '680px', width: '100%', margin: '0 auto' }}>

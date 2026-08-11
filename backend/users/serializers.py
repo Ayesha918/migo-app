@@ -8,7 +8,7 @@ class LearnerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Learner
-        fields = ['id', 'learner_id', 'name', 'age', 'known_language', 'learning_language', 'avatar', 'created_at', 'phone_number']
+        fields = ['id', 'learner_id', 'name', 'age', 'known_language', 'learning_language', 'avatar', 'created_at', 'phone_number', 'subscription_tier']
         read_only_fields = ['id', 'learner_id', 'created_at']
 
     def get_phone_number(self, obj):

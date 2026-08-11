@@ -52,6 +52,7 @@ class Learner(models.Model):
     avatar = models.CharField(max_length=20, choices=AVATAR_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     phone_account = models.ForeignKey(PhoneAccount, on_delete=models.SET_NULL, null=True, blank=True, related_name='learners')
+    subscription_tier = models.CharField(max_length=20, default='Free') # Free, Pro, Premium
 
     def save(self, *args, **kwargs):
         if not self.learner_id:
@@ -84,3 +85,48 @@ class StudySession(models.Model):
 
     def __str__(self):
         return f"{self.learner.learner_id} - Session {self.id} ({self.duration_seconds}s)"
+
+
+class Book(models.Model):
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
+    pages = models.PositiveIntegerField()
+    category = models.CharField(max_length=100) # Literature, Business, Science, Fiction
+    level = models.CharField(max_length=50) # Beginner, Intermediate, Advanced
+    emoji = models.CharField(max_length=10)
+    content = models.TextField() # Paragraph content of the book for reading
+
+    def __str__(self):
+        return self.title
+
+
+class SupportTicket(models.Model):
+    learner = models.ForeignKey(Learner, on_delete=models.CASCADE, related_name='tickets')
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.learner.name} - {self.subject}"
+
+
+class CommunityPost(models.Model):
+    learner = models.ForeignKey(Learner, on_delete=models.CASCADE, related_name='posts')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(Learner, blank=True, related_name='liked_posts')
+
+    def __str__(self):
+        return f"{self.learner.name}: {self.content[:30]}..."
+
+
+class Notification(models.Model):
+    learner = models.ForeignKey(Learner, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    unread = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    notification_type = models.CharField(max_length=50) # placement, welcome, milestone, payment
+
+    def __str__(self):
+        return f"{self.learner.name} - {self.title}"
