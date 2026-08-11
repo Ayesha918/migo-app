@@ -3216,7 +3216,7 @@ export default function LessonPlayer() {
                   >
                     <span className={styles.storyboardBadge}>{currentSlide.title}</span>
                     <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-dark)', marginTop: '8px', marginBottom: '16px' }}>
-                      Arrange the jumbled words in the correct order:
+                      {currentSlide.instruction || 'Arrange the words to form a correct sentence.'}
                     </h2>
 
                     {/* Target Sentence Display */}
@@ -3251,7 +3251,7 @@ export default function LessonPlayer() {
                     }}>
                       {jumbledSelectedIndices.length === 0 ? (
                         <span style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: 600 }}>
-                          Tap words below to arrange them...
+                          {t('tapTokensPlaceholder')}
                         </span>
                       ) : (
                         jumbledSelectedIndices.map((wordIdx) => (
@@ -3328,9 +3328,9 @@ export default function LessonPlayer() {
                         }}
                       >
                         {isCorrectOrder ? (
-                          <span>🎉 Perfect! The sentence is correctly arranged.</span>
+                          <span>🎉 {t('sentenceCorrectFeedback')}</span>
                         ) : (
-                          <span>❌ Incorrect word order! Click words to remove and try again.</span>
+                          <span>❌ {t('sentenceIncorrectFeedback')}</span>
                         )}
                       </motion.div>
                     )}
@@ -3594,7 +3594,7 @@ export default function LessonPlayer() {
                     {/* Word display slots */}
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', minHeight: '56px', border: '2.5px dashed var(--color-peach)', borderRadius: '16px', padding: '12px', background: '#FFFDFB', flexWrap: 'wrap', margin: '20px 0', alignItems: 'center' }}>
                       {sentenceAnswer.length === 0 && (
-                        <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 800 }}>Tap scrambled word tokens below to construct your sentence...</span>
+                        <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 800 }}>{t('tapTokensPlaceholder')}</span>
                       )}
                       {sentenceAnswer.map((word, wIdx) => (
                         <button
@@ -3662,7 +3662,7 @@ export default function LessonPlayer() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', margin: '12px 0' }}>
                         <span style={{ fontSize: '20px' }}>{sentenceCorrect ? '✅' : '❌'}</span>
                         <span style={{ fontSize: '13px', fontWeight: 900, color: sentenceCorrect ? '#2E7D32' : '#C62828' }}>
-                          {sentenceCorrect ? 'Excellent unscrambling!' : 'Incorrect word order. Click words to clear.'}
+                          {sentenceCorrect ? t('excellentFeedback') : t('sentenceIncorrectFeedback')}
                         </span>
                       </div>
                     )}
@@ -3684,7 +3684,7 @@ export default function LessonPlayer() {
                           disabled={sentenceAnswer.length === 0}
                           style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00', boxShadow: '0 6px 20px rgba(255, 122, 0, 0.25)' }}
                         >
-                          Check Sentence ✓
+                          {t('checkSentenceBtn')}
                         </button>
                       ) : (
                         <button

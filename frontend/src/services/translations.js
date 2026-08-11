@@ -69,7 +69,9 @@ const translations = {
     emailSent: 'Email sent successfully!',
     writeParagraphLimit: 'Write at least 10 words to submit your paragraph!',
     paragraphSubmitted: 'Excellent paragraph submission! Great effort.',
-    completeCurrentLessons: 'Complete current lessons to unlock this writing topic!'
+    completeCurrentLessons: 'Complete current lessons to unlock this writing topic!',
+    checkSentenceBtn: 'Check Sentence ✓',
+    tapTokensPlaceholder: 'Tap scrambled word tokens below to construct your sentence...',
   },
   hi: {
     welcome: 'स्वागत है',
@@ -140,7 +142,9 @@ const translations = {
     emailSent: 'ईमेल सफलतापूर्वक भेजा गया!',
     writeParagraphLimit: 'अपना अनुच्छेद सबमिट करने के लिए कम से कम 10 शब्द लिखें!',
     paragraphSubmitted: 'बहुत बढ़िया अनुच्छेद सबमिशन! शानदार प्रयास।',
-    completeCurrentLessons: 'इस लेखन विषय को अनलॉक करने के लिए वर्तमान पाठ पूरे करें!'
+    completeCurrentLessons: 'इस लेखन विषय को अनलॉक करने के लिए वर्तमान पाठ पूरे करें!',
+    checkSentenceBtn: 'वाक्य जांचें ✓',
+    tapTokensPlaceholder: 'वाक्य बनाने के लिए नीचे दिए गए शब्दों पर टैप करें...',
   },
   kn: {
     welcome: 'ಸ್ವಾಗತ',
@@ -211,7 +215,9 @@ const translations = {
     emailSent: 'ಇಮೇಲ್ ಯಶಸ್ವಿಯಾಗಿ ಕಳುಹಿಸಲಾಗಿದೆ!',
     writeParagraphLimit: 'ನಿಮ್ಮ ಪ್ಯಾರಾಗ್ರಾಫ್ ಸಲ್ಲಿಸಲು ಕನಿಷ್ಠ 10 ಪದಗಳನ್ನು ಬರೆಯಿರಿ!',
     paragraphSubmitted: 'ಅದ್ಭುತ ಪ್ಯಾರಾಗ್ರಾಫ್ ಸಲ್ಲಿಕೆ! ಉತ್ತಮ ಪ್ರಯತ್ನ.',
-    completeCurrentLessons: 'ಈ ಬರವಣಿಗೆಯ ವಿಷಯವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಪ್ರಸ್ತುತ ಪಾಠಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ!'
+    completeCurrentLessons: 'ಈ ಬರವಣಿಗೆಯ ವಿಷಯವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಪ್ರಸ್ತುತ ಪಾಠಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ!',
+    checkSentenceBtn: 'ವಾಕ್ಯವನ್ನು ಪರಿಶೀಲಿಸಿ ✓',
+    tapTokensPlaceholder: 'ವಾಕ್ಯವನ್ನು ರಚಿಸಲು ಕೆಳಗಿನ ಪದಗಳ ಮೇಲೆ ಸ್ಪರ್ಶಿಸಿ...',
   },
   ta: {
     welcome: 'வரவேற்கிறோம்',
@@ -282,7 +288,9 @@ const translations = {
     emailSent: 'மின்னஞ்சல் வெற்றிகரமாக அனுப்பப்பட்டது!',
     writeParagraphLimit: 'உங்கள் பத்தியைச் சமர்ப்பிக்க குறைந்தது 10 சொற்களை எழுதுங்கள்!',
     paragraphSubmitted: 'அருமையான பத்தி சமர்ப்பிப்பு! சிறந்த முயற்சி.',
-    completeCurrentLessons: 'இந்த எழுத்துத் தலைப்பைத் திறக்க தற்போதைய பாடங்களை முடிக்கவும்!'
+    completeCurrentLessons: 'இந்த எழுத்துத் தலைப்பைத் திறக்க தற்போதைய பாடங்களை முடிக்கவும்!',
+    checkSentenceBtn: 'வாக்கியத்தை சரிபார்க்கவும் ✓',
+    tapTokensPlaceholder: 'வாக்கியத்தை உருவாக்க கீழே உள்ள சொற்களைத் தட்டவும்...',
   },
 };
 

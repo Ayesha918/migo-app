@@ -2257,6 +2257,229 @@ class Command(BaseCommand):
             {'title': 'Practice Test', 'desc': 'Test your writing skills'}
         ]
 
+        INTERMEDIATE_WRITING_DATA = {
+            'en': {
+                1: {
+                    'unscramble_title': 'Word Building',
+                    'unscramble_subtitle': 'Unscramble the letters to make meaningful words.',
+                    'unscramble_instruction': 'Drag and drop the letters in the right order.',
+                    'items': [
+                        {'id': 1, 'clue': 'A person', 'image': 'man', 'tokens': ['u', 'n', 'm', 'h', 'a'], 'target': 'human'},
+                        {'id': 2, 'clue': 'A place to buy things', 'image': 'shop', 'tokens': ['e', 't', 'k', 'r', 'a', 'm'], 'target': 'market'},
+                        {'id': 3, 'clue': 'The shining ball in the sky', 'image': 'sun', 'tokens': ['n', 's', 'u'], 'target': 'sun'},
+                        {'id': 4, 'clue': 'To move on your feet', 'image': 'walk', 'tokens': ['l', 'w', 'a', 'k'], 'target': 'walk'}
+                    ]
+                },
+                2: {
+                    'title': 'Sentence Building',
+                    'subtitle': 'Arrange the words to form a correct sentence.',
+                    'instruction': 'Tap the scrambled word tokens in the correct order.',
+                    'tokens': ['the', 'park', 'children', 'in', 'play'],
+                    'target': 'The children play in the park.'
+                },
+                3: {
+                    'title': 'Paragraph Writing',
+                    'subtitle': 'Write a short paragraph about the topic given.',
+                    'topic': 'My School',
+                    'instruction': 'Write at least 10 words. Describe your school, teachers, and friends.'
+                },
+                4: [
+                    {'questionNumber': 1, 'questionText': 'Add the correct punctuation.', 'equation': 'Where are you going', 'target': 'Where are you going ?', 'options': ['Where are you going.', 'Where are you going ?', 'Where are you going !', 'Where are you going ,']},
+                    {'questionNumber': 2, 'questionText': 'Add the correct punctuation.', 'equation': 'Stop the car', 'target': 'Stop the car !', 'options': ['Stop the car ?', 'Stop the car ,', 'Stop the car !', 'Stop the car .']},
+                    {'questionNumber': 3, 'questionText': 'Add the correct punctuation.', 'equation': 'I bought apples bananas and oranges', 'target': 'I bought apples, bananas, and oranges.', 'options': ['I bought apples bananas and oranges.', 'I bought apples, bananas, and oranges.', 'I bought apples? bananas? and oranges.', 'I bought apples! bananas! and oranges.']},
+                    {'questionNumber': 4, 'questionText': 'Add the correct punctuation.', 'equation': 'It is a sunny day', 'target': 'It is a sunny day.', 'options': ['It is a sunny day ?', 'It is a sunny day ,', 'It is a sunny day.', 'It is a sunny day !']}
+                ],
+                5: [
+                    {'questionNumber': 1, 'questionText': 'Use capital letters correctly.', 'equation': 'my name is ayesha', 'target': 'My name is Ayesha.', 'options': ['my name is ayesha.', 'My name is ayesha.', 'My name is Ayesha.', 'my name is Ayesha.']},
+                    {'questionNumber': 2, 'questionText': 'Use capital letters correctly.', 'equation': 'we live in india', 'target': 'We live in India.', 'options': ['we live in india.', 'We live in india.', 'we live in India.', 'We live in India.']},
+                    {'questionNumber': 3, 'questionText': 'Use capital letters correctly.', 'equation': 'monday is a working day', 'target': 'Monday is a working day.', 'options': ['monday is a working day.', 'Monday is a working day.', 'monday is a Working day.', 'Monday is a Working day.']},
+                    {'questionNumber': 4, 'questionText': 'Use capital letters correctly.', 'equation': 'he read a book about mahatma gandhi', 'target': 'He read a book about Mahatma Gandhi.', 'options': ['he read a book about mahatma gandhi.', 'He read a book about mahatma gandhi.', 'He read a book about Mahatma Gandhi.', 'he read a book about Mahatma Gandhi.']}
+                ],
+                6: {
+                    'title': 'Creative Writing',
+                    'subtitle': 'Write a short paragraph about your favorite animal.',
+                    'topic': 'My Favorite Animal',
+                    'instruction': 'Write at least 10 words. Explain why you like this animal and what it does.'
+                },
+                7: {
+                    'title': 'Letter Writing',
+                    'subtitle': 'Write friendly letters to friends or family.',
+                    'topic': 'Write a letter to your friend inviting them to your birthday party.',
+                    'instruction': 'Complete the letter fields below to invite your friend.'
+                },
+                8: [
+                    {'type': 'unscramble_words', 'title': 'Review spelling words', 'subtitle': 'Unscramble the letters.', 'instruction': 'Drag and drop the letters in the right order.', 'items': [{'id': 1, 'clue': 'A person', 'image': 'man', 'tokens': ['u', 'n', 'm', 'h', 'a'], 'target': 'human'}]},
+                    {'type': 'unscramble_sentence', 'title': 'Sentence Review', 'subtitle': 'Arrange the words to form a correct sentence.', 'instruction': 'Tap the scrambled word tokens in the correct order.', 'tokens': ['makes', 'us', 'smart', 'reading'], 'target': 'Reading makes us smart.'},
+                    {'type': 'practice_missing', 'questionNumber': 3, 'questionText': 'Add the correct punctuation.', 'equation': 'What is your name', 'target': 'What is your name ?', 'options': ['What is your name.', 'What is your name ?', 'What is your name !', 'What is your name ,']}
+                ]
+            },
+            'hi': {
+                1: {
+                    'unscramble_title': 'शब्द निर्माण',
+                    'unscramble_subtitle': 'सार्थक शब्द बनाने के लिए अक्षरों को सुलझाएं।',
+                    'unscramble_instruction': 'अक्षरों को सही क्रम में व्यवस्थित करें।',
+                    'items': [
+                        {'id': 1, 'clue': 'एक मनुष्य/व्यक्ति', 'image': 'man', 'tokens': ['म', 'ा', 'न', 'व'], 'target': 'मानव'},
+                        {'id': 2, 'clue': 'सामान खरीदने की जगह', 'image': 'shop', 'tokens': ['ब', 'ा', 'ज', 'ा', 'र'], 'target': 'बाजार'},
+                        {'id': 3, 'clue': 'आसमान में चमकने वाला गोल तारा', 'image': 'sun', 'tokens': ['स', 'ू', 'र', 'ज'], 'target': 'सूरज'},
+                        {'id': 4, 'clue': 'पैरों से चलना', 'image': 'walk', 'tokens': ['च', 'ल', 'न', 'ा'], 'target': 'चलना'}
+                    ]
+                },
+                2: {
+                    'title': 'वाक्य निर्माण',
+                    'subtitle': 'सही वाक्य बनाने के लिए शब्दों को व्यवस्थित करें।',
+                    'instruction': 'दिए गए शब्दों को सही क्रम में टैप करें।',
+                    'tokens': ['खेलते', 'पार्क', 'बच्चे', 'हैं।', 'में'],
+                    'target': 'बच्चे पार्क में खेलते हैं।'
+                },
+                3: {
+                    'title': 'अनुच्छेद लेखन',
+                    'subtitle': 'दिए गए विषय पर एक संक्षिप्त अनुच्छेद लिखें।',
+                    'topic': 'मेरा विद्यालय',
+                    'instruction': 'कम से कम १० शब्द लिखें। अपने विद्यालय, शिक्षकों और दोस्तों के बारे में बताएं।'
+                },
+                4: [
+                    {'questionNumber': 1, 'questionText': 'सही विराम चिह्न जोड़ें।', 'equation': 'आप कहाँ जा रहे हैं', 'target': 'आप कहाँ जा रहे हैं?', 'options': ['आप कहाँ जा रहे हैं।', 'आप कहाँ जा रहे हैं?', 'आप कहाँ जा रहे हैं!', 'आप कहाँ जा रहे हैं,']},
+                    {'questionNumber': 2, 'questionText': 'सही विराम चिह्न जोड़ें।', 'equation': 'गाड़ी रोको', 'target': 'गाड़ी रोको!', 'options': ['गाड़ी रोको?', 'गाड़ी रोको,', 'गाड़ी रोको!', 'गाड़ी रोको।']},
+                    {'questionNumber': 3, 'questionText': 'सही विराम चिह्न जोड़ें।', 'equation': 'मैंने सेब केले और संतरे खरीदे', 'target': 'मैंने सेब, केले और संतरे खरीदे।', 'options': ['मैंने सेब केले और संतरे खरीदे।', 'मैंने सेब, केले और संतरे खरीदे।', 'मैंने सेब? केले? और संतरे खरीदे।', 'मैंने सेब! केले! और संतरे खरीदे।']},
+                    {'questionNumber': 4, 'questionText': 'सही विराम चिह्न जोड़ें।', 'equation': 'आज बहुत धूप है', 'target': 'आज बहुत धूप है।', 'options': ['आज बहुत धूप है?', 'आज बहुत धूप है,', 'आज बहुत धूप है।', 'आज बहुत धूप है!']}
+                ],
+                5: [
+                    {'questionNumber': 1, 'questionText': 'सही वर्तनी और विराम चिह्न चुनें।', 'equation': 'मेरा नाम आयशा है', 'target': 'मेरा नाम आयशा है।', 'options': ['मेरा नाम आयशा है', 'मेरा नाम आयषा है।', 'मेरा नाम आयशा है।', 'मेरा नाम आयसा है।']},
+                    {'questionNumber': 2, 'questionText': 'सही वर्तनी और विराम चिह्न चुनें।', 'equation': 'हम भारत में रहते हैं', 'target': 'हम भारत में रहते हैं।', 'options': ['हम भारत में रहते हैं', 'हम भारत में रह्ते हैं।', 'हम भारत में रहते हैं।', 'हम भारत् में रहते हैं।']},
+                    {'questionNumber': 3, 'questionText': 'सही वर्तनी और विराम चिह्न चुनें।', 'equation': 'सोमवार काम का दिन है', 'target': 'सोमवार काम का दिन है।', 'options': ['सोमवार काम का दिन है', 'सोमवार काम का दिन है।', 'सोमवार काम का दिन हैं।', 'षोमवार काम का दिन है।']},
+                    {'questionNumber': 4, 'questionText': 'सही वर्तनी और विराम चिह्न चुनें।', 'equation': 'उन्होंने महात्मा गांधी के बारे में किताब पढ़ी', 'target': 'उन्होंने महात्मा गांधी के बारे में किताब पढ़ी।', 'options': ['उन्होंने महात्मी गांधी के बारे में किताब पढ़ी।', 'उन्होंने महात्मा गांधी के बारे में किताब पढ़ी।', 'उन्होंने महात्मा गांधी के बारे में किताब पढी।', 'उन्होंने महात्मा गाँधी के बारे में किताब पढी।']}
+                ],
+                6: {
+                    'title': 'सृजनात्मक लेखन',
+                    'subtitle': 'अपने पसंदीदा जानवर के बारे में एक संक्षिप्त अनुच्छेद लिखें।',
+                    'topic': 'मेरा पसंदीदा जानवर',
+                    'instruction': 'कम से कम १० शब्द लिखें। समझाएं कि आप इस जानवर को क्यों पसंद करते हैं और यह क्या करता है।'
+                },
+                7: {
+                    'title': 'पत्र लेखन',
+                    'subtitle': 'अपने दोस्तों या परिवार को पत्र लिखें।',
+                    'topic': 'अपने मित्र को जन्मदिन की पार्टी में आमंत्रित करते हुए एक पत्र लिखें।',
+                    'instruction': 'अपने मित्र को आमंत्रित करने के लिए नीचे दिए गए क्षेत्रों को पूरा करें।'
+                },
+                8: [
+                    {'type': 'unscramble_words', 'title': 'वर्तनी शब्दों की समीक्षा', 'subtitle': 'अक्षरों को सुलझाएं।', 'instruction': 'अक्षरों को सही क्रम में व्यवस्थित करें।', 'items': [{'id': 1, 'clue': 'एक मनुष्य/व्यक्ति', 'image': 'man', 'tokens': ['म', 'ा', 'न', 'व'], 'target': 'मानव'}]},
+                    {'type': 'unscramble_sentence', 'title': 'वाक्य समीक्षा', 'subtitle': 'सही वाक्य बनाने के लिए शब्दों को व्यवस्थित करें।', 'instruction': 'दिए गए शब्दों को सही क्रम में टैप करें।', 'tokens': ['बनाता', 'हमें', 'समझदार', 'है।', 'पढ़ना'], 'target': 'पढ़ना हमें समझदार बनाता है।'},
+                    {'type': 'practice_missing', 'questionNumber': 3, 'questionText': 'सही विराम चिह्न जोड़ें।', 'equation': 'आपका नाम क्या है', 'target': 'आपका नाम क्या है?', 'options': ['आपका नाम क्या है।', 'आपका नाम क्या है?', 'आपका नाम क्या है!', 'आपका नाम क्या है,']}
+                ]
+            },
+            'kn': {
+                1: {
+                    'unscramble_title': 'ಪದ ರಚನೆ',
+                    'unscramble_subtitle': 'ಸಾರ್ಥಕ ಪದಗಳನ್ನು ರಚಿಸಲು ಅಕ್ಷರಗಳನ್ನು ಜೋಡಿಸಿ.',
+                    'unscramble_instruction': 'ಅಕ್ಷರಗಳನ್ನು ಸರಿಯಾದ ಕ್ರಮದಲ್ಲಿ ಇರಿಸಿ.',
+                    'items': [
+                        {'id': 1, 'clue': 'ಒಬ್ಬ ಮನುಷ್ಯ', 'image': 'man', 'tokens': ['ಮಾ', 'ನ', 'ವ'], 'target': 'ಮಾನವ'},
+                        {'id': 2, 'clue': 'ವಸ್ತುಗಳನ್ನು ಖರೀದಿಸುವ ಸ್ಥಳ', 'image': 'shop', 'tokens': ['ಮಾ', 'ರು', 'ಕ', 'ಟ್ಟೆ'], 'target': 'ಮಾರುಕಟ್ಟೆ'},
+                        {'id': 3, 'clue': 'ಆಕಾಶದಲ್ಲಿ ಹೊಳೆಯುವ ನಕ್ಷತ್ರ', 'image': 'sun', 'tokens': ['ಸೂ', 'ರ್ಯ'], 'target': 'ಸೂರ್ಯ'},
+                        {'id': 4, 'clue': 'ಕಾಲುಗಳಿಂದ ನಡೆಯುವುದು', 'image': 'walk', 'tokens': ['ನ', 'ಡಿ', 'ಗೆ'], 'target': 'ನಡಿಗೆ'}
+                    ]
+                },
+                2: {
+                    'title': 'ವಾಕ್ಯ ರಚನೆ',
+                    'subtitle': 'ಸರಿಯಾದ ವಾಕ್ಯವನ್ನು ರೂಪಿಸಲು ಪದಗಳನ್ನು ಜೋಡಿಸಿ.',
+                    'instruction': 'ಕೊಟ್ಟಿರುವ ಪದಗಳನ್ನು ಸರಿಯಾದ ಕ್ರಮದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ.',
+                    'tokens': ['ಆಟವಾಡುತ್ತಾರೆ.', 'ಉದ್ಯಾನವನದಲ್ಲಿ', 'ಮಕ್ಕಳು'],
+                    'target': 'ಮಕ್ಕಳು ಉದ್ಯಾನವನದಲ್ಲಿ ಆಟವಾಡುತ್ತಾರೆ.'
+                },
+                3: {
+                    'title': 'ಪ್ಯಾರಾಗ್ರಾಫ್ ಬರವಣಿಗೆ',
+                    'subtitle': 'ಕೊಟ್ಟಿರುವ ವಿಷಯದ ಬಗ್ಗೆ ಒಂದು ಸಣ್ಣ ಪ್ಯಾರಾಗ್ರಾಫ್ ಬರೆಯಿರಿ.',
+                    'topic': 'ನನ್ನ ಶಾಲೆ',
+                    'instruction': 'ಕನಿಷ್ಠ ೧೦ ಪದಗಳನ್ನು ಬರೆಯಿರಿ. ನಿಮ್ಮ ಶಾಲೆ, ಶಿಕ್ಷಕರು ಮತ್ತು ಸ್ನೇಹಿತರನ್ನು ವಿವರಿಸಿ.'
+                },
+                4: [
+                    {'questionNumber': 1, 'questionText': 'ಸರಿಯಾದ ವಿರಾಮ ಚಿಹ್ನೆಯನ್ನು ಸೇರಿಸಿ.', 'equation': 'ನೀವು ಎಲ್ಲಿಗೆ ಹೋಗುತ್ತಿದ್ದೀರಿ', 'target': 'ನೀವು ಎಲ್ಲಿಗೆ ಹೋಗುತ್ತಿದ್ದೀರಿ?', 'options': ['ನೀವು ಎಲ್ಲಿಗೆ ಹೋಗುತ್ತಿದ್ದೀರಿ.', 'ನೀವು ಎಲ್ಲಿಗೆ ಹೋಗುತ್ತಿದ್ದೀರಿ?', 'ನೀವು ಎಲ್ಲಿಗೆ ಹೋಗುತ್ತಿದ್ದೀರಿ!', 'ನೀವು ಎಲ್ಲಿಗೆ ಹೋಗುತ್ತಿದ್ದೀರಿ,']},
+                    {'questionNumber': 2, 'questionText': 'ಸರಿಯಾದ ವಿರಾಮ ಚಿಹ್ನೆಯನ್ನು ಸೇರಿಸಿ.', 'equation': 'ಗಾಡಿಯನ್ನು ನಿಲ್ಲಿಸು', 'target': 'ಗಾಡಿಯನ್ನು ನಿಲ್ಲಿಸು!', 'options': ['ಗಾಡಿಯನ್ನು ನಿಲ್ಲಿಸು?', 'ಗಾಡಿಯನ್ನು ನಿಲ್ಲಿಸು,', 'ಗಾಡಿಯನ್ನು ನಿಲ್ಲಿಸು!', 'ಗಾಡಿಯನ್ನು ನಿಲ್ಲಿಸು.']},
+                    {'questionNumber': 3, 'questionText': 'ಸರಿಯಾದ ವಿರಾಮ ಚಿಹ್ನೆಯನ್ನು ಸೇರಿಸಿ.', 'equation': 'ನಾನು ಸೇಬು ಬಾಳೆಹಣ್ಣು ಮತ್ತು ಕಿತ್ತಳೆಗಳನ್ನು ಖರೀದಿಸಿದೆ', 'target': 'ನಾನು ಸೇಬು, ಬಾಳೆಹಣ್ಣು ಮತ್ತು ಕಿತ್ತಳೆಗಳನ್ನು ಖರೀದಿಸಿದೆ.', 'options': ['ನಾನು ಸೇಬು ಬಾಳೆಹಣ್ಣು ಮತ್ತು ಕಿತ್ತಳೆಗಳನ್ನು ಖರೀದಿಸಿದೆ.', 'ನಾನು ಸೇಬು, ಬಾಳೆಹಣ್ಣು ಮತ್ತು ಕಿತ್ತಳೆಗಳನ್ನು ಖರೀದಿಸಿದೆ.', 'ನಾನು ಸೇಬು? ಬಾಳೆಹಣ್ಣು? ಮತ್ತು ಕಿತ್ತಳೆಗಳನ್ನು ಖರೀದಿಸಿದೆ.', 'ನಾನು ಸೇಬು! ಬಾಳೆಹಣ್ಣು! ಮತ್ತು ಕಿತ್ತಳೆಗಳನ್ನು ಖರೀದಿಸಿದೆ.']},
+                    {'questionNumber': 4, 'questionText': 'ಸರಿಯಾದ ವಿರಾಮ ಚಿಹ್ನೆಯನ್ನು ಸೇರಿಸಿ.', 'equation': 'ಇಂದು ಬಿಸಿಲಿನ ದಿನ', 'target': 'ಇಂದು ಬಿಸಿಲಿನ ದಿನ.', 'options': ['ಇಂದು ಬಿಸಿಲಿನ ದಿನ?', 'ಇಂದು ಬಿಸಿಲಿನ ದಿನ,', 'ಇಂದು ಬಿಸಿಲಿನ ದಿನ.', 'ಇಂದು ಬಿಸಿಲಿನ ದಿನ!']}
+                ],
+                5: [
+                    {'questionNumber': 1, 'questionText': 'ಸರಿಯಾದ ಕಾಗುಣಿತ ಮತ್ತು ವಿರಾಮ ಚಿಹ್ನೆಯನ್ನು ಆರಿಸಿ.', 'equation': 'ನನ್ನ ಹೆಸರು ಆಯಿಷಾ', 'target': 'ನನ್ನ ಹೆಸರು ಆಯಿಷಾ.', 'options': ['ನನ್ನ ಹೆಸರು ಆಯಿಷಾ', 'ನನ್ನ ಹೆಸರು ಆಯಿಸಾ.', 'ನನ್ನ ಹೆಸರು ಆಯಿಷಾ.', 'ನನ್ನ ಹೆಚರು ಆಯಿಷಾ.']},
+                    {'questionNumber': 2, 'questionText': 'ಸರಿಯಾದ ಕಾಗುಣಿತ ಮತ್ತು ವಿರಾಮ ಚಿಹ್ನೆಯನ್ನು ಆರಿಸಿ.', 'equation': 'ನಾವು ಭಾರತದಲ್ಲಿ ವಾಸಿಸುತ್ತೇವೆ', 'target': 'ನಾವು ಭಾರತದಲ್ಲಿ ವಾಸಿಸುತ್ತೇವೆ.', 'options': ['ನಾವು ಭಾರತದಲ್ಲಿ ವಾಸಿಸುತ್ತೇವೆ', 'ನಾವು ಭಾರತ್‌ನಲ್ಲಿ ವಾಸಿಸುತ್ತೇವೆ.', 'ನಾವು ಭಾರತದಲ್ಲಿ ವಾಸಿಸುತ್ತೇವೆ.', 'ನಾವು ವಾಸಿಸುತ್ತೇವೆ ಭಾರತದಲ್ಲಿ.']},
+                    {'questionNumber': 3, 'questionText': 'ಸರಿಯಾದ ಕಾಗುಣಿತ ಮತ್ತು ವಿರಾಮ ಚಿಹ್ನೆಯನ್ನು ಆರಿಸಿ.', 'equation': 'ಸೋಮವಾರ ಕೆಲಸದ ದಿನ', 'target': 'ಸೋಮವಾರ ಕೆಲಸದ ದಿನ.', 'options': ['ಸೋಮವಾರ ಕೆಲಸದ ದಿನ', 'ಸೋಮವಾರ ಕೆಲಸದ ದಿನ.', 'ಶೋಮವಾರ ಕೆಲಸದ ದಿನ.', 'ಸೋಮವಾರ ಕೆಲಶದ ದಿನ.']},
+                    {'questionNumber': 4, 'questionText': 'ಸರಿಯಾದ ಕಾಗುಣಿತ ಮತ್ತು ವಿರಾಮ ಚಿಹ್ನೆಯನ್ನು ಆರಿಸಿ.', 'equation': 'ಅವರು ಮಹಾತ್ಮ ಗಾಂಧೀಜಿಯವರ ಬಗ್ಗೆ ಪುಸ್ತಕ ಓದಿದರು', 'target': 'ಅವರು ಮಹಾತ್ಮ ಗಾಂಧೀಜಿಯವರ ಬಗ್ಗೆ ಪುಸ್ತಕ ಓದಿದರು.', 'options': ['ಅವರು ಮಹಾತ್ಮಾ ಗಾಂಧೀಜಿಯವರ ಬಗ್ಗೆ ಪುಸ್ತಕ ಓದಿದರು.', 'ಅವರು ಮಹಾತ್ಮ ಗಾಂಧೀಜಿಯವರ ಬಗ್ಗೆ ಪುಸ್ತಕ ಓದಿದರು.', 'ಅವರು ಮಹಾತ್ಮ ಗಾಂಧಿಯವರ ಬಗ್ಗೆ ಪುಸ್ತಕ ಒದಿದರು.', 'ಅವರು ಮಹಾತ್ಮ ಗಾಂಧೀಜಿಯವರ ಬಗೆ ಪುಸ್ತಕ ಓದಿದರು.']}
+                ],
+                6: {
+                    'title': 'ಸೃಜನಶೀಲ ಬರವಣಿಗೆ',
+                    'subtitle': 'ನಿಮ್ಮ ನೆಚ್ಚಿನ ಪ್ರಾಣಿಯ ಬಗ್ಗೆ ಒಂದು ಸಣ್ಣ ಪ್ಯಾರಾಗ್ರಾಫ್ ಬರೆಯಿರಿ.',
+                    'topic': 'ನನ್ನ ನೆಚ್ಚಿನ ಪ್ರಾಣಿ',
+                    'instruction': 'ಕನಿಷ್ಠ ೧೦ ಪದಗಳನ್ನು ಬರೆಯಿರಿ. ಈ ಪ್ರಾಣಿ ನಿಮಗೆ ಏಕೆ ಇಷ್ಟ ಮತ್ತು ಅದು ಏನು ಮಾಡುತ್ತದೆ ಎಂದು ವಿವರಿಸಿ.'
+                },
+                7: {
+                    'title': 'ಪತ್ರ ಬರವಣಿಗೆ',
+                    'subtitle': 'ಸ್ನೇಹಿತರು ಅಥವಾ ಕುಟುಂಬದವರಿಗೆ ಪತ್ರಗಳನ್ನು ಬರೆಯಿರಿ.',
+                    'topic': 'ನಿಮ್ಮ ಹುಟ್ಟುಹಬ್ಬದ ಪಾರ್ಟಿಗೆ ಆಹ್ವಾನಿಸುವ ಪತ್ರವನ್ನು ನಿಮ್ಮ ಸ್ನೇಹಿತನಿಗೆ ಬರೆಯಿರಿ.',
+                    'instruction': 'ನಿಮ್ಮ ಸ್ನೇಹಿತನನ್ನು ಆಹ್ವಾನಿಸಲು ಕೆಳಗಿನ ಪತ್ರದ ಕಾಲಮ್‌ಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ.'
+                },
+                8: [
+                    {'type': 'unscramble_words', 'title': 'ಕಾಗುಣಿತ ಪದಗಳ ವಿಮರ್ಶೆ', 'subtitle': 'ಅಕ್ಷರಗಳನ್ನು ಜೋಡಿಸಿ.', 'instruction': 'ಅಕ್ಷರಗಳನ್ನು ಸರಿಯಾದ ಕ್ರಮದಲ್ಲಿ ಇರಿಸಿ.', 'items': [{'id': 1, 'clue': 'ಒಬ್ಬ ಮನುಷ್ಯ', 'image': 'man', 'tokens': ['ಮಾ', 'ನ', 'ವ'], 'target': 'ಮಾನವ'}]},
+                    {'type': 'unscramble_sentence', 'title': 'ವಾಕ್ಯ ವಿಮರ್ಶೆ', 'subtitle': 'ಸರಿಯಾದ ವಾಕ್ಯವನ್ನು ರೂಪಿಸಲು ಪದಗಳನ್ನು ಜೋಡಿಸಿ.', 'instruction': 'ಕೊಟ್ಟಿರುವ ಪದಗಳನ್ನು ಸರಿಯಾದ ಕ್ರಮದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ.', 'tokens': ['ಬುದ್ಧಿವಂತರನ್ನಾಗಿ', 'ನಮ್ಮನ್ನು', 'ಓದುವುದು', 'ಮಾಡುತ್ತದೆ.'], 'target': 'ಓದುವುದು ನಮ್ಮನ್ನು ಬುದ್ಧಿವಂತರನ್ನಾಗಿ ಮಾಡುತ್ತದೆ.'},
+                    {'type': 'practice_missing', 'questionNumber': 3, 'questionText': 'ಸರಿಯಾದ ವಿರಾಮ ಚಿಹ್ನೆಯನ್ನು ಸೇರಿಸಿ.', 'equation': 'ನಿಮ್ಮ ಹೆಸರೇನು', 'target': 'ನಿಮ್ಮ ಹೆಸರೇನು?', 'options': ['ನಿಮ್ಮ ಹೆಸರೇನು.', 'ನಿಮ್ಮ ಹೆಸರೇನು?', 'ನಿಮ್ಮ ಹೆಸರೇನು!', 'ನಿಮ್ಮ ಹೆಸರೇನು,']}
+                ]
+            },
+            'ta': {
+                1: {
+                    'unscramble_title': 'சொல் உருவாக்கம்',
+                    'unscramble_subtitle': 'சரியான சொற்களை உருவாக்க எழுத்துக்களை வரிசைப்படுத்தவும்.',
+                    'unscramble_instruction': 'எழுத்துக்களை சரியான வரிசையில் வைக்கவும்.',
+                    'items': [
+                        {'id': 1, 'clue': 'ஒரு மனிதன்', 'image': 'man', 'tokens': ['ம', 'னி', 'த', 'ன்'], 'target': 'மனிதன்'},
+                        {'id': 2, 'clue': 'பொருட்கள் வாங்கும் இடம்', 'image': 'shop', 'tokens': ['ச', 'ந்', 'தை'], 'target': 'சந்தை'},
+                        {'id': 3, 'clue': 'வானில் ஒளிரும் நட்சத்திரம்', 'image': 'sun', 'tokens': ['சூ', 'ரி', 'ய', 'ன்'], 'target': 'சூரியன்'},
+                        {'id': 4, 'clue': 'கால்களால் நடப்பது', 'image': 'walk', 'tokens': ['ந', 'டை'], 'target': 'நடை'}
+                    ]
+                },
+                2: {
+                    'title': 'வாக்கியம் உருவாக்குதல்',
+                    'subtitle': 'சரியான வாக்கியத்தை உருவாக்க சொற்களை வரிசைப்படுத்தவும்.',
+                    'instruction': 'கொடுக்கப்பட்ட சொற்களை சரியான வரிசையில் தட்டவும்.',
+                    'tokens': ['விளையாடுகிறார்கள்.', 'பூங்காவில்', 'குழந்தைகள்'],
+                    'target': 'குழந்தைகள் பூங்காவில் விளையாடுகிறார்கள்.'
+                },
+                3: {
+                    'title': 'பத்தி எழுதுதல்',
+                    'subtitle': 'கொடுக்கப்பட்ட தலைப்பைப் பற்றி ஒரு சிறு பத்தி எழுதவும்.',
+                    'topic': 'எனது பள்ளி',
+                    'instruction': 'குறைந்தது 10 வார்த்தைகள் எழுதவும். உங்கள் பள்ளி, ஆசிரியர்கள் மற்றும் நண்பர்களைப் பற்றி விவரிக்கவும்.'
+                },
+                4: [
+                    {'questionNumber': 1, 'questionText': 'சரியான நிறுத்தற்குறியைச் சேர்க்கவும்.', 'equation': 'நீங்கள் எங்கே போகிறீர்கள்', 'target': 'நீங்கள் எங்கே போகிறீர்கள்?', 'options': ['நீங்கள் எங்கே போகிறீர்கள்.', 'நீங்கள் எங்கே போகிறீர்கள்?', 'நீங்கள் எங்கே போகிறீர்கள்!', 'நீங்கள் எங்கே போகிறீர்கள்,']},
+                    {'questionNumber': 2, 'questionText': 'சரியான நிறுத்தற்குறியைச் சேர்க்கவும்.', 'equation': 'வண்டியை நிறுத்து', 'target': 'வண்டியை நிறுத்து!', 'options': ['வண்டியை நிறுத்து?', 'வண்டியை நிறுத்து,', 'வண்டியை நிறுத்து!', 'வண்டியை நிறுத்து.']},
+                    {'questionNumber': 3, 'questionText': 'சரியான நிறுத்தற்குறியைச் சேர்க்கவும்.', 'equation': 'நான் ஆப்பிள் வாழைப்பழம் மற்றும் ஆரஞ்சு வாங்கினேன்', 'target': 'நான் ஆப்பிள், வாழைப்பழம் மற்றும் ஆரஞ்சு வாங்கினேன்.', 'options': ['நான் ஆப்பிள் வாழைப்பழம் மற்றும் ஆரஞ்சு வாங்கினேன்.', 'நான் ஆப்பிள், வாழைப்பழம் மற்றும் ஆரஞ்சு வாங்கினேன்.', 'நான் ஆப்பிள்? வாழைப்பழம்? மற்றும் ஆரஞ்சு வாங்கினேன்.', 'நான் ஆப்பிள்! வாழைப்பழம்! மற்றும் ஆரஞ்சு வாங்கினேன்.']},
+                    {'questionNumber': 4, 'questionText': 'சரியான நிறுத்தற்குறியைச் சேர்க்கவும்.', 'equation': 'இன்று ஒரு வெயில் நாள்', 'target': 'இன்று ஒரு வெயில் நாள்.', 'options': ['இன்று ஒரு வெயில் நாள்?', 'இன்று ஒரு வெயில் நாள்,', 'இன்று ஒரு வெயில் நாள்.', 'இன்று ஒரு வெயில் நாள்!']}
+                ],
+                5: [
+                    {'questionNumber': 1, 'questionText': 'சரியான எழுத்து மற்றும் நிறுத்தற்குறியைத் தேர்ந்தெடுக்கவும்.', 'equation': 'என் பெயர் ஆயிஷா', 'target': 'என் பெயர் ஆயிஷா.', 'options': ['என் பெயர் ஆயிஷா', 'என் பெயர் ஆயிஸா.', 'என் பெயர் ஆயிஷா.', 'எனது பெயர் ஆயிஷா.']},
+                    {'questionNumber': 2, 'questionText': 'சரியான எழுத்து மற்றும் நிறுத்தற்குறியைத் தேர்ந்தெடுக்கவும்.', 'equation': 'நாங்கள் இந்தியாவில் வசிக்கிறோம்', 'target': 'நாங்கள் இந்தியாவில் வசிக்கிறோம்.', 'options': ['நாங்கள் இந்தியாவில் வசிக்கிறோம்', 'நாங்கள் இந்தியாவிள் வசிக்கிறோம்.', 'நாங்கள் இந்தியாவில் வசிக்கிறோம்.', 'நாங்கள் வசிப்பது இந்தியாவில்.']},
+                    {'questionNumber': 3, 'questionText': 'சரியான எழுத்து மற்றும் நிறுத்தற்குறியைத் தேர்ந்தெடுக்கவும்.', 'equation': 'திங்கட்கிழமை ஒரு வேலை நாள்', 'target': 'திங்கட்கிழமை ஒரு வேலை நாள்.', 'options': ['திங்கட்கிழமை ஒரு வேலை நாள்', 'திங்கட்கிழமை ஒரு வேலை நாள்.', 'திங்கட்கிழமைகளில் வேலை நாள்.', 'திங்கற்கிழமை வேலை நாள்.']},
+                    {'questionNumber': 4, 'questionText': 'சரியான எழுத்து மற்றும் நிறுத்தற்குறியைத் தேர்ந்தெடுக்கவும்.', 'equation': 'அவர் மகாத்மா காந்தியைப் பற்றிய புத்தகம் படித்தார்', 'target': 'அவர் மகாத்மா காந்தியைப் பற்றிய புத்தகம் படித்தார்.', 'options': ['அவர் மகாத்மா காந்திப் பற்றிய புத்தகம் படித்தார்.', 'அவர் மகாத்மா காந்தியைப் பற்றிய புத்தகம் படித்தார்.', 'அவர் மகாத்மா காந்தியைப் பற்றிய புத்தகம் படிதார்.', 'அவர் மகாத்மா காந்தியைப் பற்றி புத்தகம் படித்தார்.']}
+                ],
+                6: {
+                    'title': 'படைப்பு எழுத்து',
+                    'subtitle': 'உங்களுக்கு பிடித்த விலங்கைப் பற்றி ஒரு சிறு பத்தி எழுதவும்.',
+                    'topic': 'எனக்கு பிடித்த விலங்கு',
+                    'instruction': 'குறைந்தது 10 வார்த்தைகள் எழுதவும். இந்த விலங்கை ஏன் விரும்புகிறீர்கள் மற்றும் அது என்ன செய்கிறது என்று விளக்கவும்.'
+                },
+                7: {
+                    'title': 'கடிதம் எழுதுதல்',
+                    'subtitle': 'நண்பர்கள் அல்லது குடும்பத்தினருக்கு கடிதங்கள் எழுதுங்கள்.',
+                    'topic': 'உங்கள் பிறந்தநாள் விழாவிற்கு அழைப்பு விடுத்து உங்கள் நண்பருக்கு கடிதம் எழுதுங்கள்.',
+                    'instruction': 'உங்கள் நண்பரை அழைக்க கீழே உள்ள கடிதக் கட்டங்களை நிரப்பவும்.'
+                },
+                8: [
+                    {'type': 'unscramble_words', 'title': 'எழுத்து சொற்களின் மதிப்பாய்வு', 'subtitle': 'எழுத்துக்களை வரிசைப்படுத்தவும்.', 'instruction': 'எழுத்துக்களை சரியான வரிசையில் வைக்கவும்.', 'items': [{'id': 1, 'clue': 'ஒரு மனிதன்', 'image': 'man', 'tokens': ['ம', 'னி', 'த', 'ன்'], 'target': 'மனிதன்'}]},
+                    {'type': 'unscramble_sentence', 'title': 'வாக்கிய மதிப்பாய்வு', 'subtitle': 'சரியான வாக்கியத்தை உருவாக்க சொற்களை வரிசைப்படுத்தவும்.', 'instruction': 'கொடுக்கப்பட்ட சொற்களை சரியான வரிசையில் தட்டவும்.', 'tokens': ['அறிவாளியாக்குகிறது.', 'நம்மை', 'வாசிப்பு'], 'target': 'வாசிப்பு நம்மை அறிவாளியாக்குகிறது.'},
+                    {'type': 'practice_missing', 'questionNumber': 3, 'questionText': 'சரியான நிறுத்தற்குறியைச் சேர்க்கவும்.', 'equation': 'உன் பெயர் என்ன', 'target': 'உன் பெயர் என்ன?', 'options': ['உன் பெயர் என்ன.', 'உன் பெயர் என்ன?', 'உன் பெயர் என்ன!', 'உன் பெயர் என்ன,']}
+                ]
+            }
+        }
+
         LANGUAGE_TOPIC_DATA = {
             'en': {
                 1: {'trace': 'A', 'trace_sub': "Let's learn to write the letter A.", 'missing_eq': 'b _ t', 'missing_target': 'a', 'missing_opts': ['a', 'e', 'i'], 'word': 'cat', 'word_image': 'cat', 'sentence': 'The cat is fat.'},
@@ -2279,7 +2502,7 @@ class Command(BaseCommand):
                 8: {'trace': 'ह', 'trace_sub': "आइए व्यंजन 'ह' लिखना सीखें।", 'missing_eq': 'ह _ ार', 'missing_target': 'ल', 'missing_opts': ['ल', 'न', 'म'], 'word': 'हल', 'word_image': 'tool', 'sentence': 'हल मजबूत है।'}
             },
             'kn': {
-                1: {'trace': 'ಅ', 'trace_sub': "ಬನ್ನಿ, ಸ್ವರ 'ಅ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ಅ _ ತ', 'missing_target': 'ರ', 'missing_opts': ['ರ', 'ಮ', 'ನ'], 'word': 'ಅರಸ', 'word_image': 'person', 'sentence': 'ಅರಸನು ತುಂಬಾ ಒಳ್ಳೆಯವನು.'},
+                1: {'trace': 'ಅ', 'trace_sub': "ಬನ್ನಿ, ಸ್ವರ 'ಅ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ಅ _ ಸ', 'missing_target': 'ರ', 'missing_opts': ['ರ', 'ಮ', 'ನ'], 'word': 'ಅರಸ', 'word_image': 'person', 'sentence': 'ಅರಸನು ತುಂಬಾ ಒಳ್ಳೆಯವನು.'},
                 2: {'trace': 'ಆ', 'trace_sub': "ಬನ್ನಿ, ಸ್ವರ 'ಆ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ಆ _ ೆ', 'missing_target': 'ನ', 'missing_opts': ['ನೆ', 'ಮೆ', 'ಕೆ'], 'word': 'ಆನೆ', 'word_image': 'animal', 'sentence': 'ಆನೆಯು ಕಾಡಿನಲ್ಲಿದೆ.'},
                 3: {'trace': '೧', 'trace_sub': "ಬನ್ನಿ, ಸಂಖ್ಯೆ '೧' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': '೧ _ ೩', 'missing_target': '೨', 'missing_opts': ['೨', '೪', '೫'], 'word': 'ಒಂದು', 'word_image': 'number', 'sentence': 'ನನ್ನ ಹತ್ತಿರ ಒಂದು ಹಣ್ಣು ಇದೆ.'},
                 4: {'trace': 'ಕ', 'trace_sub': "ಬನ್ನಿ, ವ್ಯಂಜನ 'ಕ' ಬರೆಯಲು ಕಲಿಯೋಣ.", 'missing_eq': 'ಕ _ ಲ', 'missing_target': 'ಮ', 'missing_opts': ['ಮ', 'ನ', 'ತ'], 'word': 'ಕಮಲ', 'word_image': 'flower', 'sentence': 'ಕಮಲ ಕೆರೆಯಲ್ಲಿ ಅರಳುತ್ತದೆ.'},
@@ -2416,180 +2639,62 @@ class Command(BaseCommand):
                 
                 activities = [welcome_slide]
 
-                if idx == 1: # Word Building
+                lang_data = INTERMEDIATE_WRITING_DATA.get(lang, INTERMEDIATE_WRITING_DATA['en'])
+                lesson_data = lang_data.get(idx)
+
+                if idx == 1:
                     activities.append({
                         'type': 'unscramble_words',
-                        'title': translate_str('Word Building'),
-                        'subtitle': translate_str('Unscramble the letters to make meaningful words.'),
-                        'instruction': translate_str('Drag and drop the letters in the right order.'),
-                        'items': [
-                            {
-                                'id': 1,
-                                'clue': translate_str('A person'),
-                                'image': 'man',
-                                'tokens': ['u', 'n', 'm', 'h', 'a'],
-                                'target': 'human'
-                            },
-                            {
-                                'id': 2,
-                                'clue': translate_str('A place to buy things'),
-                                'image': 'shop',
-                                'tokens': ['e', 't', 'k', 'r', 'a', 'm'],
-                                'target': 'market'
-                            },
-                            {
-                                'id': 3,
-                                'clue': translate_str('The shining ball in the sky'),
-                                'image': 'sun',
-                                'tokens': ['n', 's', 'u'],
-                                'target': 'sun'
-                            },
-                            {
-                                'id': 4,
-                                'clue': translate_str('To move on your feet'),
-                                'image': 'walk',
-                                'tokens': ['l', 'w', 'a', 'k'],
-                                'target': 'walk'
-                            }
-                        ]
+                        'title': lesson_data['unscramble_title'],
+                        'subtitle': lesson_data['unscramble_subtitle'],
+                        'instruction': lesson_data['unscramble_instruction'],
+                        'items': lesson_data['items']
                     })
-                elif idx == 2: # Sentence Building
+                elif idx == 2:
                     activities.append({
                         'type': 'unscramble_sentence',
-                        'title': translate_str('Sentence Building'),
-                        'subtitle': translate_str('Arrange the words to form a correct sentence.'),
-                        'instruction': translate_str('Tap the scrambled word tokens in the correct order.'),
-                        'tokens': ['the', 'park', 'children', 'in', 'play'],
-                        'target': 'The children play in the park.'
+                        'title': lesson_data['title'],
+                        'subtitle': lesson_data['subtitle'],
+                        'instruction': lesson_data['instruction'],
+                        'tokens': lesson_data['tokens'],
+                        'target': lesson_data['target']
                     })
-                elif idx == 3: # Paragraph Writing
+                elif idx == 3:
                     activities.append({
                         'type': 'paragraph_writing',
-                        'title': translate_str('Paragraph Writing'),
-                        'subtitle': translate_str('Write a short paragraph about the topic given.'),
-                        'topic': translate_str('My School'),
-                        'instruction': translate_str('Write at least 10 words. Describe your school, teachers, and friends.')
+                        'title': lesson_data['title'],
+                        'subtitle': lesson_data['subtitle'],
+                        'topic': lesson_data['topic'],
+                        'instruction': lesson_data['instruction']
                     })
-                elif idx == 4: # Punctuation
-                    activities.extend([
-                        {
+                elif idx == 4 or idx == 5:
+                    for item in lesson_data:
+                        activities.append({
                             'type': 'practice_missing',
-                            'questionNumber': 1,
-                            'questionText': translate_str('Add the correct punctuation.'),
-                            'equation': 'Where are you going',
-                            'target': 'Where are you going ?',
-                            'options': ['Where are you going.', 'Where are you going ?', 'Where are you going !', 'Where are you going ,']
-                        },
-                        {
-                            'type': 'practice_missing',
-                            'questionNumber': 2,
-                            'questionText': translate_str('Add the correct punctuation.'),
-                            'equation': 'Stop the car',
-                            'target': 'Stop the car !',
-                            'options': ['Stop the car ?', 'Stop the car ,', 'Stop the car !', 'Stop the car .']
-                        },
-                        {
-                            'type': 'practice_missing',
-                            'questionNumber': 3,
-                            'questionText': translate_str('Add the correct punctuation.'),
-                            'equation': 'I bought apples bananas and oranges',
-                            'target': 'I bought apples, bananas, and oranges.',
-                            'options': ['I bought apples bananas and oranges.', 'I bought apples, bananas, and oranges.', 'I bought apples? bananas? and oranges.', 'I bought apples! bananas! and oranges.']
-                        },
-                        {
-                            'type': 'practice_missing',
-                            'questionNumber': 4,
-                            'questionText': translate_str('Add the correct punctuation.'),
-                            'equation': 'It is a sunny day',
-                            'target': 'It is a sunny day.',
-                            'options': ['It is a sunny day ?', 'It is a sunny day ,', 'It is a sunny day.', 'It is a sunny day !']
-                        }
-                    ])
-                elif idx == 5: # Capitalization
-                    activities.extend([
-                        {
-                            'type': 'practice_missing',
-                            'questionNumber': 1,
-                            'questionText': translate_str('Use capital letters correctly.'),
-                            'equation': 'my name is ayesha',
-                            'target': 'My name is Ayesha.',
-                            'options': ['my name is ayesha.', 'My name is ayesha.', 'My name is Ayesha.', 'my name is Ayesha.']
-                        },
-                        {
-                            'type': 'practice_missing',
-                            'questionNumber': 2,
-                            'questionText': translate_str('Use capital letters correctly.'),
-                            'equation': 'we live in india',
-                            'target': 'We live in India.',
-                            'options': ['we live in india.', 'We live in india.', 'we live in India.', 'We live in India.']
-                        },
-                        {
-                            'type': 'practice_missing',
-                            'questionNumber': 3,
-                            'questionText': translate_str('Use capital letters correctly.'),
-                            'equation': 'monday is a working day',
-                            'target': 'Monday is a working day.',
-                            'options': ['monday is a working day.', 'Monday is a working day.', 'monday is a Working day.', 'Monday is a Working day.']
-                        },
-                        {
-                            'type': 'practice_missing',
-                            'questionNumber': 4,
-                            'questionText': translate_str('Use capital letters correctly.'),
-                            'equation': 'he read a book about mahatma gandhi',
-                            'target': 'He read a book about Mahatma Gandhi.',
-                            'options': ['he read a book about mahatma gandhi.', 'He read a book about mahatma gandhi.', 'He read a book about Mahatma Gandhi.', 'he read a book about Mahatma Gandhi.']
-                        }
-                    ])
-                elif idx == 6: # Creative Writing
+                            'questionNumber': item['questionNumber'],
+                            'questionText': item['questionText'],
+                            'equation': item['equation'],
+                            'target': item['target'],
+                            'options': item['options']
+                        })
+                elif idx == 6:
                     activities.append({
                         'type': 'paragraph_writing',
-                        'title': translate_str('Creative Writing'),
-                        'subtitle': translate_str('Write a short paragraph about your favorite animal.'),
-                        'topic': translate_str('My Favorite Animal'),
-                        'instruction': translate_str('Write at least 10 words. Explain why you like this animal and what it does.')
+                        'title': lesson_data['title'],
+                        'subtitle': lesson_data['subtitle'],
+                        'topic': lesson_data['topic'],
+                        'instruction': lesson_data['instruction']
                     })
-                elif idx == 7: # Letter Writing
+                elif idx == 7:
                     activities.append({
                         'type': 'letter_drafting',
-                        'title': translate_str('Letter Writing'),
-                        'subtitle': translate_str('Write friendly letters to friends or family.'),
-                        'topic': translate_str('Write a letter to your friend inviting them to your birthday party.'),
-                        'instruction': translate_str('Complete the letter fields below to invite your friend.')
+                        'title': lesson_data['title'],
+                        'subtitle': lesson_data['subtitle'],
+                        'topic': lesson_data['topic'],
+                        'instruction': lesson_data['instruction']
                     })
-                elif idx == 8: # Practice Test
-                    activities.extend([
-                        {
-                            'type': 'unscramble_words',
-                            'title': translate_str('Review spelling words'),
-                            'subtitle': translate_str('Unscramble the letters.'),
-                            'instruction': translate_str('Drag and drop the letters in the right order.'),
-                            'items': [
-                                {
-                                    'id': 1,
-                                    'clue': translate_str('A person'),
-                                    'image': 'man',
-                                    'tokens': ['u', 'n', 'm', 'h', 'a'],
-                                    'target': 'human'
-                                }
-                            ]
-                        },
-                        {
-                            'type': 'unscramble_sentence',
-                            'title': translate_str('Sentence Review'),
-                            'subtitle': translate_str('Arrange the words to form a correct sentence.'),
-                            'instruction': translate_str('Tap the scrambled word tokens in the correct order.'),
-                            'tokens': ['makes', 'us', 'smart', 'reading'],
-                            'target': 'Reading makes us smart.'
-                        },
-                        {
-                            'type': 'practice_missing',
-                            'questionNumber': 3,
-                            'questionText': translate_str('Add the correct punctuation.'),
-                            'equation': 'What is your name',
-                            'target': 'What is your name ?',
-                            'options': ['What is your name.', 'What is your name ?', 'What is your name !', 'What is your name ,']
-                        }
-                    ])
+                elif idx == 8:
+                    activities.extend(lesson_data)
 
                 grad_slide = {
                     'type': 'graduation',
