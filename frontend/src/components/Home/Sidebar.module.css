@@ -192,3 +192,37 @@
     display: none; /* Hide labels on small viewports, icon-only is extremely clean! */
   }
 }
+
+.sidebarCard {
+  background-color: var(--bg-cream-card);
+  border: 2px solid var(--color-peach-light);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin: 16px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebarCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+.sidebarCardSub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+  .sidebarCard {
+    display: none; /* Hide on mobile to keep space clean */
+  }
+}
