@@ -15,6 +15,7 @@ import {
 import { useLearner } from '../../services/LearnerContext';
 import useTranslate from '../../services/useTranslate';
 import { fetchDashboardSummary } from '../../services/api';
+import speak from '../../services/speak';
 import owl from '../../assets/images/owl.png';
 import Sidebar from '../Home/Sidebar';
 import styles from './Dashboard.module.css';
@@ -26,10 +27,75 @@ const AVATAR_EMOJI = {
 };
 
 const STORE_ITEMS = [
-  { id: 'xp_boost', title: 'Double XP Boost', cost: 50, emoji: '⚡', desc: 'Get double XP points for next 3 lessons.' },
-  { id: 'mascot_skin', title: 'Owl Mascot Skin', cost: 120, emoji: '👑', desc: 'Unlock a golden crown for your mascot tutor.' },
-  { id: 'star_badge', title: 'Super Star Badge', cost: 30, emoji: '🎖️', desc: 'Decorate your learner profile avatar frame.' }
+  { id: 'quiz', title: 'Weakness Revision Quiz', cost: 20, emoji: '📝', desc: 'Unlock a custom quiz based on your recently missed questions.' },
+  { id: 'flashcards', title: 'Interactive Vocabulary Deck', cost: 30, emoji: '🃏', desc: 'Unlock flashcards with visual aids and audio speak triggers.' },
+  { id: 'story', title: 'Personalized Story Reader', cost: 40, emoji: '📖', desc: 'Unlock an illustrated story tailored to your current level.' }
 ];
+
+const QUIZ_QUESTIONS = {
+  kn: [
+    { q: 'ಅರಸ ಪದದ ಸರಿಯಾದ ಕಾಗುಣಿತ ಯಾವುದು?', opts: ['ಅರಸ', 'ಅರತ', 'ಅರಪ', 'ಅರವ'], ans: 0 },
+    { q: 'ಮಕ್ಕಳು ______ ಆಟವಾಡುತ್ತಾರೆ.', opts: ['ಉದ್ಯಾನವನದಲ್ಲಿ', 'ಆಕಾಶದಲ್ಲಿ', 'ಮನೆಯಲ್ಲಿ', 'ನೀರಿನಲ್ಲಿ'], ans: 0 }
+  ],
+  hi: [
+    { q: 'सही वर्तनी वाला शब्द चुनें:', opts: ['मानव', 'मावन', 'मनाव', 'मानवा'], ans: 0 },
+    { q: 'बच्चे पार्क में ______ हैं।', opts: ['खेलते', 'सोते', 'पढ़ते', 'रोते'], ans: 0 }
+  ],
+  ta: [
+    { q: 'சரியான சொல்லைத் தேர்ந்தெடுக்கவும்:', opts: ['மனிதன்', 'மனிதா', 'மனிதம்', 'மனிதர்'], ans: 0 },
+    { q: 'குழந்தைகள் பூங்காவில் ______.', opts: ['விளையாடுகிறார்கள்', 'தூங்குகிறார்கள்', 'படிக்கிறார்கள்', 'அழுகிறார்கள்'], ans: 0 }
+  ],
+  en: [
+    { q: 'Which word is spelled correctly?', opts: ['human', 'humn', 'humon', 'humanne'], ans: 0 },
+    { q: 'The children ______ in the park.', opts: ['play', 'sleep', 'read', 'cry'], ans: 0 }
+  ]
+};
+
+const FLASHCARDS = {
+  kn: [
+    { word: 'ಮಾನವ', eng: 'Human', desc: 'ಒಬ್ಬ ಮನುಷ್ಯ / A human being' },
+    { word: 'ಸೂರ್ಯ', eng: 'Sun', desc: 'ಆಕಾಶದಲ್ಲಿ ಹೊಳೆಯುವ ನಕ್ಷತ್ರ / The hot star' },
+    { word: 'ಮಾರುಕಟ್ಟೆ', eng: 'Market', desc: 'ವಸ್ತುಗಳನ್ನು ಖರೀದಿಸುವ ಸ್ಥಳ / Place to shop' }
+  ],
+  hi: [
+    { word: 'मानव', eng: 'Human', desc: 'एक मनुष्य / A human being' },
+    { word: 'सूरज', eng: 'Sun', desc: 'आसमान में चमकने वाला तारा / The hot star' },
+    { word: 'बाजार', eng: 'Market', desc: 'सामान खरीदने की जगह / Place to shop' }
+  ],
+  ta: [
+    { word: 'மனிதன்', eng: 'Human', desc: 'ஒரு மனிதர் / A human being' },
+    { word: 'சூரியன்', eng: 'Sun', desc: 'வானில் ஒளிரும் நட்சத்திரம் / The hot star' },
+    { word: 'சந்தை', eng: 'Market', desc: 'பொருட்கள் வாங்கும் இடம் / Place to shop' }
+  ],
+  en: [
+    { word: 'human', eng: 'Human', desc: 'A person / individual' },
+    { word: 'sun', eng: 'Sun', desc: 'The shining star in the sky' },
+    { word: 'market', eng: 'Market', desc: 'A place to buy things' }
+  ]
+};
+
+const STORIES = {
+  kn: {
+    title: 'ಸಹಾಯ ಮಾಡುವ ಕರಡಿ 🐻',
+    text: 'ಒಂದು ಕಾಡಿನಲ್ಲಿ ಒಂದು ಕರಡಿ ಇತ್ತು. ಅದು ತನ್ನ ಎಲ್ಲಾ ಸ್ನೇಹಿತರಿಗೆ ಸಹಾಯ ಮಾಡುತ್ತಿತ್ತು. ಒಂದು ದಿನ ನರಿ ಕಷ್ಟದಲ್ಲಿದ್ದಾಗ ಕರಡಿ ಓಡಿ ಬಂದು ಕಾಪಾಡಿತು.',
+    speechText: 'ಒಂದು ಕಾಡಿನಲ್ಲಿ ಒಂದು ಕರಡಿ ಇತ್ತು. ಅದು ತನ್ನ ಎಲ್ಲಾ ಸ್ನೇಹಿತರಿಗೆ ಸಹಾಯ ಮಾಡುತ್ತಿತ್ತು.'
+  },
+  hi: {
+    title: 'सच्चा मित्र भालू 🐻',
+    text: 'एक जंगल में एक भालू रहता था। वह हमेशा अपने दोस्तों की मदद करता था। एक दिन जब लोमड़ी मुसीबत में थी, भालू ने उसकी जान बचाई।',
+    speechText: 'एक जंगल में एक भालू रहता था। वह हमेशा अपने दोस्तों की मदद करता था।'
+  },
+  ta: {
+    title: 'உதவும் கரடி 🐻',
+    text: 'ஒரு காட்டில் ஒரு கரடி இருந்தது. அது தனது நண்பர்களுக்கு எப்போதும் உதவி செய்தது. ஒரு நாள் நரி ஆபத்தில் இருந்தபோது கரடி ஓடி வந்து காப்பாற்றியது.',
+    speechText: 'ஒரு காட்டில் ஒரு கரடி இருந்தது. அது தனது நண்பர்களுக்கு எப்போதும் உதவி செய்தது.'
+  },
+  en: {
+    title: 'The Helpful Bear 🐻',
+    text: 'In a beautiful forest, there lived a friendly bear. He loved helping all his forest friends. One day, when the fox got stuck, the bear rescued him immediately.',
+    speechText: 'In a beautiful forest, there lived a friendly bear. He loved helping all his forest friends.'
+  }
+};
 
 export default function Dashboard() {
   const { learner } = useLearner();
@@ -39,6 +105,17 @@ export default function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [buyMessage, setBuyMessage] = useState('');
+  const [unlockedIds, setUnlockedIds] = useState([]);
+  const [activePractice, setActivePractice] = useState(null);
+
+  // Quiz state
+  const [quizIdx, setQuizIdx] = useState(0);
+  const [quizAnswered, setQuizAnswered] = useState(null);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+
+  // Flashcards state
+  const [flashcardIdx, setFlashcardIdx] = useState(0);
+  const [flashcardFlipped, setFlashcardFlipped] = useState(false);
 
   useEffect(() => {
     if (!learner) return;
@@ -69,6 +146,8 @@ export default function Dashboard() {
       ...summary,
       virtual_coins: summary.virtual_coins - item.cost
     });
+    setUnlockedIds([...unlockedIds, item.id]);
+    setActivePractice(item.id);
     setBuyMessage(`🎉 Success! You unlocked: ${item.title} ${item.emoji}!`);
     setTimeout(() => setBuyMessage(''), 3000);
   };
@@ -77,6 +156,200 @@ export default function Dashboard() {
     localStorage.removeItem('migo_learner');
     navigate('/');
     window.location.reload();
+  };
+
+  const renderPracticeSection = () => {
+    const langKey = learner.learning_language || 'en';
+    const nativeLangCode = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN' }[langKey] || 'en-US';
+
+    if (activePractice === 'quiz') {
+      const questions = QUIZ_QUESTIONS[langKey] || QUIZ_QUESTIONS['en'];
+      const question = questions[quizIdx];
+
+      const handleOptionClick = (optIdx) => {
+        if (quizAnswered !== null) return;
+        if (optIdx === question.ans) {
+          setQuizAnswered({ optIdx, isCorrect: true });
+          speak('Excellent work!', 'en-US');
+        } else {
+          setQuizAnswered({ optIdx, isCorrect: false });
+          speak('Try again!', 'en-US');
+        }
+      };
+
+      const handleNextQuestion = () => {
+        setQuizAnswered(null);
+        if (quizIdx + 1 < questions.length) {
+          setQuizIdx(quizIdx + 1);
+        } else {
+          setQuizCompleted(true);
+        }
+      };
+
+      const handleClaimReward = () => {
+        setSummary({
+          ...summary,
+          virtual_coins: summary.virtual_coins + 10
+        });
+        setBuyMessage('🎉 Claimed 10 bonus 🪙 for completing revision!');
+        setTimeout(() => setBuyMessage(''), 3000);
+        setQuizIdx(0);
+        setQuizAnswered(null);
+        setQuizCompleted(false);
+        setActivePractice(null);
+      };
+
+      return (
+        <div className={styles.interactivePracticeContainer}>
+          <div className={styles.practiceHeader}>
+            <h4>📝 Revision Quiz</h4>
+            <button className={styles.closePracticeBtn} onClick={() => { setActivePractice(null); setQuizAnswered(null); setQuizCompleted(false); setQuizIdx(0); }}>✕</button>
+          </div>
+
+          {quizCompleted ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', textAlign: 'center', padding: '10px 0' }}>
+              <span style={{ fontSize: '40px' }}>🏆</span>
+              <h5 style={{ fontWeight: 850, margin: 0 }}>Quiz Completed!</h5>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 700 }}>Great job revising your weak topics today.</p>
+              <button className={styles.claimBtn} onClick={handleClaimReward}>
+                Claim 10 🪙 Reward
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--color-orange)', fontWeight: 800 }}>Question {quizIdx + 1} of {questions.length}</span>
+              <p className={styles.quizQuestion}>{question.q}</p>
+              <div className={styles.quizOptionsList}>
+                {question.opts.map((opt, oIdx) => {
+                  let optStyle = styles.quizOptionBtn;
+                  if (quizAnswered !== null) {
+                    if (oIdx === question.ans) {
+                      optStyle = `${styles.quizOptionBtn} ${styles.quizOptionCorrect}`;
+                    } else if (quizAnswered.optIdx === oIdx && !quizAnswered.isCorrect) {
+                      optStyle = `${styles.quizOptionBtn} ${styles.quizOptionIncorrect}`;
+                    }
+                  }
+                  return (
+                    <button
+                      key={oIdx}
+                      className={optStyle}
+                      disabled={quizAnswered !== null}
+                      onClick={() => handleOptionClick(oIdx)}
+                    >
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {quizAnswered !== null && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div className={`${styles.quizFeedback} ${quizAnswered.isCorrect ? styles.feedbackSuccess : styles.feedbackFail}`}>
+                    {quizAnswered.isCorrect ? '✅ Correct Answer! Keep it up.' : '❌ Incorrect. Study the options.'}
+                  </div>
+                  <button className={styles.buyBtn} style={{ marginTop: '4px' }} onClick={handleNextQuestion}>
+                    <span>{quizIdx + 1 === questions.length ? 'Finish Quiz ➔' : 'Next Question ➔'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (activePractice === 'flashcards') {
+      const cards = FLASHCARDS[langKey] || FLASHCARDS['en'];
+      const card = cards[flashcardIdx];
+
+      const handleHearWord = (e) => {
+        e.stopPropagation();
+        speak(card.word, nativeLangCode);
+      };
+
+      return (
+        <div className={styles.interactivePracticeContainer}>
+          <div className={styles.practiceHeader}>
+            <h4>🃏 Vocabulary Deck</h4>
+            <button className={styles.closePracticeBtn} onClick={() => { setActivePractice(null); setFlashcardIdx(0); setFlashcardFlipped(false); }}>✕</button>
+          </div>
+
+          <div className={styles.flashcardBody} onClick={() => setFlashcardFlipped(!flashcardFlipped)}>
+            {flashcardFlipped ? (
+              <>
+                <span className={styles.flashcardTranslation}>{card.eng}</span>
+                <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, marginTop: '8px', textAlign: 'center' }}>
+                  {card.desc}
+                </p>
+                <span className={styles.flashcardFlipNotice}>Tap to flip back</span>
+              </>
+            ) : (
+              <>
+                <span className={styles.flashcardWord}>{card.word}</span>
+                <span className={styles.flashcardFlipNotice}>Tap to see translation</span>
+              </>
+            )}
+          </div>
+
+          <div className={styles.flashcardActionsRow}>
+            <button
+              className={styles.prevNextBtn}
+              disabled={flashcardIdx === 0}
+              onClick={() => { setFlashcardIdx(flashcardIdx - 1); setFlashcardFlipped(false); }}
+            >
+              ◀ Prev
+            </button>
+
+            <button className={styles.speakCardBtn} onClick={handleHearWord}>
+              <Volume2 size={16} />
+              <span>Listen</span>
+            </button>
+
+            <button
+              className={styles.prevNextBtn}
+              disabled={flashcardIdx + 1 === cards.length}
+              onClick={() => { setFlashcardIdx(flashcardIdx + 1); setFlashcardFlipped(false); }}
+            >
+              Next ▶
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (activePractice === 'story') {
+      const story = STORIES[langKey] || STORIES['en'];
+
+      const handleHearStory = () => {
+        speak(story.text, nativeLangCode, 0.9);
+      };
+
+      return (
+        <div className={styles.interactivePracticeContainer}>
+          <div className={styles.practiceHeader}>
+            <h4>📖 Short Story Reader</h4>
+            <button className={styles.closePracticeBtn} onClick={() => setActivePractice(null)}>✕</button>
+          </div>
+
+          <div className={styles.storyTextContainer}>
+            <h5 className={styles.storyTitleText}>{story.title}</h5>
+            <p className={styles.storyParagraph}>{story.text}</p>
+          </div>
+
+          <div className={styles.storyActionsRow}>
+            <button className={styles.speakCardBtn} onClick={handleHearStory}>
+              <Volume2 size={16} />
+              <span>Read Aloud</span>
+            </button>
+            <button className={styles.buyBtn} style={{ background: 'linear-gradient(135deg, #27AE60, #2ECC71)', boxShadow: '0 4px 0 #219A52' }} onClick={() => setActivePractice(null)}>
+              <span>Mark as Read</span>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   if (!learner) {
@@ -308,10 +581,10 @@ export default function Dashboard() {
 
             {/* GAMIFICATION ROOM (Store, badges, leaderboard) */}
             <section className={styles.gamificationSection}>
-              {/* Virtual Coin Store */}
+              {/* Practice & Revision Center */}
               <div className={styles.storeCard}>
                 <div className={styles.storeHeader}>
-                  <h3>🪙 Virtual Reward Shop</h3>
+                  <h3>🪙 Practice & Revision Center</h3>
                   <span className={styles.coinsCount}>Balance: 🪙 {summary.virtual_coins}</span>
                 </div>
                 
@@ -328,20 +601,33 @@ export default function Dashboard() {
                   )}
                 </AnimatePresence>
 
-                <div className={styles.storeItemsList}>
-                  {STORE_ITEMS.map((item) => (
-                    <div key={item.id} className={styles.storeItem}>
-                      <span className={styles.itemEmoji}>{item.emoji}</span>
-                      <div className={styles.itemMeta}>
-                        <h5>{item.title}</h5>
-                        <p>{item.desc}</p>
-                      </div>
-                      <button className={styles.buyBtn} onClick={() => handleBuyItem(item)}>
-                        <span>Buy {item.cost} 🪙</span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                {activePractice ? (
+                  renderPracticeSection()
+                ) : (
+                  <div className={styles.storeItemsList}>
+                    {STORE_ITEMS.map((item) => {
+                      const isUnlocked = unlockedIds.includes(item.id);
+                      return (
+                        <div key={item.id} className={styles.storeItem}>
+                          <span className={styles.itemEmoji}>{item.emoji}</span>
+                          <div className={styles.itemMeta}>
+                            <h5>{item.title}</h5>
+                            <p>{item.desc}</p>
+                          </div>
+                          {isUnlocked ? (
+                            <button className={styles.buyBtn} style={{ background: 'linear-gradient(135deg, #27AE60, #2ECC71)', boxShadow: '0 4px 0 #219A52' }} onClick={() => setActivePractice(item.id)}>
+                              <span>Start ➔</span>
+                            </button>
+                          ) : (
+                            <button className={styles.buyBtn} onClick={() => handleBuyItem(item)}>
+                              <span>Unlock {item.cost} 🪙</span>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Leaderboard widget */}

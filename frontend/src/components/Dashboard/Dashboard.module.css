@@ -574,3 +574,235 @@
     gap: 16px !important;
   }
 }
+
+/* Interactive Practice Widgets */
+.interactivePracticeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: var(--bg-cream);
+  border: 2px solid var(--color-peach-light);
+  border-radius: var(--radius-sm);
+  padding: 18px;
+  position: relative;
+  margin-top: 10px;
+}
+
+.practiceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--color-peach-light);
+  padding-bottom: 10px;
+}
+
+.practiceHeader h4 {
+  font-size: 15px;
+  font-weight: 850;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.closePracticeBtn {
+  background-color: #FFEAEB;
+  color: #FF4757;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.closePracticeBtn:hover {
+  background-color: #FF4757;
+  color: #FFFFFF;
+}
+
+/* Quiz styles */
+.quizQuestion {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+.quizOptionsList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.quizOptionBtn {
+  background-color: #FFFFFF;
+  border: 2px solid var(--color-peach-light);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.quizOptionBtn:hover:not(:disabled) {
+  border-color: var(--color-orange);
+  background-color: var(--color-peach-light);
+}
+
+.quizOptionCorrect {
+  background-color: #E8F8F0 !important;
+  border-color: #27AE60 !important;
+  color: #27AE60 !important;
+}
+
+.quizOptionIncorrect {
+  background-color: #FFECEE !important;
+  border-color: #FF4757 !important;
+  color: #FF4757 !important;
+}
+
+.quizFeedback {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.feedbackSuccess {
+  background-color: #E8F8F0;
+  color: #27AE60;
+}
+
+.feedbackFail {
+  background-color: #FFECEE;
+  color: #FF4757;
+}
+
+.claimBtn {
+  background: linear-gradient(135deg, #27AE60, #2ECC71);
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 4px 0 #219A52;
+}
+
+/* Flashcards styles */
+.flashcardBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #FFFFFF;
+  border: 2px solid var(--color-peach-light);
+  border-radius: 16px;
+  height: 140px;
+  padding: 20px;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+.flashcardWord {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--color-orange-dark);
+}
+
+.flashcardTranslation {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-top: 8px;
+}
+
+.flashcardFlipNotice {
+  position: absolute;
+  bottom: 8px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.flashcardActionsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+}
+
+.prevNextBtn {
+  background-color: #FFFFFF;
+  border: 1.5px solid var(--color-peach-light);
+  color: var(--text-dark);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.prevNextBtn:hover:not(:disabled) {
+  border-color: var(--color-orange);
+  background-color: var(--color-peach-light);
+}
+
+.speakCardBtn {
+  background-color: #FFF3E0;
+  border: 1.5px solid var(--color-peach);
+  color: var(--color-orange-dark);
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+}
+
+/* Story reader styles */
+.storyTextContainer {
+  background-color: #FFFFFF;
+  border: 2px solid var(--color-peach-light);
+  border-radius: 16px;
+  padding: 16px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.storyTitleText {
+  font-size: 15px;
+  font-weight: 850;
+  color: var(--color-orange-dark);
+  margin-bottom: 6px;
+}
+
+.storyParagraph {
+  font-size: 13px;
+  color: var(--text-dark);
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.storyActionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
