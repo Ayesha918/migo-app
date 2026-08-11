@@ -2,7 +2,7 @@
 
 import { useNavigate, useLocation } from 'react-router-dom';
 import owl from '../../assets/images/owl.png';
-import { Home as HomeIcon, Compass, TrendingUp, Trophy, ClipboardCheck, LogOut, Mic, BookOpen, ShieldCheck } from 'lucide-react';
+import { Home as HomeIcon, Compass, TrendingUp, Trophy, ClipboardCheck, LogOut, Mic, BookOpen, ShieldCheck, Users, Bell, CreditCard, Award, HelpCircle } from 'lucide-react';
 import useTranslate from '../../services/useTranslate';
 import styles from './Sidebar.module.css';
 
@@ -14,6 +14,12 @@ const menuItems = [
   { title: 'Pronunciation Practice', key: 'pronunciationPractice', icon: Mic, route: '/pronunciation' },
   { title: 'Trophy Room', key: 'trophyRoom', icon: Trophy, route: '/dashboard' },
   { title: 'Assessments', key: 'assessments', icon: ClipboardCheck, route: '/assessment/reading' },
+  { title: 'Library', key: 'library', icon: BookOpen, route: '/library' },
+  { title: 'Community', key: 'community', icon: Users, route: '/community' },
+  { title: 'Notifications', key: 'notifications', icon: Bell, route: '/notifications' },
+  { title: 'Subscription', key: 'subscription', icon: CreditCard, route: '/subscription' },
+  { title: 'Certifications', key: 'certifications', icon: Award, route: '/certifications' },
+  { title: 'Help & Support', key: 'helpSupport', icon: HelpCircle, route: '/support' },
 ];
 
 export default function Sidebar({ onLogout }) {

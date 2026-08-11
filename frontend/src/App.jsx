@@ -14,6 +14,12 @@ import PredictionPage from './components/Dashboard/PredictionPage';
 import VoiceAssistantChatbot from './components/Home/VoiceAssistantChatbot';
 import AccessibilityToggles from './components/Common/AccessibilityToggles';
 import PlacementAssessment from './components/Assessment/PlacementAssessment';
+import Library from './components/Extra/Library';
+import Support from './components/Extra/Support';
+import Community from './components/Extra/Community';
+import Notifications from './components/Extra/Notifications';
+import Subscription from './components/Extra/Subscription';
+import Certifications from './components/Extra/Certifications';
 import { useLearner } from './services/LearnerContext';
 import { startSession, endSession } from './services/api';
 import './App.css';
@@ -63,6 +69,12 @@ function App() {
         <Route path="/pronunciation" element={<PronunciationPractice />} />
         <Route path="/learn" element={<Learn />} />
         <Route path="/lesson-player" element={<LessonPlayer />} />
+        <Route path="/library" element={<Library />} />
+        <Route path="/community" element={<Community />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/subscription" element={<Subscription />} />
+        <Route path="/certifications" element={<Certifications />} />
+        <Route path="/support" element={<Support />} />
         <Route path="*" element={<Home />} />
       </Routes>
       <VoiceAssistantChatbot />

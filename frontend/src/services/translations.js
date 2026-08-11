@@ -24,6 +24,12 @@ const translations = {
     pronunciationPractice: 'Pronunciation Practice',
     trophyRoom: 'Trophy Room',
     assessments: 'Assessments',
+    library: 'Library',
+    community: 'Community',
+    notifications: 'Notifications',
+    subscription: 'Subscriptions',
+    certifications: 'Certifications',
+    helpSupport: 'Help & Support',
     exitGame: 'Exit Game',
 
     // Login screen
@@ -110,6 +116,12 @@ const translations = {
     pronunciationPractice: 'उच्चारण अभ्यास',
     trophyRoom: 'ट्रॉफी रूम',
     assessments: 'मूल्यांकन',
+    library: 'पुस्तकालय',
+    community: 'समुदाय',
+    notifications: 'सूचनाएं',
+    subscription: 'सदस्यता',
+    certifications: 'प्रमाणपत्र',
+    helpSupport: 'सहायता और समर्थन',
     exitGame: 'खेल से बाहर निकलें',
 
     // Login screen
@@ -196,6 +208,12 @@ const translations = {
     pronunciationPractice: 'ಉಚ್ಚಾರಣೆ ಅಭ್ಯಾಸ',
     trophyRoom: 'ಟ್ರೋಫಿ ಕೊಠಡಿ',
     assessments: 'ಮೌಲ್ಯಮಾಪನಗಳು',
+    library: 'ಗ್ರಂಥಾಲಯ',
+    community: 'ಸಮುದಾಯ',
+    notifications: 'ಅಧಿಸೂಚನೆಗಳು',
+    subscription: 'ಚಂದಾದಾರಿಕೆ',
+    certifications: 'ಪ್ರಮಾಣಪತ್ರಗಳು',
+    helpSupport: 'ಸಹಾಯ ಮತ್ತು ಬೆಂಬಲ',
     exitGame: 'ಆಟದಿಂದ ನಿರ್ಗಮಿಸಿ',
 
     // Login screen
@@ -282,6 +300,12 @@ const translations = {
     pronunciationPractice: 'உச்சரிப்பு பயிற்சி',
     trophyRoom: 'கோப்பை அறை',
     assessments: 'மதிப்பீடுகள்',
+    library: 'நூலகம்',
+    community: 'சமூகம்',
+    notifications: 'அறிவிப்புகள்',
+    subscription: 'சந்தாக்கள்',
+    certifications: 'சான்றிதழ்கள்',
+    helpSupport: 'உதவி & ஆதரவு',
     exitGame: 'விளையாட்டிலிருந்து வெளியேறு',
 
     // Login screen

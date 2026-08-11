@@ -1,0 +1,818 @@
+/* src/components/Extra/Extra.module.css */
+
+.pageLayout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-cream);
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 28px;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Page Headers */
+.headerArea {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 2px dashed var(--color-peach);
+  padding-bottom: 20px;
+}
+
+.headerIcon {
+  font-size: 40px;
+}
+
+.headerMeta h2 {
+  font-size: 28px;
+  font-weight: 850;
+  color: var(--color-orange-dark);
+  margin-bottom: 4px;
+}
+
+.headerMeta p {
+  font-size: 15px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* Filter Pill Tags */
+.tabBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.tabPill {
+  padding: 10px 20px;
+  border-radius: 30px;
+  border: 2px solid var(--color-peach);
+  background-color: #FFFFFF;
+  color: var(--text-muted);
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tabPill:hover {
+  border-color: var(--color-orange);
+  background-color: var(--color-peach-light);
+}
+
+.activeTabPill {
+  background-color: var(--color-orange);
+  border-color: var(--color-orange);
+  color: #FFFFFF;
+}
+
+.activeTabPill:hover {
+  background-color: var(--color-orange-dark);
+  border-color: var(--color-orange-dark);
+}
+
+/* Cards Grid */
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Book Card */
+.bookCard {
+  background-color: #FFFFFF;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-peach-light);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bookCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(255, 122, 0, 0.08);
+}
+
+.bookCoverPlaceholder {
+  height: 140px;
+  background: linear-gradient(135deg, var(--color-peach-light), #FFE4D0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  border-bottom: 2px solid var(--color-peach);
+}
+
+.bookBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.bookTagRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bookCategoryTag {
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--color-orange-dark);
+  background-color: var(--color-peach-light);
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.bookRating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #F1C40F;
+}
+
+.bookTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-dark);
+  line-height: 1.3;
+}
+
+.bookAuthor {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.bookPages {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.bookProgressContainer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bookProgressLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.bookProgressTrack {
+  height: 8px;
+  background-color: var(--bg-cream-card);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bookProgressBar {
+  height: 100%;
+  background-color: var(--color-orange);
+  border-radius: 4px;
+}
+
+/* Library Recommendations Card */
+.recommendationCard {
+  background-color: var(--color-peach-light);
+  border: 3.5px dashed var(--color-orange);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.recLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.recIcon {
+  font-size: 32px;
+}
+
+.recTitle {
+  font-size: 18px;
+  font-weight: 850;
+  color: var(--color-orange-dark);
+  margin-bottom: 4px;
+}
+
+.recText {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.recBtn {
+  background-color: var(--color-orange);
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.recBtn:hover {
+  transform: scale(1.04);
+}
+
+/* FAQ / Support Accordion */
+.supportGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionBox {
+  background-color: #FFFFFF;
+  border: 3px solid var(--color-peach-light);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.sectionBox h3 {
+  font-size: 20px;
+  font-weight: 850;
+  color: var(--color-orange-dark);
+  margin-bottom: 16px;
+  border-bottom: 2px dashed var(--color-peach);
+  padding-bottom: 10px;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faqItem {
+  border: 2px solid var(--color-peach-light);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.faqHeader {
+  width: 100%;
+  text-align: left;
+  padding: 16px 20px;
+  background-color: #FFFFFF;
+  border: none;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-dark);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faqHeader:hover {
+  background-color: var(--color-peach-light);
+}
+
+.faqAnswer {
+  padding: 16px 20px;
+  background-color: var(--bg-cream);
+  border-top: 1px dashed var(--color-peach-light);
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* Support Form */
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.formLabel {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+.formInput {
+  padding: 12px 16px;
+  border: 2px solid var(--color-peach);
+  border-radius: var(--radius-sm);
+  outline: none;
+  font-size: 15px;
+  font-weight: 700;
+  background-color: #FFFFFF;
+  color: var(--text-dark);
+}
+
+.formInput:focus {
+  border-color: var(--color-orange);
+}
+
+.formTextarea {
+  padding: 12px 16px;
+  border: 2px solid var(--color-peach);
+  border-radius: var(--radius-sm);
+  outline: none;
+  font-size: 15px;
+  font-weight: 700;
+  background-color: #FFFFFF;
+  color: var(--text-dark);
+  resize: vertical;
+}
+
+.formTextarea:focus {
+  border-color: var(--color-orange);
+}
+
+.submitBtn {
+  background: linear-gradient(135deg, var(--color-orange), #FF9F43);
+  color: #FFFFFF;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: var(--shadow-button-orange);
+  transition: transform 0.15s ease;
+}
+
+.submitBtn:hover {
+  transform: translateY(-1px);
+}
+
+/* Community Feed */
+.communityComposer {
+  background-color: #FFFFFF;
+  border: 3px solid var(--color-peach-light);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 20px;
+}
+
+.composerAvatar {
+  font-size: 32px;
+  width: 44px;
+  height: 44px;
+  background-color: var(--color-peach-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.composerRight {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.composerInput {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+  resize: none;
+  width: 100%;
+}
+
+.composerFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.postBtn {
+  background-color: var(--color-orange);
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 900;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.postBtn:hover {
+  transform: scale(1.04);
+}
+
+/* Post Cards Feed */
+.postCard {
+  background-color: #FFFFFF;
+  border: 3px solid var(--color-peach-light);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.postHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.postMeta h5 {
+  font-size: 16px;
+  font-weight: 850;
+  color: var(--text-dark);
+}
+
+.postMeta span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.postText {
+  font-size: 15px;
+  color: var(--text-dark);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.postActions {
+  display: flex;
+  gap: 20px;
+  margin-top: 4px;
+  border-top: 1px dashed var(--color-peach-light);
+  padding-top: 12px;
+}
+
+.postActionBtn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.postActionBtn:hover {
+  color: var(--color-orange);
+}
+
+/* Notifications View */
+.notificationCard {
+  background-color: #FFFFFF;
+  border: 3px solid var(--color-peach-light);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 12px;
+}
+
+.notificationCardUnread {
+  border-color: var(--color-orange);
+  background-color: var(--color-peach-light);
+}
+
+.notifCircle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notifText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notifText p {
+  font-size: 14px;
+  font-weight: 750;
+  color: var(--text-dark);
+  line-height: 1.4;
+}
+
+.notifTime {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* Subscription Pricing Cards */
+.subGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 28px;
+  margin-top: 12px;
+}
+
+.subCard {
+  background-color: #FFFFFF;
+  border: 3px solid var(--color-peach-light);
+  border-radius: var(--radius-md);
+  padding: 32px 24px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.subCardPopular {
+  border-color: var(--color-orange);
+  box-shadow: 0 12px 30px rgba(255, 122, 0, 0.12);
+  transform: scale(1.02);
+}
+
+.popularBadge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-orange);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 6px 16px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.subHeader h4 {
+  font-size: 22px;
+  font-weight: 850;
+  color: var(--text-dark);
+}
+
+.subPrice {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--color-orange-dark);
+  margin-top: 10px;
+}
+
+.subPrice span {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.subBulletList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  margin: 10px 0;
+}
+
+.subBulletItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.subBulletIcon {
+  color: #27AE60;
+  flex-shrink: 0;
+}
+
+.subBtn {
+  background-color: #FFFFFF;
+  color: var(--text-muted);
+  border: 3px solid var(--color-peach);
+  width: 100%;
+  padding: 12px;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  margin-top: auto;
+  transition: all 0.15s ease;
+}
+
+.subBtn:hover {
+  background-color: var(--color-peach-light);
+  border-color: var(--color-orange);
+  color: var(--color-orange-dark);
+}
+
+.subBtnActive {
+  background: linear-gradient(135deg, var(--color-orange), #FF9F43);
+  color: #FFFFFF;
+  border: none;
+  box-shadow: var(--shadow-button-orange);
+}
+
+.subBtnActive:hover {
+  background: var(--color-orange-dark);
+}
+
+.stripeInfoBox {
+  background-color: var(--bg-cream-card);
+  border: 2px solid var(--color-peach);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+/* Certifications Stamp Cards */
+.certificateCard {
+  background-color: #FFFFFF;
+  border: 4px double var(--color-peach);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.certificateCard:hover {
+  transform: scale(1.03);
+}
+
+.certificateStamp {
+  width: 60px;
+  height: 60px;
+  background-color: var(--color-peach-light);
+  border: 3px dashed var(--color-orange);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.certificateTitle {
+  font-size: 18px;
+  font-weight: 850;
+  color: var(--color-orange-dark);
+  margin-bottom: 4px;
+}
+
+.certificateSub {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.certificateBtn {
+  background: none;
+  border: 2px solid var(--color-orange);
+  color: var(--color-orange);
+  font-size: 13px;
+  font-weight: 900;
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.certificateBtn:hover {
+  background-color: var(--color-orange);
+  color: #FFFFFF;
+}
+
+/* Certificate View Modal Popup */
+.certModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.certModalContent {
+  background-color: #FFFDFB;
+  border: 12px double #D35400;
+  border-radius: var(--radius-md);
+  padding: 40px;
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.certModalClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.certBadge {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.certMainTitle {
+  font-family: serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: #D35400;
+  margin-bottom: 10px;
+}
+
+.certDivider {
+  height: 2px;
+  background-color: var(--color-peach);
+  width: 60%;
+  margin: 16px auto;
+}
+
+.certRecipient {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.certDesc {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 16px 0;
+  font-weight: 600;
+}
+
+.certDateRow {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 30px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-muted);
+}

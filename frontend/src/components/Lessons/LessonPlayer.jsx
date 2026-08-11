@@ -13,6 +13,7 @@ import useVoiceInput from '../../services/useVoiceInput';
 import { completeLessonDay, fetchLearningPath, generateLearningPath, startSession, endSession } from '../../services/api';
 import owl from '../../assets/images/owl.png';
 import treasure from '../../assets/images/treasure.png';
+import LessonDocument from './LessonDocument';
 import styles from './LessonPlayer.module.css';
 
 const SPEECH_LANG_MAP = {
@@ -524,6 +525,7 @@ export default function LessonPlayer() {
   // 3: Short Quiz (Exactly 3 questions)
   // 4: Reward / Certificate
   const [stage, setStage] = useState(0);
+  const [showNotes, setShowNotes] = useState(false);
   const [audioSpeed, setAudioSpeed] = useState(0.95);
 
   // Animated Hand Pointer Guide State
@@ -1573,6 +1575,11 @@ export default function LessonPlayer() {
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <ArrowLeft size={24} />
           <span>Adventure Map</span>
+        </button>
+
+        <button className={styles.backBtn} onClick={() => setShowNotes(true)} style={{ marginLeft: '12px', border: '2px solid var(--color-peach)', color: 'var(--color-orange-dark)', background: '#FFFFFF' }}>
+          <FileText size={20} />
+          <span>Study Notes</span>
         </button>
 
         <div className={styles.progressTracker}>
@@ -4881,6 +4888,13 @@ export default function LessonPlayer() {
         </AnimatePresence>
         </div>
       </main>
+
+      {showNotes && (
+        <LessonDocument
+          language={preferredLanguage}
+          onClose={() => setShowNotes(false)}
+        />
+      )}
     </div>
   );
 }

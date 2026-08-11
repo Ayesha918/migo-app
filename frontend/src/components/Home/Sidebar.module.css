@@ -46,6 +46,26 @@
   flex-direction: column;
   gap: 10px;
   flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  max-height: 520px;
+}
+
+.navMenu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.navMenu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.navMenu::-webkit-scrollbar-thumb {
+  background: var(--color-peach-light);
+  border-radius: 3px;
+}
+
+.navMenu::-webkit-scrollbar-thumb:hover {
+  background: var(--color-peach);
 }
 
 .navItem {
