@@ -10,7 +10,7 @@ import { useLearner } from '../../services/LearnerContext';
 import owl from '../../assets/images/owl.png';
 import {
   Search, ArrowLeft, User, Hash, Mic, MicOff,
-  ShieldAlert, Smartphone, Check, HelpCircle
+  ShieldAlert, Mail, Check, HelpCircle
 } from 'lucide-react';
 import styles from './Login.module.css';
 
@@ -32,9 +32,11 @@ function Login() {
   const [isListening, setIsListening] = useState(false);
 
   // OTP Device Verification flow states
-  const [subStage, setSubStage] = useState('search'); // 'search', 'new_device_warning', 'phone_input', 'otp_input', 'welcome_back'
+  const [subStage, setSubStage] = useState('search'); // 'search', 'new_device_warning', 'email_input', 'otp_input', 'welcome_back'
   const [selectedLearnerItem, setSelectedLearnerItem] = useState(null);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(''); // Stores email address now
+  const emailAddress = phoneNumber;
+  const setEmailAddress = setPhoneNumber;
   const [otpArray, setOtpArray] = useState(['', '', '', '', '', '']);
   const [isSubmittingOtp, setIsSubmittingOtp] = useState(false);
   const [timerCount, setTimerCount] = useState(25);
@@ -316,15 +318,15 @@ function Login() {
         </>
       )}
 
-      {/* Screen 2: New Phone/Device Detected */}
+      {/* Screen 2: New Email/Device Detected */}
       {subStage === 'new_device_warning' && (
         <div className={styles.verifyCard}>
-          <Smartphone size={56} color="var(--color-orange)" />
-          <h2 className={styles.verifyTitle}>Is this your first time on this phone?</h2>
+          <Mail size={56} color="var(--color-orange)" />
+          <h2 className={styles.verifyTitle}>Is this your first time on this email?</h2>
           <p className={styles.verifyText}>
-            Let's verify your phone number to secure your learning data and make recovery simple.
+            Let's verify your email address to secure your learning data and make recovery simple.
           </p>
-          <button className={styles.verifyBtn} onClick={() => setSubStage('phone_input')}>
+          <button className={styles.verifyBtn} onClick={() => setSubStage('email_input')}>
             Yes, let's verify
           </button>
           <button className={styles.verifyBtnSecondary} onClick={handleBackToSearch}>
@@ -333,35 +335,40 @@ function Login() {
         </div>
       )}
 
-      {/* Screen 3: Verify Your Phone */}
-      {subStage === 'phone_input' && (
+      {/* Screen 3: Verify Your Email */}
+      {subStage === 'email_input' && (
         <div className={styles.verifyCard}>
-          <Smartphone size={56} color="var(--color-orange)" />
-          <h2 className={styles.verifyTitle}>Verify Your Phone</h2>
+          <Mail size={56} color="var(--color-orange)" />
+          <h2 className={styles.verifyTitle}>Verify Your Email</h2>
           <p className={styles.verifyText}>
-            We will send a 6-digit code to verify your phone number.
+            We will send a 6-digit code to verify your email address.
           </p>
           
-          <div className={styles.mobileRow}>
-            <div className={styles.countryCode}>
-              <span style={{ fontSize: '18px' }}>🇮🇳</span>
-              <span>+91</span>
-            </div>
+          <div style={{ width: '100%', marginTop: '10px' }}>
             <input
-              type="tel"
-              className={styles.mobileInput}
-              placeholder="Enter your mobile number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              type="email"
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                fontSize: '16px',
+                fontWeight: 800,
+                border: '2px solid var(--color-peach)',
+                borderRadius: 'var(--radius-sm)',
+                outline: 'none',
+                color: 'var(--text-dark)',
+                textAlign: 'center'
+              }}
+              placeholder="Enter your email address"
+              value={emailAddress}
+              onChange={(e) => setEmailAddress(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendPhoneOtp()}
-              maxLength={10}
             />
           </div>
 
           {error && <p className={styles.errorText}>{error}</p>}
 
           <button className={styles.verifyBtn} onClick={handleSendPhoneOtp}>
-            Send OTP
+            Send Code
           </button>
           <button className={styles.verifyBtnSecondary} onClick={handleBackToSearch}>
             Cancel
@@ -375,12 +382,12 @@ function Login() {
           <HelpCircle size={56} color="var(--color-orange)" />
           <h2 className={styles.verifyTitle}>Enter the 6-digit code</h2>
           <p className={styles.verifyText}>
-            We sent a verification code to +91 {phoneNumber.replace(/(\d{5})(\d{5})/, 'XXXXX $2')}
+            We sent a verification code to <strong>{emailAddress}</strong>
           </p>
 
           {isMockOtp && (
             <div style={{ backgroundColor: 'var(--color-peach-light)', color: 'var(--color-orange-dark)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', fontSize: '13.5px', fontWeight: 800, margin: '6px 0', border: '1.5px solid var(--color-peach)', lineHeight: 1.4 }}>
-              ⚠️ Twilio SMS credentials not detected in your backend .env file. Falling back to development mock mode. Use verification code: <strong>123456</strong>
+              ⚠️ Email SMTP credentials not configured in backend settings. The OTP has been printed to the server terminal. For local testing, use code: <strong>123456</strong>
             </div>
           )}
 
@@ -410,10 +417,10 @@ function Login() {
           {error && <p className={styles.errorText}>{error}</p>}
 
           <button className={styles.verifyBtn} onClick={handleVerifyCode} disabled={isSubmittingOtp}>
-            {isSubmittingOtp ? 'Verifying...' : 'Verify OTP'}
+            {isSubmittingOtp ? 'Verifying...' : 'Verify Code'}
           </button>
-          <button className={styles.verifyBtnSecondary} onClick={() => setSubStage('phone_input')}>
-            Change phone number
+          <button className={styles.verifyBtnSecondary} onClick={() => setSubStage('email_input')}>
+            Change email address
           </button>
         </div>
       )}

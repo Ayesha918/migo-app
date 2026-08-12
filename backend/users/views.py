@@ -5,22 +5,17 @@ from rest_framework import status
 from django.db.models import Q
 from .models import Learner, PhoneAccount, DeviceSession, Book, SupportTicket, CommunityPost, Notification
 from .serializers import LearnerSerializer
-from .otp_service import send_real_otp, verify_real_otp
+from .otp_service import send_email_otp, verify_email_otp
 
 
-def normalize_phone_number(phone):
+def normalize_phone_number(email_or_phone):
     """
-    Cleans and normalizes phone number to E.164 format.
-    E.g. '9876543210' -> '+919876543210', '13125550143' -> '+13125550143'
+    Cleans and normalizes identifier (email address).
+    Preserves original helper name to avoid renaming DB columns.
     """
-    cleaned = ''.join(c for c in phone if c.isdigit() or c == '+')
-    if not cleaned.startswith('+'):
-        # If it is long enough and starts with common country codes (like 91, 1, 44), prepend '+'
-        if len(cleaned) > 10 and (cleaned.startswith('91') or cleaned.startswith('1') or cleaned.startswith('44')):
-            cleaned = f"+{cleaned}"
-        else:
-            cleaned = f"+91{cleaned}"
-    return cleaned
+    if not email_or_phone:
+        return ""
+    return email_or_phone.strip().lower()
 
 
 @api_view(['POST'])
@@ -87,70 +82,47 @@ def search_learner(request):
 def send_otp(request):
     """
     POST /api/users/otp/send
-    Body: { phone_number }
-    Sends a 6-digit OTP code to the actual phone number via Twilio Verify API.
+    Body: { phone_number } (stores email address string)
+    Sends a 6-digit OTP code to the email address.
     """
-    phone_number = request.data.get('phone_number')
-    if not phone_number:
-        return Response({'error': 'Phone number is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    email = request.data.get('phone_number')
+    if not email:
+        return Response({'error': 'Email address is required.'}, status=status.HTTP_400_BAD_REQUEST)
     
-    normalized = normalize_phone_number(phone_number)
-    try:
-        res = send_real_otp(normalized)
-        is_mock = False
-        if res and "mock" in res.get("message", "").lower():
-            is_mock = True
-        return Response({
-            'message': 'OTP sent successfully.',
-            'is_mock': is_mock,
-            'mock_code': '123456' if is_mock else None
-        }, status=status.HTTP_200_OK)
-    except Exception as e:
-        # Catch Twilio Verify errors and fallback to mock mode to ensure it works for all phone numbers
-        print(f"[OTP FALLBACK] Twilio send failed for {normalized}: {str(e)}. Falling back to mock OTP.")
-        return Response({
-            'message': 'OTP simulated successfully.',
-            'is_mock': True,
-            'mock_code': '123456'
-        }, status=status.HTTP_200_OK)
+    normalized = normalize_phone_number(email)
+    res = send_email_otp(normalized)
+    return Response({
+        'message': 'Verification code sent to your email.',
+        'is_mock': res.get('is_mock', False),
+        'mock_code': res.get('mock_code', None)
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
 def verify_otp(request):
     """
     POST /api/users/otp/verify
-    Body: { phone_number, otp, device_id }
-    Verifies the OTP via Twilio Verify API and creates PhoneAccount/DeviceSession.
+    Body: { phone_number, otp, device_id } (phone_number contains email address)
+    Verifies the email OTP code.
     """
-    phone_number = request.data.get('phone_number')
+    email = request.data.get('phone_number')
     otp = request.data.get('otp')
     device_id = request.data.get('device_id')
 
-    if not phone_number or not otp:
-        return Response({'error': 'Phone number and OTP are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    if not email or not otp:
+        return Response({'error': 'Email address and verification code are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    normalized = normalize_phone_number(phone_number)
+    normalized = normalize_phone_number(email)
     try:
-        check_res = verify_real_otp(normalized, otp)
+        check_res = verify_email_otp(normalized, otp)
         if check_res.get('status') == 'approved':
-            # Success: Get or create phone account
             phone_account, _ = PhoneAccount.objects.get_or_create(phone_number=normalized)
-
-            # Register device session if device_id is provided
             if device_id:
                 DeviceSession.objects.get_or_create(phone_account=phone_account, device_id=device_id)
-
             return Response({'verified': True, 'phone_number': normalized}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Verification code is incorrect or expired.'}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        # Fallback verification in case of Twilio connection errors or mock verification
-        if otp == '123456':
-            print(f"[OTP FALLBACK] Twilio verification failed: {str(e)}. Verifying via mock code fallback.")
-            phone_account, _ = PhoneAccount.objects.get_or_create(phone_number=normalized)
-            if device_id:
-                DeviceSession.objects.get_or_create(phone_account=phone_account, device_id=device_id)
-            return Response({'verified': True, 'phone_number': normalized}, status=status.HTTP_200_OK)
+    except ValueError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 

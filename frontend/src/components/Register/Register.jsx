@@ -11,7 +11,7 @@ import {
   registerLearner, sendOtp, verifyOtp, fetchPhoneLearners
 } from '../../services/api';
 import { useLearner } from '../../services/LearnerContext';
-import { Smartphone, HelpCircle, ArrowLeft, Plus } from 'lucide-react';
+import { Mail, HelpCircle, ArrowLeft, Plus } from 'lucide-react';
 import styles from './Register.module.css';
 import RegistrationSuccess from './RegistrationSuccess';
 
@@ -27,8 +27,10 @@ function Register() {
   const { setLearner } = useLearner();
 
   // Multi-learner phone onboarding stages
-  const [stage, setStage] = useState('phone_input'); // 'phone_input', 'otp_input', 'select_learner', 'wizard'
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [stage, setStage] = useState('email_input'); // 'email_input', 'otp_input', 'select_learner', 'wizard'
+  const [phoneNumber, setPhoneNumber] = useState(''); // Stores email address now
+  const emailAddress = phoneNumber;
+  const setEmailAddress = setPhoneNumber;
   const [otpArray, setOtpArray] = useState(['', '', '', '', '', '']);
   const [timerCount, setTimerCount] = useState(25);
   const [linkedLearners, setLinkedLearners] = useState([]);
@@ -159,19 +161,19 @@ function Register() {
   };
 
   const handleBack = () => {
-    if (stage === 'phone_input') {
+    if (stage === 'email_input') {
       navigate('/');
     } else if (stage === 'otp_input') {
-      setStage('phone_input');
+      setStage('email_input');
       setOtpArray(['', '', '', '', '', '']);
     } else if (stage === 'select_learner') {
-      setStage('phone_input');
+      setStage('email_input');
     } else if (stage === 'wizard') {
       if (currentStep === 0) {
         if (linkedLearners.length > 0) {
           setStage('select_learner');
         } else {
-          setStage('phone_input');
+          setStage('email_input');
         }
       } else {
         setCurrentStep((prev) => prev - 1);
@@ -229,27 +231,23 @@ function Register() {
     <div className={styles.page}>
       <button className={styles.backButton} onClick={handleBack} type="button">‹</button>
 
-      {/* Stage 1: Phone Input */}
-      {stage === 'phone_input' && (
+      {/* Stage 1: Email Input */}
+      {stage === 'email_input' && (
         <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '20px', marginTop: '40px' }}>
-          <Smartphone size={64} color="var(--color-orange)" />
-          <h1 className={styles.pageTitle} style={{ marginBottom: '4px' }}>Verify Your Phone</h1>
+          <Mail size={64} color="var(--color-orange)" />
+          <h1 className={styles.pageTitle} style={{ marginBottom: '4px' }}>Verify Your Email</h1>
           <p style={{ fontSize: '15px', color: 'var(--text-muted)', fontWeight: 700 }}>
-            Enter your mobile number to set up your safe learning profiles.
+            Enter your email address to set up your safe learning profiles.
           </p>
 
           <div style={{ display: 'flex', gap: '10px', width: '100%', marginTop: '10px' }}>
-            <div style={{ padding: '14px 16px', fontSize: '16px', fontWeight: 800, backgroundColor: 'var(--bg-cream-card)', border: '2px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', color: 'var(--text-dark)' }}>
-              <span>🇮🇳</span> +91
-            </div>
             <input
-              type="tel"
-              style={{ flex: 1, padding: '14px 16px', fontSize: '16px', fontWeight: 800, border: '2px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--text-dark)' }}
-              placeholder="Enter your mobile number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              type="email"
+              style={{ flex: 1, padding: '14px 16px', fontSize: '16px', fontWeight: 800, border: '2px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--text-dark)', textAlign: 'center' }}
+              placeholder="Enter your email address"
+              value={emailAddress}
+              onChange={(e) => setEmailAddress(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
-              maxLength={10}
             />
           </div>
 
@@ -261,7 +259,7 @@ function Register() {
             type="button"
             style={{ width: '100%', marginTop: '10px', position: 'static' }}
           >
-            Send OTP
+            Send Code
           </button>
         </div>
       )}
@@ -272,12 +270,12 @@ function Register() {
           <HelpCircle size={64} color="var(--color-orange)" />
           <h1 className={styles.pageTitle} style={{ marginBottom: '4px' }}>Enter the 6-digit code</h1>
           <p style={{ fontSize: '15px', color: 'var(--text-muted)', fontWeight: 700 }}>
-            We sent a verification code to +91 {phoneNumber.replace(/(\d{5})(\d{5})/, 'XXXXX $2')}
+            We sent a verification code to <strong>{emailAddress}</strong>
           </p>
 
           {isMockOtp && (
             <div style={{ backgroundColor: 'var(--color-peach-light)', color: 'var(--color-orange-dark)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', fontSize: '13.5px', fontWeight: 800, margin: '6px 0', border: '1.5px solid var(--color-peach)', lineHeight: 1.4, width: '100%' }}>
-              ⚠️ Twilio SMS credentials not detected in your backend .env file. Falling back to development mock mode. Use verification code: <strong>123456</strong>
+              ⚠️ Email SMTP credentials not configured in backend settings. The OTP has been printed to the server terminal. For local testing, use code: <strong>123456</strong>
             </div>
           )}
 
@@ -313,7 +311,7 @@ function Register() {
             type="button"
             style={{ width: '100%', marginTop: '10px', position: 'static' }}
           >
-            {isSubmitting ? 'Verifying...' : 'Verify OTP'}
+            {isSubmitting ? 'Verifying...' : 'Verify Code'}
           </button>
         </div>
       )}
@@ -323,7 +321,7 @@ function Register() {
         <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', marginTop: '20px' }}>
           <h1 className={styles.pageTitle} style={{ marginBottom: '4px', textAlign: 'center' }}>Who is playing today?</h1>
           <p style={{ fontSize: '15px', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'center', marginTop: '-10px' }}>
-            We found profile(s) already linked to +91 {phoneNumber}. Select one to play or create a new profile!
+            We found profile(s) already linked to <strong>{emailAddress}</strong>. Select one to play or create a new profile!
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', marginTop: '10px' }}>
