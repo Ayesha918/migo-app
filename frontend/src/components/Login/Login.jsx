@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   searchLearnerById, searchLearnerByName,
-  sendOtp, verifyOtp, checkDevice
+  sendOtp, verifyOtp, checkDevice, googleLogin
 } from '../../services/api';
 import { useLearner } from '../../services/LearnerContext';
 import owl from '../../assets/images/owl.png';
@@ -32,7 +32,7 @@ function Login() {
   const [isListening, setIsListening] = useState(false);
 
   // OTP Device Verification flow states
-  const [subStage, setSubStage] = useState('search'); // 'search', 'new_device_warning', 'email_input', 'otp_input', 'welcome_back'
+  const [subStage, setSubStage] = useState('search'); // 'search', 'new_device_warning', 'email_input', 'otp_input', 'welcome_back', 'select_learner'
   const [selectedLearnerItem, setSelectedLearnerItem] = useState(null);
   const [phoneNumber, setPhoneNumber] = useState(''); // Stores email address now
   const emailAddress = phoneNumber;
@@ -41,7 +41,55 @@ function Login() {
   const [isSubmittingOtp, setIsSubmittingOtp] = useState(false);
   const [timerCount, setTimerCount] = useState(25);
   const [isMockOtp, setIsMockOtp] = useState(false);
+  const [linkedLearners, setLinkedLearners] = useState([]);
   const timerRef = useRef(null);
+
+  const handleGoogleCredentialResponse = async (response) => {
+    try {
+      setError('');
+      setIsSubmittingOtp(true);
+      const res = await googleLogin(response.credential, localStorage.getItem('migo_device_id') || 'dev-device');
+      if (res.data.verified) {
+        const learnersList = res.data.learners || [];
+        if (learnersList.length > 0) {
+          setLinkedLearners(learnersList);
+          setSubStage('select_learner');
+        } else {
+          // Send user to registration stage with verified email
+          navigate('/register', { state: { email: res.data.email } });
+        }
+      }
+    } catch (err) {
+      console.error('Google verification failed:', err);
+      setError('Google Sign-In failed. Please try again.');
+    } finally {
+      setIsSubmittingOtp(false);
+    }
+  };
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "1028308472931-dummyid.apps.googleusercontent.com";
+    
+    const initGsi = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleCredentialResponse
+        });
+        
+        const btnElement = document.getElementById("google-signin-button-login");
+        if (btnElement) {
+          window.google.accounts.id.renderButton(
+            btnElement,
+            { theme: "outline", size: "large", width: 280 }
+          );
+        }
+      }
+    };
+
+    const timer = setTimeout(initGsi, 500);
+    return () => clearTimeout(timer);
+  }, [subStage]);
 
   // Input refs for OTP fields auto-focus
   const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
@@ -370,7 +418,16 @@ function Login() {
           <button className={styles.verifyBtn} onClick={handleSendPhoneOtp}>
             Send Code
           </button>
-          <button className={styles.verifyBtnSecondary} onClick={handleBackToSearch}>
+
+          <div style={{ margin: '14px 0', borderBottom: '2.5px dashed var(--color-peach-light)', width: '100%' }}></div>
+
+          {/* Google Sign-in Button wrapper */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>Or continue with:</span>
+            <div id="google-signin-button-login" style={{ display: 'flex', justifyContent: 'center' }}></div>
+          </div>
+
+          <button className={styles.verifyBtnSecondary} onClick={handleBackToSearch} style={{ marginTop: '16px' }}>
             Cancel
           </button>
         </div>
@@ -422,6 +479,45 @@ function Login() {
           <button className={styles.verifyBtnSecondary} onClick={() => setSubStage('email_input')}>
             Change email address
           </button>
+        </div>
+      )}
+
+      {/* Google Login: Select Learner Profile */}
+      {subStage === 'select_learner' && (
+        <div className={styles.verifyCard} style={{ maxWidth: '420px' }}>
+          <h2 className={styles.verifyTitle}>Who is playing today?</h2>
+          <p className={styles.verifyText}>
+            We found profile(s) linked to your email <strong>{emailAddress}</strong>. Select one to play or create a new profile!
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', marginTop: '10px' }}>
+            {linkedLearners.map((learnerItem) => (
+              <button
+                key={learnerItem.learner_id}
+                type="button"
+                style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: 'var(--radius-md)', border: '3px solid var(--color-peach)', backgroundColor: '#FFFFFF', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                onClick={() => {
+                  setLearner(learnerItem);
+                  navigate('/home');
+                }}
+              >
+                <span style={{ fontSize: '36px' }}>
+                  {AVATAR_EMOJI[learnerItem.avatar] || '⭐'}
+                </span>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-dark)' }}>{learnerItem.name}</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-muted)' }}>{learnerItem.learner_id}</span>
+                </div>
+                <span style={{ color: 'var(--color-orange)', fontWeight: 900 }}>Play ▶</span>
+              </button>
+            ))}
+            <button
+              onClick={() => navigate('/register', { state: { email: emailAddress } })}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', borderRadius: 'var(--radius-md)', border: '2.5px dashed var(--color-orange)', backgroundColor: 'transparent', cursor: 'pointer', fontWeight: 850, color: 'var(--color-orange)' }}
+              type="button"
+            >
+              + Create New Profile
+            </button>
+          </div>
         </div>
       )}
 

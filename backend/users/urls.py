@@ -16,4 +16,5 @@ urlpatterns = [
     path('notifications', views.manage_notifications, name='manage_notifications'),
     path('notifications/read-all', views.manage_notifications, name='read_all_notifications'),
     path('subscription/upgrade', views.upgrade_subscription, name='upgrade_subscription'),
+    path('google-login', views.google_login, name='google_login'),
 ]

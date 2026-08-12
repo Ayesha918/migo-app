@@ -1,14 +1,14 @@
 // src/components/Register/Register.jsx
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ProgressBar from './ProgressBar';
 import StepName from './StepName';
 import StepAge from './StepAge';
 import StepLanguage from './StepLanguage';
 import StepAvatar from './StepAvatar';
 import {
-  registerLearner, sendOtp, verifyOtp, fetchPhoneLearners
+  registerLearner, sendOtp, verifyOtp, fetchPhoneLearners, googleLogin
 } from '../../services/api';
 import { useLearner } from '../../services/LearnerContext';
 import { Mail, HelpCircle, ArrowLeft, Plus } from 'lucide-react';
@@ -24,11 +24,12 @@ const AVATAR_EMOJI = {
 
 function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setLearner } = useLearner();
 
   // Multi-learner phone onboarding stages
-  const [stage, setStage] = useState('email_input'); // 'email_input', 'otp_input', 'select_learner', 'wizard'
-  const [phoneNumber, setPhoneNumber] = useState(''); // Stores email address now
+  const [stage, setStage] = useState(location.state?.email ? 'wizard' : 'email_input'); // 'email_input', 'otp_input', 'select_learner', 'wizard'
+  const [phoneNumber, setPhoneNumber] = useState(location.state?.email || ''); // Stores email address now
   const emailAddress = phoneNumber;
   const setEmailAddress = setPhoneNumber;
   const [otpArray, setOtpArray] = useState(['', '', '', '', '', '']);
@@ -44,6 +45,54 @@ function Register() {
 
   const timerRef = useRef(null);
   const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
+
+  const handleGoogleCredentialResponse = async (response) => {
+    try {
+      setSubmitError('');
+      setIsSubmitting(true);
+      const res = await googleLogin(response.credential, localStorage.getItem('migo_device_id') || 'dev-device');
+      if (res.data.verified) {
+        const learnersList = res.data.learners || [];
+        setEmailAddress(res.data.email);
+        if (learnersList.length > 0) {
+          setLinkedLearners(learnersList);
+          setStage('select_learner');
+        } else {
+          // Auto-verified with Google: immediately skip OTP check and show profile creation wizard
+          setStage('wizard');
+        }
+      }
+    } catch (err) {
+      console.error('Google verification failed:', err);
+      setSubmitError('Google Sign-In failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "1028308472931-dummyid.apps.googleusercontent.com";
+    
+    const initGsi = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleCredentialResponse
+        });
+        
+        const btnElement = document.getElementById("google-signin-button-register");
+        if (btnElement) {
+          window.google.accounts.id.renderButton(
+            btnElement,
+            { theme: "outline", size: "large", width: 280 }
+          );
+        }
+      }
+    };
+
+    const timer = setTimeout(initGsi, 500);
+    return () => clearTimeout(timer);
+  }, [stage]);
 
   const [formData, setFormData] = useState({
     name: '', age: '', knownLanguage: 'en', learningLanguage: '', avatar: '',
@@ -261,6 +310,14 @@ function Register() {
           >
             Send Code
           </button>
+
+          <div style={{ margin: '14px 0', borderBottom: '2.5px dashed var(--color-peach-light)', width: '100%' }}></div>
+
+          {/* Google Sign-in Button */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>Or continue with:</span>
+            <div id="google-signin-button-register" style={{ display: 'flex', justifyContent: 'center' }}></div>
+          </div>
         </div>
       )}
 

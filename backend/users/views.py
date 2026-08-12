@@ -491,3 +491,69 @@ def upgrade_subscription(request):
         'subscription_tier': learner.subscription_tier,
         'status': 'upgraded'
     }, status=status.HTTP_200_OK)
+
+
+import urllib.request
+import json
+from django.conf import settings
+
+@api_view(['POST'])
+def google_login(request):
+    """
+    POST /api/users/google-login
+    Body: { credential, device_id }
+    Verifies the Google JWT ID token and authenticates the user.
+    """
+    credential = request.data.get('credential')
+    device_id = request.data.get('device_id')
+
+    if not credential:
+        return Response({'error': 'Google credential token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Call Google's tokeninfo API to verify the token for free without external python dependencies
+    url = f"https://oauth2.googleapis.com/tokeninfo?id_token={credential}"
+    try:
+        req = urllib.request.Request(url, method='GET')
+        with urllib.request.urlopen(req) as response:
+            payload = json.loads(response.read().decode('utf-8'))
+            
+            # Check for token validation errors
+            if "error_description" in payload:
+                return Response({'error': payload["error_description"]}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Check Audience (aud) matches our Client ID if configured
+            client_id = getattr(settings, 'GOOGLE_CLIENT_ID', '')
+            if client_id and payload.get('aud') != client_id:
+                print(f"[GOOGLE LOGIN] Warning: Token audience '{payload.get('aud')}' does not match client ID '{client_id}'")
+            
+            email = payload.get('email')
+            name = payload.get('name')
+            avatar_url = payload.get('picture')
+            
+            if not email:
+                return Response({'error': 'Email address not found in Google profile.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            normalized = email.strip().lower()
+            
+            # Get or create PhoneAccount (using email identifier)
+            phone_account, created = PhoneAccount.objects.get_or_create(phone_number=normalized)
+            
+            # Register device session if device_id is provided
+            if device_id:
+                DeviceSession.objects.get_or_create(phone_account=phone_account, device_id=device_id)
+
+            # Query existing learners linked to this account
+            learners = phone_account.learners.all()
+            serializer = LearnerSerializer(learners, many=True)
+
+            return Response({
+                'verified': True,
+                'phone_number': normalized,
+                'email': normalized,
+                'name': name,
+                'avatar_url': avatar_url,
+                'learners': serializer.data
+            }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'error': f"Failed to verify Google token: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
