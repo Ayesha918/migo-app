@@ -16,11 +16,11 @@ export const searchLearnerById = (learnerId) =>
 export const searchLearnerByName = (name) =>
   api.get('/users/search', { params: { name } });
 
-export const sendOtp = (phoneNumber) =>
-  api.post('/users/otp/send', { phone_number: phoneNumber });
+export const signupAccount = (email, password) =>
+  api.post('/users/signup', { email, password });
 
-export const verifyOtp = (phoneNumber, otp, deviceId) =>
-  api.post('/users/otp/verify', { phone_number: phoneNumber, otp, device_id: deviceId });
+export const loginAccount = (email, password, deviceId) =>
+  api.post('/users/login', { email, password, device_id: deviceId });
 
 export const checkDevice = (learnerId, deviceId) =>
   api.get('/users/check-device', { params: { learner_id: learnerId, device_id: deviceId } });

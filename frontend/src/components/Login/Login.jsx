@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   searchLearnerById, searchLearnerByName,
-  sendOtp, verifyOtp, checkDevice, googleLogin
+  loginAccount, checkDevice, googleLogin
 } from '../../services/api';
 import { useLearner } from '../../services/LearnerContext';
 import owl from '../../assets/images/owl.png';
@@ -31,18 +31,16 @@ function Login() {
   const [error, setError] = useState('');
   const [isListening, setIsListening] = useState(false);
 
-  // OTP Device Verification flow states
-  const [subStage, setSubStage] = useState('search'); // 'search', 'new_device_warning', 'email_input', 'otp_input', 'welcome_back', 'select_learner'
+  // Authentication states
+  const [subStage, setSubStage] = useState('search'); // 'search', 'new_device_warning', 'password_input', 'welcome_back', 'select_learner'
   const [selectedLearnerItem, setSelectedLearnerItem] = useState(null);
   const [phoneNumber, setPhoneNumber] = useState(''); // Stores email address now
   const emailAddress = phoneNumber;
   const setEmailAddress = setPhoneNumber;
-  const [otpArray, setOtpArray] = useState(['', '', '', '', '', '']);
+  const [password, setPassword] = useState('');
+  const [loginMode, setLoginMode] = useState('account'); // 'account' (email/password), 'search' (profile search)
   const [isSubmittingOtp, setIsSubmittingOtp] = useState(false);
-  const [timerCount, setTimerCount] = useState(25);
-  const [isMockOtp, setIsMockOtp] = useState(false);
   const [linkedLearners, setLinkedLearners] = useState([]);
-  const timerRef = useRef(null);
 
   const handleGoogleCredentialResponse = async (response) => {
     try {
@@ -55,7 +53,6 @@ function Login() {
           setLinkedLearners(learnersList);
           setSubStage('select_learner');
         } else {
-          // Send user to registration stage with verified email
           navigate('/register', { state: { email: res.data.email } });
         }
       }
@@ -89,10 +86,7 @@ function Login() {
 
     const timer = setTimeout(initGsi, 500);
     return () => clearTimeout(timer);
-  }, [subStage]);
-
-  // Input refs for OTP fields auto-focus
-  const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
+  }, [subStage, loginMode]);
 
   // Auto-fill simulated ID from landing page onboarding wizard
   useEffect(() => {
@@ -209,61 +203,44 @@ function Login() {
     }
   };
 
-  const handleSendPhoneOtp = async () => {
-    if (!phoneNumber.trim()) {
-      setError('Please enter your mobile number.');
-      return;
-    }
-    setError('');
-    try {
-      const res = await sendOtp(phoneNumber.trim());
-      setIsMockOtp(!!res.data?.is_mock);
-      setTimerCount(25);
-      setSubStage('otp_input');
-    } catch (err) {
-      setError('Could not send code. Try again.');
-    }
-  };
-
-  const handleOtpBoxChange = (val, idx) => {
-    if (!/^\d*$/.test(val)) return; // Allow numbers only
-    const newOtp = [...otpArray];
-    newOtp[idx] = val.substring(val.length - 1);
-    setOtpArray(newOtp);
-
-    // Auto-focus next field
-    if (val && idx < 5) {
-      otpRefs[idx + 1].current.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (e, idx) => {
-    if (e.key === 'Backspace' && !otpArray[idx] && idx > 0) {
-      otpRefs[idx - 1].current.focus();
-    }
-  };
-
-  const handleVerifyCode = async () => {
-    const fullOtp = otpArray.join('');
-    if (fullOtp.length < 6) {
-      setError('Please enter all 6 digits of the OTP.');
+  const handleLoginAccount = async () => {
+    if (!emailAddress.trim() || !password) {
+      setError('Please fill in both email and password.');
       return;
     }
     setError('');
     setIsSubmittingOtp(true);
     const deviceId = getDeviceId();
-
     try {
-      const response = await verifyOtp(phoneNumber.trim(), fullOtp, deviceId);
+      const response = await loginAccount(emailAddress.trim(), password, deviceId);
       if (response.data.verified) {
-        // Link this learner account in Django to this verified phone account
-        // and register this device session. (This linking occurs implicitly on views verify_otp)
-        // Set the active session and open.
+        const learnersList = response.data.learners || [];
+        setLinkedLearners(learnersList);
+        setSubStage('select_learner');
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Invalid email address or password.');
+    } finally {
+      setIsSubmittingOtp(false);
+    }
+  };
+
+  const handleVerifyPassword = async () => {
+    if (!password) {
+      setError('Please enter your password.');
+      return;
+    }
+    setError('');
+    setIsSubmittingOtp(true);
+    const deviceId = getDeviceId();
+    try {
+      const response = await loginAccount(selectedLearnerItem.phone_number, password, deviceId);
+      if (response.data.verified) {
         setLearner(selectedLearnerItem);
         navigate('/home');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Verification code is incorrect.');
+      setError(err.response?.data?.error || 'Invalid password.');
     } finally {
       setIsSubmittingOtp(false);
     }
@@ -272,7 +249,7 @@ function Login() {
   const handleBackToSearch = () => {
     setSubStage('search');
     setPhoneNumber('');
-    setOtpArray(['', '', '', '', '', '']);
+    setPassword('');
     setError('');
   };
 
@@ -293,76 +270,139 @@ function Login() {
           <div className={styles.modeToggle}>
             <button
               type="button"
-              className={`${styles.modeButton} ${mode === 'id' ? styles.modeActive : ''}`}
-              onClick={() => { setMode('id'); setQuery(''); setResults([]); setError(''); }}
-            >
-              <Hash size={18} />
-              <span>Learner ID</span>
-            </button>
-            <button
-              type="button"
-              className={`${styles.modeButton} ${mode === 'name' ? styles.modeActive : ''}`}
-              onClick={() => { setMode('name'); setQuery(''); setResults([]); setError(''); }}
+              className={`${styles.modeButton} ${loginMode === 'account' ? styles.modeActive : ''}`}
+              onClick={() => { setLoginMode('account'); setError(''); }}
             >
               <User size={18} />
-              <span>Search by Name</span>
+              <span>Sign In</span>
             </button>
-          </div>
-
-          <div className={styles.searchRow}>
-            <input
-              type="text"
-              className={`${styles.searchInput} ${isListening ? styles.listeningInput : ''}`}
-              placeholder={isListening ? 'Listening...' : mode === 'id' ? 'e.g. MG000001' : 'Enter your name'}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            
             <button
-              className={`${styles.micButton} ${isListening ? styles.micActive : ''}`}
               type="button"
-              onClick={startVoiceSearch}
-              title="Speak your name/ID"
+              className={`${styles.modeButton} ${loginMode === 'search' ? styles.modeActive : ''}`}
+              onClick={() => { setLoginMode('search'); setQuery(''); setResults([]); setError(''); }}
             >
-              {isListening ? <MicOff size={22} className={styles.pulse} /> : <Mic size={22} />}
-            </button>
-
-            <button className={styles.searchButton} type="button" onClick={handleSearch}>
-              <Search size={22} />
+              <Search size={18} />
+              <span>Search Profile</span>
             </button>
           </div>
 
-          <p className={styles.speakInstruction}>
-            🎙️ Don't know how to write? Tap the microphone and speak your name!
-          </p>
+          {loginMode === 'account' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '340px', margin: '20px auto 0' }}>
+              <input
+                type="email"
+                style={{ width: '100%', padding: '14px 18px', fontSize: '15px', fontWeight: 800, border: '2px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--text-dark)' }}
+                placeholder="Enter your email address"
+                value={emailAddress}
+                onChange={(e) => setEmailAddress(e.target.value)}
+              />
+              <input
+                type="password"
+                style={{ width: '100%', padding: '14px 18px', fontSize: '15px', fontWeight: 800, border: '2px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--text-dark)' }}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleLoginAccount()}
+              />
 
-          {isSearching && <p className={styles.statusText}>Searching for your profile...</p>}
-          {error && <p className={styles.errorText}>{error}</p>}
+              {error && <p className={styles.errorText}>{error}</p>}
 
-          <div className={styles.resultsGrid}>
-            {results.map((learnerItem) => (
-              <motion.button
-                key={learnerItem.id || learnerItem.learner_id}
-                type="button"
-                className={styles.resultCard}
-                onClick={() => handleSelectLearner(learnerItem)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.96 }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <span className={styles.resultAvatar}>
-                  {AVATAR_EMOJI[learnerItem.avatar] || '⭐'}
-                </span>
-                <div className={styles.resultInfo}>
-                  <span className={styles.resultName}>{learnerItem.name}</span>
-                  <span className={styles.resultId}>{learnerItem.learner_id}</span>
-                </div>
-                <span className={styles.playBadge}>Play ▶</span>
-              </motion.button>
-            ))}
-          </div>
+              <button className={styles.verifyBtn} onClick={handleLoginAccount} disabled={isSubmittingOtp}>
+                {isSubmittingOtp ? 'Logging in...' : 'Sign In'}
+              </button>
+
+              <div style={{ margin: '8px 0', borderBottom: '2.5px dashed var(--color-peach-light)', width: '100%' }}></div>
+
+              {/* Google Sign-in Button wrapper */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>Or continue with:</span>
+                <div id="google-signin-button-login" style={{ display: 'flex', justifyContent: 'center' }}></div>
+              </div>
+
+              <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '14px', fontWeight: 800, color: 'var(--text-muted)' }}>
+                Don't have an account? <span style={{ color: 'var(--color-orange)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate('/register')}>Register Now</span>
+              </div>
+            </div>
+          )}
+
+          {loginMode === 'search' && (
+            <>
+              <div className={styles.modeToggle} style={{ width: '100%', maxWidth: '340px', margin: '14px auto 0' }}>
+                <button
+                  type="button"
+                  className={`${styles.modeButton} ${mode === 'id' ? styles.modeActive : ''}`}
+                  onClick={() => { setMode('id'); setQuery(''); setResults([]); setError(''); }}
+                  style={{ fontSize: '13.5px', padding: '8px 12px' }}
+                >
+                  <Hash size={16} />
+                  <span>Learner ID</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.modeButton} ${mode === 'name' ? styles.modeActive : ''}`}
+                  onClick={() => { setMode('name'); setQuery(''); setResults([]); setError(''); }}
+                  style={{ fontSize: '13.5px', padding: '8px 12px' }}
+                >
+                  <User size={16} />
+                  <span>Search Name</span>
+                </button>
+              </div>
+
+              <div className={styles.searchRow}>
+                <input
+                  type="text"
+                  className={`${styles.searchInput} ${isListening ? styles.listeningInput : ''}`}
+                  placeholder={isListening ? 'Listening...' : mode === 'id' ? 'e.g. MG000001' : 'Enter your name'}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+                
+                <button
+                  className={`${styles.micButton} ${isListening ? styles.micActive : ''}`}
+                  type="button"
+                  onClick={startVoiceSearch}
+                  title="Speak your name/ID"
+                >
+                  {isListening ? <MicOff size={22} className={styles.pulse} /> : <Mic size={22} />}
+                </button>
+
+                <button className={styles.searchButton} type="button" onClick={handleSearch}>
+                  <Search size={22} />
+                </button>
+              </div>
+
+              <p className={styles.speakInstruction}>
+                🎙️ Don't know how to write? Tap the microphone and speak your name!
+              </p>
+
+              {isSearching && <p className={styles.statusText}>Searching for your profile...</p>}
+              {error && <p className={styles.errorText}>{error}</p>}
+
+              <div className={styles.resultsGrid}>
+                {results.map((learnerItem) => (
+                  <motion.button
+                    key={learnerItem.id || learnerItem.learner_id}
+                    type="button"
+                    className={styles.resultCard}
+                    onClick={() => handleSelectLearner(learnerItem)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.96 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <span className={styles.resultAvatar}>
+                      {AVATAR_EMOJI[learnerItem.avatar] || '⭐'}
+                    </span>
+                    <div className={styles.resultInfo}>
+                      <span className={styles.resultName}>{learnerItem.name}</span>
+                      <span className={styles.resultId}>{learnerItem.learner_id}</span>
+                    </div>
+                    <span className={styles.playBadge}>Play ▶</span>
+                  </motion.button>
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
 
@@ -370,11 +410,15 @@ function Login() {
       {subStage === 'new_device_warning' && (
         <div className={styles.verifyCard}>
           <Mail size={56} color="var(--color-orange)" />
-          <h2 className={styles.verifyTitle}>Is this your first time on this email?</h2>
+          <h2 className={styles.verifyTitle}>Is this your first time on this device?</h2>
           <p className={styles.verifyText}>
-            Let's verify your email address to secure your learning data and make recovery simple.
+            Let's verify your password to trust this device and sync your learning data.
           </p>
-          <button className={styles.verifyBtn} onClick={() => setSubStage('email_input')}>
+          <button className={styles.verifyBtn} onClick={() => {
+            setEmailAddress(selectedLearnerItem.phone_number);
+            setPassword('');
+            setSubStage('password_input');
+          }}>
             Yes, let's verify
           </button>
           <button className={styles.verifyBtnSecondary} onClick={handleBackToSearch}>
@@ -383,18 +427,18 @@ function Login() {
         </div>
       )}
 
-      {/* Screen 3: Verify Your Email */}
-      {subStage === 'email_input' && (
+      {/* Screen 3: Verify Password for Searched Profile */}
+      {subStage === 'password_input' && (
         <div className={styles.verifyCard}>
           <Mail size={56} color="var(--color-orange)" />
-          <h2 className={styles.verifyTitle}>Verify Your Email</h2>
+          <h2 className={styles.verifyTitle}>Confirm Password</h2>
           <p className={styles.verifyText}>
-            We will send a 6-digit code to verify your email address.
+            Enter the password for <strong>{emailAddress}</strong> to trust this device.
           </p>
           
           <div style={{ width: '100%', marginTop: '10px' }}>
             <input
-              type="email"
+              type="password"
               style={{
                 width: '100%',
                 padding: '14px 18px',
@@ -406,78 +450,20 @@ function Login() {
                 color: 'var(--text-dark)',
                 textAlign: 'center'
               }}
-              placeholder="Enter your email address"
-              value={emailAddress}
-              onChange={(e) => setEmailAddress(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendPhoneOtp()}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleVerifyPassword()}
             />
           </div>
 
           {error && <p className={styles.errorText}>{error}</p>}
 
-          <button className={styles.verifyBtn} onClick={handleSendPhoneOtp}>
-            Send Code
+          <button className={styles.verifyBtn} onClick={handleVerifyPassword} disabled={isSubmittingOtp}>
+            {isSubmittingOtp ? 'Verifying...' : 'Verify Password'}
           </button>
-
-          <div style={{ margin: '14px 0', borderBottom: '2.5px dashed var(--color-peach-light)', width: '100%' }}></div>
-
-          {/* Google Sign-in Button wrapper */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>Or continue with:</span>
-            <div id="google-signin-button-login" style={{ display: 'flex', justifyContent: 'center' }}></div>
-          </div>
-
-          <button className={styles.verifyBtnSecondary} onClick={handleBackToSearch} style={{ marginTop: '16px' }}>
+          <button className={styles.verifyBtnSecondary} onClick={handleBackToSearch}>
             Cancel
-          </button>
-        </div>
-      )}
-
-      {/* Screen 4: Enter the 6-digit code */}
-      {subStage === 'otp_input' && (
-        <div className={styles.verifyCard}>
-          <HelpCircle size={56} color="var(--color-orange)" />
-          <h2 className={styles.verifyTitle}>Enter the 6-digit code</h2>
-          <p className={styles.verifyText}>
-            We sent a verification code to <strong>{emailAddress}</strong>
-          </p>
-
-          {isMockOtp && (
-            <div style={{ backgroundColor: 'var(--color-peach-light)', color: 'var(--color-orange-dark)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', fontSize: '13.5px', fontWeight: 800, margin: '6px 0', border: '1.5px solid var(--color-peach)', lineHeight: 1.4 }}>
-              ⚠️ Email SMTP credentials not configured in backend settings. The OTP has been printed to the server terminal. For local testing, use code: <strong>123456</strong>
-            </div>
-          )}
-
-          <div className={styles.otpGrid}>
-            {otpArray.map((digit, idx) => (
-              <input
-                key={idx}
-                ref={otpRefs[idx]}
-                type="text"
-                className={styles.otpBox}
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleOtpBoxChange(e.target.value, idx)}
-                onKeyDown={(e) => handleOtpKeyDown(e, idx)}
-              />
-            ))}
-          </div>
-
-          <div className={styles.resendRow}>
-            {timerCount > 0 ? (
-              <span>Didn't get the code? Resend in 0:{timerCount < 10 ? '0' : ''}{timerCount}</span>
-            ) : (
-              <span>Didn't get the code? <button className={styles.resendBtn} onClick={handleSendPhoneOtp}>Resend Now</button></span>
-            )}
-          </div>
-
-          {error && <p className={styles.errorText}>{error}</p>}
-
-          <button className={styles.verifyBtn} onClick={handleVerifyCode} disabled={isSubmittingOtp}>
-            {isSubmittingOtp ? 'Verifying...' : 'Verify Code'}
-          </button>
-          <button className={styles.verifyBtnSecondary} onClick={() => setSubStage('email_input')}>
-            Change email address
           </button>
         </div>
       )}

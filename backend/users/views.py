@@ -3,9 +3,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q
+from django.contrib.auth.hashers import make_password, check_password
 from .models import Learner, PhoneAccount, DeviceSession, Book, SupportTicket, CommunityPost, Notification
 from .serializers import LearnerSerializer
-from .otp_service import send_email_otp, verify_email_otp
 
 
 def normalize_phone_number(email_or_phone):
@@ -79,51 +79,68 @@ def search_learner(request):
 
 
 @api_view(['POST'])
-def send_otp(request):
+def signup_account(request):
     """
-    POST /api/users/otp/send
-    Body: { phone_number } (stores email address string)
-    Sends a 6-digit OTP code to the email address.
+    POST /api/users/signup
+    Body: { email, password }
+    Creates a new PhoneAccount (email identifier) with hashed password.
     """
-    email = request.data.get('phone_number')
-    if not email:
-        return Response({'error': 'Email address is required.'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    normalized = normalize_phone_number(email)
-    res = send_email_otp(normalized)
-    return Response({
-        'message': 'Verification code sent to your email.',
-        'is_mock': res.get('is_mock', False),
-        'mock_code': res.get('mock_code', None)
-    }, status=status.HTTP_200_OK)
+    email = request.data.get('email')
+    password = request.data.get('password')
+
+    if not email or not password:
+        return Response({'error': 'Email address and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    normalized = email.strip().lower()
+
+    if PhoneAccount.objects.filter(phone_number=normalized).exists():
+        return Response({'error': 'An account with this email address already exists. Please log in.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    hashed_password = make_password(password)
+    PhoneAccount.objects.create(phone_number=normalized, password=hashed_password)
+
+    return Response({'success': True, 'email': normalized}, status=status.HTTP_201_CREATED)
 
 
 @api_view(['POST'])
-def verify_otp(request):
+def login_account(request):
     """
-    POST /api/users/otp/verify
-    Body: { phone_number, otp, device_id } (phone_number contains email address)
-    Verifies the email OTP code.
+    POST /api/users/login
+    Body: { email, password, device_id }
+    Authenticates email and password. Registers trusted device session.
     """
-    email = request.data.get('phone_number')
-    otp = request.data.get('otp')
+    email = request.data.get('email')
+    password = request.data.get('password')
     device_id = request.data.get('device_id')
 
-    if not email or not otp:
-        return Response({'error': 'Email address and verification code are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    if not email or not password:
+        return Response({'error': 'Email address and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    normalized = normalize_phone_number(email)
+    normalized = email.strip().lower()
+
     try:
-        check_res = verify_email_otp(normalized, otp)
-        if check_res.get('status') == 'approved':
-            phone_account, _ = PhoneAccount.objects.get_or_create(phone_number=normalized)
-            if device_id:
-                DeviceSession.objects.get_or_create(phone_account=phone_account, device_id=device_id)
-            return Response({'verified': True, 'phone_number': normalized}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': 'Verification code is incorrect or expired.'}, status=status.HTTP_400_BAD_REQUEST)
-    except ValueError as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        phone_account = PhoneAccount.objects.get(phone_number=normalized)
+    except PhoneAccount.DoesNotExist:
+        return Response({'error': 'Invalid email address or password.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not phone_account.password:
+        return Response({'error': 'This account was signed up via Google. Please log in with Google.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not check_password(password, phone_account.password):
+        return Response({'error': 'Invalid email address or password.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if device_id:
+        DeviceSession.objects.get_or_create(phone_account=phone_account, device_id=device_id)
+
+    learners = phone_account.learners.all()
+    serializer = LearnerSerializer(learners, many=True)
+
+    return Response({
+        'verified': True,
+        'phone_number': normalized,
+        'email': normalized,
+        'learners': serializer.data
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

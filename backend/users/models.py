@@ -4,6 +4,7 @@ from django.db import models
 
 class PhoneAccount(models.Model):
     phone_number = models.CharField(max_length=255, unique=True)
+    password = models.CharField(max_length=255, blank=True, null=True) # stores hashed password
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -139,11 +140,3 @@ class Notification(models.Model):
     def __str__(self):
         return f"{self.learner.name} - {self.title}"
 
-
-class EmailOTP(models.Model):
-    email = models.EmailField(unique=True)
-    code = models.CharField(max_length=6)
-    created_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.email} - {self.code}"

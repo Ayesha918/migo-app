@@ -8,7 +8,7 @@ import StepAge from './StepAge';
 import StepLanguage from './StepLanguage';
 import StepAvatar from './StepAvatar';
 import {
-  registerLearner, sendOtp, verifyOtp, fetchPhoneLearners, googleLogin
+  registerLearner, fetchPhoneLearners, googleLogin, signupAccount
 } from '../../services/api';
 import { useLearner } from '../../services/LearnerContext';
 import { Mail, HelpCircle, ArrowLeft, Plus } from 'lucide-react';
@@ -28,12 +28,11 @@ function Register() {
   const { setLearner } = useLearner();
 
   // Multi-learner phone onboarding stages
-  const [stage, setStage] = useState(location.state?.email ? 'wizard' : 'email_input'); // 'email_input', 'otp_input', 'select_learner', 'wizard'
+  const [stage, setStage] = useState(location.state?.email ? 'wizard' : 'email_input'); // 'email_input', 'select_learner', 'wizard'
   const [phoneNumber, setPhoneNumber] = useState(location.state?.email || ''); // Stores email address now
   const emailAddress = phoneNumber;
   const setEmailAddress = setPhoneNumber;
-  const [otpArray, setOtpArray] = useState(['', '', '', '', '', '']);
-  const [timerCount, setTimerCount] = useState(25);
+  const [password, setPassword] = useState('');
   const [linkedLearners, setLinkedLearners] = useState([]);
   
   // Wizard steps
@@ -41,10 +40,8 @@ function Register() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [registeredLearner, setRegisteredLearner] = useState(null);
-  const [isMockOtp, setIsMockOtp] = useState(false);
 
   const timerRef = useRef(null);
-  const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
 
   const handleGoogleCredentialResponse = async (response) => {
     try {
@@ -102,16 +99,6 @@ function Register() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Timer countdown for Resend code
-  useEffect(() => {
-    if (stage === 'otp_input' && timerCount > 0) {
-      timerRef.current = setTimeout(() => {
-        setTimerCount(prev => prev - 1);
-      }, 1000);
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [stage, timerCount]);
-
   const getDeviceId = () => {
     let devId = localStorage.getItem('migo_device_id');
     if (!devId) {
@@ -121,66 +108,18 @@ function Register() {
     return devId;
   };
 
-  const handleSendOtp = async () => {
-    if (!phoneNumber.trim()) {
-      setSubmitError('Please enter your mobile number.');
-      return;
-    }
-    setSubmitError('');
-    try {
-      const res = await sendOtp(phoneNumber.trim());
-      setIsMockOtp(!!res.data?.is_mock);
-      setTimerCount(25);
-      setStage('otp_input');
-    } catch (err) {
-      setSubmitError('Could not send code. Try again.');
-    }
-  };
-
-  const handleOtpBoxChange = (val, idx) => {
-    if (!/^\d*$/.test(val)) return;
-    const newOtp = [...otpArray];
-    newOtp[idx] = val.substring(val.length - 1);
-    setOtpArray(newOtp);
-
-    if (val && idx < 5) {
-      otpRefs[idx + 1].current.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (e, idx) => {
-    if (e.key === 'Backspace' && !otpArray[idx] && idx > 0) {
-      otpRefs[idx - 1].current.focus();
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    const fullOtp = otpArray.join('');
-    if (fullOtp.length < 6) {
-      setSubmitError('Please enter the 6-digit code.');
+  const handleSignup = async () => {
+    if (!emailAddress.trim() || !password) {
+      setSubmitError('Please enter both email and password.');
       return;
     }
     setSubmitError('');
     setIsSubmitting(true);
-    const deviceId = getDeviceId();
-
     try {
-      const response = await verifyOtp(phoneNumber.trim(), fullOtp, deviceId);
-      if (response.data.verified) {
-        // Query existing learners associated with this phone
-        const learnersResponse = await fetchPhoneLearners(phoneNumber.trim());
-        const learners = learnersResponse.data;
-        setLinkedLearners(learners);
-
-        if (learners && learners.length > 0) {
-          setStage('select_learner');
-        } else {
-          // No linked learners -> Go straight to profile wizard
-          setStage('wizard');
-        }
-      }
+      await signupAccount(emailAddress.trim(), password);
+      setStage('wizard');
     } catch (err) {
-      setSubmitError(err.response?.data?.error || 'Verification code is incorrect.');
+      setSubmitError(err.response?.data?.error || 'Registration failed. Try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -212,9 +151,6 @@ function Register() {
   const handleBack = () => {
     if (stage === 'email_input') {
       navigate('/');
-    } else if (stage === 'otp_input') {
-      setStage('email_input');
-      setOtpArray(['', '', '', '', '', '']);
     } else if (stage === 'select_learner') {
       setStage('email_input');
     } else if (stage === 'wizard') {
@@ -280,23 +216,30 @@ function Register() {
     <div className={styles.page}>
       <button className={styles.backButton} onClick={handleBack} type="button">‹</button>
 
-      {/* Stage 1: Email Input */}
+      {/* Stage 1: Email & Password Input */}
       {stage === 'email_input' && (
         <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '20px', marginTop: '40px' }}>
           <Mail size={64} color="var(--color-orange)" />
           <h1 className={styles.pageTitle} style={{ marginBottom: '4px' }}>Verify Your Email</h1>
           <p style={{ fontSize: '15px', color: 'var(--text-muted)', fontWeight: 700 }}>
-            Enter your email address to set up your safe learning profiles.
+            Enter your email and choose a password to secure your learning profiles.
           </p>
 
-          <div style={{ display: 'flex', gap: '10px', width: '100%', marginTop: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', marginTop: '10px' }}>
             <input
               type="email"
-              style={{ flex: 1, padding: '14px 16px', fontSize: '16px', fontWeight: 800, border: '2px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--text-dark)', textAlign: 'center' }}
+              style={{ width: '100%', padding: '14px 16px', fontSize: '16px', fontWeight: 800, border: '2px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--text-dark)', textAlign: 'center' }}
               placeholder="Enter your email address"
               value={emailAddress}
               onChange={(e) => setEmailAddress(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
+            />
+            <input
+              type="password"
+              style={{ width: '100%', padding: '14px 16px', fontSize: '16px', fontWeight: 800, border: '2px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--text-dark)', textAlign: 'center' }}
+              placeholder="Create a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSignup()}
             />
           </div>
 
@@ -304,11 +247,11 @@ function Register() {
 
           <button
             className={styles.nextButton}
-            onClick={handleSendOtp}
+            onClick={handleSignup}
             type="button"
             style={{ width: '100%', marginTop: '10px', position: 'static' }}
           >
-            Send Code
+            Continue
           </button>
 
           <div style={{ margin: '14px 0', borderBottom: '2.5px dashed var(--color-peach-light)', width: '100%' }}></div>
@@ -318,62 +261,14 @@ function Register() {
             <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>Or continue with:</span>
             <div id="google-signin-button-register" style={{ display: 'flex', justifyContent: 'center' }}></div>
           </div>
+
+          <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '14px', fontWeight: 800, color: 'var(--text-muted)' }}>
+            Already have an account? <span style={{ color: 'var(--color-orange)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate('/login')}>Sign In</span>
+          </div>
         </div>
       )}
 
-      {/* Stage 2: OTP Input */}
-      {stage === 'otp_input' && (
-        <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '20px', marginTop: '40px' }}>
-          <HelpCircle size={64} color="var(--color-orange)" />
-          <h1 className={styles.pageTitle} style={{ marginBottom: '4px' }}>Enter the 6-digit code</h1>
-          <p style={{ fontSize: '15px', color: 'var(--text-muted)', fontWeight: 700 }}>
-            We sent a verification code to <strong>{emailAddress}</strong>
-          </p>
-
-          {isMockOtp && (
-            <div style={{ backgroundColor: 'var(--color-peach-light)', color: 'var(--color-orange-dark)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', fontSize: '13.5px', fontWeight: 800, margin: '6px 0', border: '1.5px solid var(--color-peach)', lineHeight: 1.4, width: '100%' }}>
-              ⚠️ Email SMTP credentials not configured in backend settings. The OTP has been printed to the server terminal. For local testing, use code: <strong>123456</strong>
-            </div>
-          )}
-
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', width: '100%', margin: '10px 0' }}>
-            {otpArray.map((digit, idx) => (
-              <input
-                key={idx}
-                ref={otpRefs[idx]}
-                type="text"
-                style={{ width: '46px', height: '52px', fontSize: '22px', fontWeight: 900, textAlign: 'center', border: '3.5px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', outline: 'none', backgroundColor: '#FFFFFF', color: 'var(--text-dark)' }}
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleOtpBoxChange(e.target.value, idx)}
-                onKeyDown={(e) => handleOtpKeyDown(e, idx)}
-              />
-            ))}
-          </div>
-
-          <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-muted)', marginTop: '-8px' }}>
-            {timerCount > 0 ? (
-              <span>Didn't get the code? Resend in 0:{timerCount < 10 ? '0' : ''}{timerCount}</span>
-            ) : (
-              <span>Didn't get the code? <button style={{ color: 'var(--color-orange)', background: 'none', border: 'none', fontWeight: 900, cursor: 'pointer' }} onClick={handleSendOtp}>Resend Now</button></span>
-            )}
-          </div>
-
-          {submitError && <p className={styles.errorText}>{submitError}</p>}
-
-          <button
-            className={styles.nextButton}
-            onClick={handleVerifyOtp}
-            disabled={isSubmitting}
-            type="button"
-            style={{ width: '100%', marginTop: '10px', position: 'static' }}
-          >
-            {isSubmitting ? 'Verifying...' : 'Verify Code'}
-          </button>
-        </div>
-      )}
-
-      {/* Stage 3: Select or Create Profile */}
+      {/* Stage 3: Select or Create Profile (used for Google redirects if profiles exist) */}
       {stage === 'select_learner' && (
         <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', marginTop: '20px' }}>
           <h1 className={styles.pageTitle} style={{ marginBottom: '4px', textAlign: 'center' }}>Who is playing today?</h1>
