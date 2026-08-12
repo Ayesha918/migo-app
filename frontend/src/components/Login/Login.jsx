@@ -108,15 +108,7 @@ function Login() {
     return devId;
   };
 
-  // Timer countdown for Resend code
-  useEffect(() => {
-    if (subStage === 'otp_input' && timerCount > 0) {
-      timerRef.current = setTimeout(() => {
-        setTimerCount(prev => prev - 1);
-      }, 1000);
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [subStage, timerCount]);
+
 
   const startVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
