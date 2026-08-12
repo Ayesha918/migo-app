@@ -191,25 +191,100 @@ def list_books(request):
     Returns all books. Auto-seeds default books if none exist.
     """
     if not Book.objects.exists():
+        # English Books
         Book.objects.create(
-            title='The Magic of Words', author='Elena Vance', pages=120,
-            category='Literature', level='Beginner', emoji='📖',
-            content='Once upon a time, there was a little seed that wanted to speak. It learned sound by sound. First came "A", then came "Aa". Soon it could trace the letters on the sand, and the magic of words began to bloom!'
+            title='The Lost Wallet: A Story About Integrity', author='Malik Taalib', pages=32,
+            category='Family & Friendship', level='Level 2 — Beginner', emoji='👛',
+            content='Maya finds a wallet on the sidewalk. Inside: one hundred dollars. Nobody saw her pick it up. Nobody would ever know. Her mind races with possibilities. New art supplies! That skateboard she\'s been wanting! Ice cream every day for a month! But then she sees the name inside: Mrs. Park, the kind woman who runs the corner grocery store...',
+            rating=4.8, price='₹423.00', google_play_url='https://play.google.com/store/books/details?id=B0GV43FNGX',
+            why_recommended='This story matches your current reading level and introduces simple everyday vocabulary about honesty.',
+            audio_available=False, language='en', book_type='Story', cover_image_path='/src/assets/images/lost_wallet_cover.jpg'
         )
         Book.objects.create(
-            title='Modern Communication', author='Dr. Julian Thorne', pages=245,
-            category='Business', level='Intermediate', emoji='💼',
-            content='Communication is the cornerstone of progress. In this book, we explore how spoken dialogue and writing connect communities across barriers.'
+            title='The Tortoise and the Hare', author='Aesop', pages=16,
+            category='Folk & Moral Stories', level='Level 1 — Early Reader', emoji='🐢',
+            content='A speedy Hare mocks a slow-moving Tortoise. Tired of the Hare\'s boasting, the Tortoise challenges him to a race. The Hare, confident of winning, decides to take a nap mid-race. The Tortoise walks steadily and slowly, passes the sleeping Hare, and wins the race! Slow and steady wins the race.',
+            rating=4.9, price='Free', google_play_url='https://play.google.com/store/books/details?id=tortoise_and_hare',
+            why_recommended='This classic fable is excellent for early readers with repetitive words and a clear, simple lesson.',
+            audio_available=True, language='en', book_type='Folk Tale', cover_image_path='/src/assets/images/tortoise_hare_cover.jpg'
         )
         Book.objects.create(
-            title='Linguistic Psychology', author='Sarah Miller', pages=310,
-            category='Science', level='Advanced', emoji='🧠',
-            content='How does our brain decode scripts? When we trace characters, a network of motor and visual neurons fire together to associate characters with phonetic mappings.'
+            title='Panchatantra Stories', author='Vishnu Sharma', pages=48,
+            category='Animal Stories', level='Level 2 — Beginner', emoji='🐘',
+            content='A collection of ancient animal stories from India. The clever monkey tricks the crocodile, the small mouse saves the mighty lion from a net, and the loyal mongoose protects the baby. Each story teaches a valuable moral lesson.',
+            rating=4.7, price='Free', google_play_url='https://play.google.com/store/books/details?id=panchatantra_stories',
+            why_recommended='Panchatantra stories are wonderful for building beginner vocabulary using familiar animal characters.',
+            audio_available=True, language='en', book_type='Moral Story', cover_image_path='/src/assets/images/panchatantra_cover.jpg'
         )
         Book.objects.create(
-            title='Short Stories for Learners', author='Various Authors', pages=95,
-            category='Fiction', level='Beginner', emoji='🧚',
-            content='A collection of short tales. The cat said "Meow". The dog said "Woof". The king looked at his garden and smiled as the sun went down.'
+            title='Grandma\'s Bag of Stories', author='Sudha Murty', pages=160,
+            category='Easy Stories', level='Level 3 — Elementary', emoji='👵',
+            content='Anand, Krishna, Raghu, and Meena go to their grandparents\' home in Shiggaon. Grandma opens her magical bag of stories. She tells stories of kings, monkeys, magic pots, and clever villagers, keeping the children enchanted during their summer holidays.',
+            rating=4.9, price='₹250.00', google_play_url='https://play.google.com/store/books/details?id=grandmas_bag_stories',
+            why_recommended='Perfect for developing readers ready for longer sentence structures and elementary comprehension challenges.',
+            audio_available=False, language='en', book_type='Short Story', cover_image_path='/src/assets/images/grandma_stories_cover.jpg'
+        )
+        Book.objects.create(
+            title='The Jungle Book', author='Rudyard Kipling', pages=92,
+            category='Popular Beginner Books', level='Level 4 — Developing Reader', emoji='🐯',
+            content='Mowgli is a young human boy raised by a pack of wolves in the Indian jungle. He learns the Law of the Jungle from Baloo the wise bear and Bagheera the panther, while staying safe from the tiger Shere Khan.',
+            rating=4.6, price='Free', google_play_url='https://play.google.com/store/books/details?id=jungle_book',
+            why_recommended='This version of the classic story builds reading confidence with richer vocabulary and sentence structures.',
+            audio_available=True, language='en', book_type='Graded Reader', cover_image_path=''
+        )
+
+        # Hindi Books
+        Book.objects.create(
+            title='पंचतंत्र की कहानियां (Panchatantra Stories)', author='Vishnu Sharma', pages=48,
+            category='Animal Stories', level='Level 2 — Beginner', emoji='🐻',
+            content='पंचतंत्र की कहानियां बहुत पुरानी और प्रसिद्ध हैं। इनमें जानवरों जैसे शेर, बंदर, चूहा और खरगोश के माध्यम से जीवन के महत्वपूर्ण पाठ सिखाए गए हैं।',
+            rating=4.8, price='Free', google_play_url='https://play.google.com/store/books/details?id=panchatantra_hindi',
+            why_recommended='यह पुस्तक सरल हिंदी वाक्यों के साथ आपकी शब्दावली और नैतिक समझ को बढ़ाएगी।',
+            audio_available=True, language='hi', book_type='Moral Story', cover_image_path='/src/assets/images/panchatantra_cover.jpg'
+        )
+        Book.objects.create(
+            title='हाथी और दर्जी (The Elephant and the Tailor)', author='Traditional', pages=12,
+            category='Folk & Moral Stories', level='Level 1 — Early Reader', emoji='🐘',
+            content='एक हाथी रोज नदी पर नहाने जाता था। रास्ते में एक दर्जी की दुकान थी। दर्जी हाथी को रोज खाने के लिए फल देता था। एक दिन दर्जी ने मजाक में हाथी की सूंड में सुई चुभा दी...',
+            rating=4.7, price='Free', google_play_url='https://play.google.com/store/books/details?id=elephant_tailor_hindi',
+            why_recommended='यह कहानी बहुत सरल शब्दों में लिखी गई है, जो शुरुआती पाठकों के लिए उपयुक्त है।',
+            audio_available=False, language='hi', book_type='Folk Tale', cover_image_path=''
+        )
+
+        # Kannada Books
+        Book.objects.create(
+            title='ತೆನಾಲಿ ರಾಮನ ಕಥೆಗಳು (Tenali Rama Stories)', author='Traditional', pages=40,
+            category='Folk & Moral Stories', level='Level 2 — Beginner', emoji='👑',
+            content='ತೆನಾಲಿ ರಾಮಕೃಷ್ಣನು ಕೃಷ್ಣದೇವರಾಯನ ಆಸ್ಥಾನದಲ್ಲಿದ್ದ ಪ್ರಸಿದ್ಧ ಹಾಸ್ಯಕವಿ ಮತ್ತು ಬುದ್ಧಿವಂತ ಮಂತ್ರಿ. ಅವನ ಚತುರತೆಯ ಕಥೆಗಳು ಎಲ್ಲರಿಗೂ ಇಷ್ಟವಾಗುತ್ತವೆ.',
+            rating=4.8, price='Free', google_play_url='https://play.google.com/store/books/details?id=tenali_rama_kannada',
+            why_recommended='ಸರಳ ಕನ್ನಡ ಪದಗಳ ಬಳಕೆ ಹೊಂದಿರುವ ಈ ಕಥೆಗಳು ಆರಂಭಿಕ ಕಲಿಯುವವರಿಗೆ ತುಂಬಾ ಸಹಕಾರಿಯಾಗಿದೆ.',
+            audio_available=False, language='kn', book_type='Folk Tale', cover_image_path=''
+        )
+        Book.objects.create(
+            title='ಪ್ರಾಮಾಣಿಕ ಕಟ್ಟಿಗೆ ಕಡಿಯುವವನು (The Honest Woodcutter)', author='Traditional', pages=16,
+            category='Folk & Moral Stories', level='Level 1 — Early Reader', emoji='🪓',
+            content='ಒಬ್ಬ ಬಡ ಕಟ್ಟಿಗೆ ಕಡಿಯುವವನು ನದಿಯ ದಡದಲ್ಲಿ ಮರ ಕಡಿಯುತ್ತಿದ್ದಾಗ ಅವನ ಕೊಡಲಿ ನದಿಗೆ ಬಿದ್ದಿತು. ಆಗ ಜಲದೇವತೆ ಪ್ರತ್ಯಕ್ಷಳಾಗಿ ಚಿನ್ನದ ಕೊಡಲಿ ತೋರಿಸಿದಳು...',
+            rating=4.9, price='Free', google_play_url='https://play.google.com/store/books/details?id=honest_woodcutter_kannada',
+            why_recommended='ಕನ್ನಡ ವರ್ಣಮಾಲೆ ಮತ್ತು ಸರಳ ಪದಗಳ ಕಲಿಕೆಗೆ ಇದು ಅತ್ಯುತ್ತಮ ಕಥೆಯಾಗಿದೆ.',
+            audio_available=True, language='kn', book_type='Moral Story', cover_image_path=''
+        )
+
+        # Tamil Books
+        Book.objects.create(
+            title='தெனாலிராமன் கதைகள் (Tenali Raman Stories)', author='Traditional', pages=40,
+            category='Folk & Moral Stories', level='Level 2 — Beginner', emoji='👳',
+            content='தெனாலிராமன் கிருஷ்ணதேவராயரின் அவையில் இருந்த சிறந்த விகடகவி ஆவார். அவரது அறிவுக் கூர்மையும் நகைச்சுவையும் நிறைந்த கதைகள் உலகப் புகழ் பெற்றவை.',
+            rating=4.8, price='Free', google_play_url='https://play.google.com/store/books/details?id=tenali_raman_tamil',
+            why_recommended='எளிய தமிழ் வாக்கியங்களுடன் அமைந்துள்ள இந்த கதைகள் புதிய சொற்களை கற்க உதவும்.',
+            audio_available=False, language='ta', book_type='Folk Tale', cover_image_path=''
+        )
+        Book.objects.create(
+            title='ஆமையும் முயலும் (The Tortoise and the Hare)', author='Aesop', pages=16,
+            category='Folk & Moral Stories', level='Level 1 — Early Reader', emoji='🐢',
+            content='ஒரு முயலும் ஆமையும் ஓட்டப்பந்தயம் வைக்க முடிவு செய்தன. முயல் வேகமாக ஓடிவிட்டு வழியில் தூங்கிவிட்டது, ஆனால் ஆமை மெதுவாகவும் தொடர்ந்தும் நடந்து வென்றது.',
+            rating=4.9, price='Free', google_play_url='https://play.google.com/store/books/details?id=tortoise_hare_tamil',
+            why_recommended='குழந்தைகள் எளிதாக வாசித்து புரிந்து கொள்ளக்கூடிய எளிய சொற்கள் கொண்ட கதை.',
+            audio_available=True, language='ta', book_type='Moral Story', cover_image_path='/src/assets/images/tortoise_hare_cover.jpg'
         )
 
     books = Book.objects.all()
@@ -223,7 +298,15 @@ def list_books(request):
             'category': b.category,
             'level': b.level,
             'emoji': b.emoji,
-            'content': b.content
+            'content': b.content,
+            'rating': b.rating,
+            'price': b.price,
+            'google_play_url': b.google_play_url,
+            'why_recommended': b.why_recommended,
+            'audio_available': b.audio_available,
+            'language': b.language,
+            'book_type': b.book_type,
+            'cover_image_path': b.cover_image_path
         })
     return Response(data, status=status.HTTP_200_OK)
 

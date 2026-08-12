@@ -816,3 +816,169 @@
   font-weight: 800;
   color: var(--text-muted);
 }
+
+/* Bookstore-Specific Layouts */
+.shelfSection {
+  margin-bottom: 24px;
+}
+
+.shelfHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.shelfHeader h3 {
+  font-size: 20px;
+  font-weight: 850;
+  color: var(--color-orange-dark);
+}
+
+.seeAllLink {
+  color: var(--color-orange);
+  font-size: 14px;
+  font-weight: 800;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.seeAllLink:hover {
+  color: var(--color-orange-dark);
+}
+
+.shelfScroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding: 8px 4px 16px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-peach-light) transparent;
+}
+
+.shelfScroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.shelfScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shelfScroll::-webkit-scrollbar-thumb {
+  background: var(--color-peach-light);
+  border-radius: 3px;
+}
+
+.shelfScroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-peach);
+}
+
+/* Make book card size consistent inside horizontal scroll */
+.shelfScroll .bookCard {
+  flex: 0 0 200px;
+  width: 200px;
+}
+
+.bookCoverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Advanced Filters */
+.searchFilterArea {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: #FFFFFF;
+  border: 2px solid var(--color-peach-light);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.searchBarWrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.searchBar {
+  flex: 1;
+  padding: 12px 18px;
+  border: 2.5px solid var(--color-peach-light);
+  border-radius: 30px;
+  outline: none;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.searchBar:focus {
+  border-color: var(--color-orange);
+}
+
+.filterControls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.filterSelect {
+  padding: 10px 14px;
+  border: 2px solid var(--color-peach);
+  border-radius: var(--radius-sm);
+  background-color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-dark);
+  outline: none;
+  cursor: pointer;
+}
+
+.filterSelect:focus {
+  border-color: var(--color-orange);
+}
+
+/* Why this book callout */
+.whyBox {
+  background-color: #FFF4E5;
+  border-left: 5px solid var(--color-orange);
+  padding: 14px 18px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.whyBox h5 {
+  font-size: 15px;
+  font-weight: 850;
+  color: var(--color-orange-dark);
+  margin-bottom: 4px;
+}
+
+.whyBox p {
+  font-size: 13.5px;
+  color: var(--text-dark);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* Detail modal metadata rows */
+.metaLabelRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.metaBadge {
+  background-color: var(--bg-cream);
+  border: 1.5px solid var(--color-peach);
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+

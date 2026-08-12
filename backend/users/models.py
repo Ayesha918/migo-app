@@ -91,10 +91,18 @@ class Book(models.Model):
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
     pages = models.PositiveIntegerField()
-    category = models.CharField(max_length=100) # Literature, Business, Science, Fiction
-    level = models.CharField(max_length=50) # Beginner, Intermediate, Advanced
+    category = models.CharField(max_length=100)
+    level = models.CharField(max_length=50) # Level 1 — Early Reader, Level 2 — Beginner, etc.
     emoji = models.CharField(max_length=10)
-    content = models.TextField() # Paragraph content of the book for reading
+    content = models.TextField()
+    rating = models.FloatField(default=4.5)
+    price = models.CharField(max_length=50, default='Free')
+    google_play_url = models.CharField(max_length=500, default='')
+    why_recommended = models.TextField(default='')
+    audio_available = models.BooleanField(default=False)
+    language = models.CharField(max_length=20, default='en') # en, hi, kn, ta
+    book_type = models.CharField(max_length=100, default='Story') # Story, Graded Reader, Folk Tale, etc.
+    cover_image_path = models.CharField(max_length=255, default='')
 
     def __str__(self):
         return self.title
