@@ -7,6 +7,5 @@ gunicorn
 pymysql
 groq
 numpy
-scikit-learn
 whitenoise
 psycopg2-binary
