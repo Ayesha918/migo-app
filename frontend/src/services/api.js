@@ -45,8 +45,12 @@ export const generateLearningPath = (learnerId) =>
 export const completeLessonDay = (learnerId, dayNumber) =>
   api.put('/lessons/path/complete', { learner_id: learnerId, day_number: dayNumber });
 
-export const fetchPrediction = (learnerId) => {
-  return api.get('/predictions', { params: { learner_id: learnerId } });
+export const fetchPrediction = (learnerId, studySeconds = null) => {
+  const params = { learner_id: learnerId };
+  if (studySeconds !== null) {
+    params.study_duration_seconds = studySeconds;
+  }
+  return api.get('/predictions', { params });
 };
 
 export const fetchRewardsSummary = (learnerId) =>

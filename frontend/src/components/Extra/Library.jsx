@@ -6,7 +6,7 @@ import Sidebar from '../Home/Sidebar';
 import Header from '../Home/Header';
 import { 
   Search, BookOpen, Star, Volume2, VolumeX, ArrowLeft, ArrowRight, Play, X, 
-  Headphones, Clock, Bookmark, Sparkles, Award, RotateCcw, AlertCircle
+  Headphones, Clock, Bookmark, Sparkles, Award, RotateCcw, AlertCircle, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Extra.module.css';
@@ -59,7 +59,7 @@ const READ_PROGRESS = {
 };
 
 export default function Library() {
-  const { learner, logout } = useLearner();
+  const { learner, logout, hasFeatureAccess, triggerUpgradeModal } = useLearner();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -73,11 +73,49 @@ export default function Library() {
   // Navigation / Modal View states
   const [selectedBook, setSelectedBook] = useState(null);
   const [readingBook, setReadingBook] = useState(null);
+
+  const handleReadBook = (book, startAudio = false) => {
+    if (!book) return;
+    const isFree = book.price === 'Free';
+    if (!hasFeatureAccess('Pro') && !isFree) {
+      triggerUpgradeModal('Pro', `Story: "${book.title}"`, () => {
+        setSelectedBook(null);
+        setReadingBook(book);
+        setCurrentPageIndex(0);
+        if (startAudio) {
+          setTimeout(() => {
+            startReadAloud(getStoryPages(book)[0]);
+          }, 300);
+        }
+      });
+      return;
+    }
+
+    setSelectedBook(null);
+    setReadingBook(book);
+    setCurrentPageIndex(0);
+    if (startAudio) {
+      setTimeout(() => {
+        startReadAloud(getStoryPages(book)[0]);
+      }, 300);
+    }
+  };
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
   const synthRef = useRef(window.speechSynthesis);
+  const [voices, setVoices] = useState([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const updateVoices = () => {
+        setVoices(window.speechSynthesis.getVoices());
+      };
+      updateVoices();
+      window.speechSynthesis.onvoiceschanged = updateVoices;
+    }
+  }, []);
 
   useEffect(() => {
     fetchBooks()
@@ -188,20 +226,31 @@ export default function Library() {
     synthRef.current.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    // Try to find a friendly child-like English voice or local language voice if available
-    const voices = synthRef.current.getVoices();
-    let voice = voices.find(v => v.lang.startsWith(readingBook.language));
-    if (!voice) {
-      voice = voices.find(v => v.lang.startsWith('en'));
-    }
+    
+    // Explicitly set language tag based on story book language
+    let langTag = 'en-US';
+    if (readingBook.language === 'hi') langTag = 'hi-IN';
+    else if (readingBook.language === 'kn') langTag = 'kn-IN';
+    else if (readingBook.language === 'ta') langTag = 'ta-IN';
+    
+    utterance.lang = langTag;
+
+    // Use populated voices state list
+    // Try to find a voice that matches this language tag or code
+    let voice = voices.find(v => v.lang.toLowerCase() === langTag.toLowerCase() || v.lang.toLowerCase().startsWith(readingBook.language.toLowerCase()));
+    
     if (voice) {
       utterance.voice = voice;
     }
-    utterance.rate = 0.85; // slightly slower for children's learning speed
+    
+    utterance.rate = 0.8; // slower reading speed for children's comprehension
 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onerror = (e) => {
+      console.error('Speech synthesis error:', e);
+      setIsSpeaking(false);
+    };
 
     synthRef.current.speak(utterance);
   };
@@ -377,6 +426,11 @@ export default function Library() {
                         <div key={book.id} className={styles.bookCard} onClick={() => handleBookCardClick(book)}>
                           <div style={{ height: '170px', overflow: 'hidden', position: 'relative', borderTopLeftRadius: 'var(--radius-sm)', borderTopRightRadius: 'var(--radius-sm)' }}>
                             {renderBookCover(book)}
+                            {!hasFeatureAccess('Pro') && book.price !== 'Free' && (
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.65)', padding: '5px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Lock size={12} color="#FFF" />
+                              </div>
+                            )}
                           </div>
                           <div className={styles.bookBody}>
                             <div className={styles.bookTagRow}>
@@ -413,8 +467,13 @@ export default function Library() {
                       <div className={styles.shelfScroll} style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '10px' }}>
                         {recommendations.map(book => (
                           <div key={book.id} className={styles.bookCard} style={{ flexShrink: 0, width: '180px' }} onClick={() => handleBookCardClick(book)}>
-                            <div style={{ height: '150px', overflow: 'hidden' }}>
+                            <div style={{ height: '150px', overflow: 'hidden', position: 'relative' }}>
                               {renderBookCover(book)}
+                              {!hasFeatureAccess('Pro') && book.price !== 'Free' && (
+                                <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.65)', padding: '5px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <Lock size={12} color="#FFF" />
+                                </div>
+                              )}
                             </div>
                             <div className={styles.bookBody}>
                               <div className={styles.bookTagRow}>
@@ -446,6 +505,11 @@ export default function Library() {
                           <div key={book.id} className={styles.bookCard} style={{ flexShrink: 0, width: '180px' }} onClick={() => handleBookCardClick(book)}>
                             <div style={{ height: '110px', overflow: 'hidden', position: 'relative' }}>
                               {renderBookCover(book)}
+                              {!hasFeatureAccess('Pro') && book.price !== 'Free' && (
+                                <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.65)', padding: '5px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <Lock size={12} color="#FFF" />
+                                </div>
+                              )}
                             </div>
                             <div className={styles.bookBody} style={{ padding: '12px' }}>
                               <h4 className={styles.bookTitle} style={{ fontSize: '13px', fontWeight: 900, height: '34px', overflow: 'hidden', margin: 0 }}>{book.title}</h4>
@@ -473,8 +537,13 @@ export default function Library() {
                     <div className={styles.shelfScroll} style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '10px' }}>
                       {books.filter(b => b.level.includes('Level 1') && b.language === 'en').map(book => (
                         <div key={book.id} className={styles.bookCard} style={{ flexShrink: 0, width: '180px' }} onClick={() => handleBookCardClick(book)}>
-                          <div style={{ height: '140px', overflow: 'hidden' }}>
+                          <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
                             {renderBookCover(book)}
+                            {!hasFeatureAccess('Pro') && book.price !== 'Free' && (
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.65)', padding: '5px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Lock size={12} color="#FFF" />
+                              </div>
+                            )}
                           </div>
                           <div className={styles.bookBody}>
                             <div className={styles.bookTagRow}>
@@ -500,8 +569,13 @@ export default function Library() {
                     <div className={styles.shelfScroll} style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '10px' }}>
                       {books.filter(b => (b.book_type === 'Folk Tale' || b.book_type === 'Moral Story') && b.language === 'en').map(book => (
                         <div key={book.id} className={styles.bookCard} style={{ flexShrink: 0, width: '180px' }} onClick={() => handleBookCardClick(book)}>
-                          <div style={{ height: '140px', overflow: 'hidden' }}>
+                          <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
                             {renderBookCover(book)}
+                            {!hasFeatureAccess('Pro') && book.price !== 'Free' && (
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.65)', padding: '5px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Lock size={12} color="#FFF" />
+                              </div>
+                            )}
                           </div>
                           <div className={styles.bookBody}>
                             <div className={styles.bookTagRow}>
@@ -527,8 +601,13 @@ export default function Library() {
                     <div className={styles.shelfScroll} style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '10px' }}>
                       {books.filter(b => b.language === 'hi' || b.language === 'kn' || b.language === 'ta').map(book => (
                         <div key={book.id} className={styles.bookCard} style={{ flexShrink: 0, width: '180px' }} onClick={() => handleBookCardClick(book)}>
-                          <div style={{ height: '140px', overflow: 'hidden' }}>
+                          <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
                             {renderBookCover(book)}
+                            {!hasFeatureAccess('Pro') && book.price !== 'Free' && (
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.65)', padding: '5px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Lock size={12} color="#FFF" />
+                              </div>
+                            )}
                           </div>
                           <div className={styles.bookBody}>
                             <div className={styles.bookTagRow}>
@@ -812,30 +891,37 @@ export default function Library() {
                     <button
                       className={styles.submitBtn}
                       style={{ flex: 1.2, margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                      onClick={() => {
-                        setSelectedBook(null);
-                        setReadingBook(selectedBook);
-                        setCurrentPageIndex(0);
-                      }}
+                      onClick={() => handleReadBook(selectedBook, false)}
                     >
-                      <Play size={16} fill="#FFFFFF" />
-                      <span>Read Story</span>
+                      {!hasFeatureAccess('Pro') && selectedBook.price !== 'Free' ? (
+                        <>
+                          <Lock size={16} />
+                          <span>Preview Pro to Read</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play size={16} fill="#FFFFFF" />
+                          <span>Read Story</span>
+                        </>
+                      )}
                     </button>
 
                     <button
                       className={styles.verifyBtnSecondary}
                       style={{ flex: 1, margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                      onClick={() => {
-                        setSelectedBook(null);
-                        setReadingBook(selectedBook);
-                        setCurrentPageIndex(0);
-                        setTimeout(() => {
-                          startReadAloud(getStoryPages(selectedBook)[0]);
-                        }, 300);
-                      }}
+                      onClick={() => handleReadBook(selectedBook, true)}
                     >
-                      <Volume2 size={16} />
-                      <span>Listen to Story</span>
+                      {!hasFeatureAccess('Pro') && selectedBook.price !== 'Free' ? (
+                        <>
+                          <Lock size={16} />
+                          <span>Preview Pro to Listen</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 size={16} />
+                          <span>Listen to Story</span>
+                        </>
+                      )}
                     </button>
                   </div>
 

@@ -4,14 +4,15 @@ import { useLearner } from '../../services/LearnerContext';
 import { fetchNotifications, markNotificationsRead } from '../../services/api';
 import Sidebar from '../Home/Sidebar';
 import Header from '../Home/Header';
-import { CheckCircle2, Info, Star, CreditCard } from 'lucide-react';
+import { CheckCircle2, Info, Star, Award, Sparkles } from 'lucide-react';
 import styles from './Extra.module.css';
 
 const ICON_MAP = {
   placement: { icon: CheckCircle2, color: '#27AE60' },
   welcome: { icon: Info, color: '#2980B9' },
   milestone: { icon: Star, color: '#F1C40F' },
-  payment: { icon: CreditCard, color: '#FF7A00' }
+  upgrade: { icon: Award, color: '#FF7A00' },
+  payment: { icon: Award, color: '#FF7A00' } // fallback for old records
 };
 
 export default function Notifications() {

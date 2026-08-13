@@ -168,8 +168,33 @@ const PRACTICE_CHALLENGES = {
 };
 
 export default function PronunciationPractice() {
-  const { learner } = useLearner();
+  const { learner, hasFeatureAccess, triggerUpgradeModal } = useLearner();
   const navigate = useNavigate();
+
+  const handleSelectTab = (tab) => {
+    if (tab === 'intermediate') {
+      if (!hasFeatureAccess('Pro')) {
+        triggerUpgradeModal('Pro', 'Everyday Phrases (Intermediate Speech Practice)', () => {
+          setDifficulty('intermediate');
+          setChallengeIdx(0);
+          setFeedback(null);
+        });
+        return;
+      }
+    } else if (tab === 'advanced') {
+      if (!hasFeatureAccess('Premium')) {
+        triggerUpgradeModal('Premium', 'Advanced Sentences (Premium Speech Analysis)', () => {
+          setDifficulty('advanced');
+          setChallengeIdx(0);
+          setFeedback(null);
+        });
+        return;
+      }
+    }
+    setDifficulty(tab);
+    setChallengeIdx(0);
+    setFeedback(null);
+  };
 
   // Selected difficulty & challenge index
   const [difficulty, setDifficulty] = useState('basic');
@@ -187,6 +212,18 @@ export default function PronunciationPractice() {
   
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+
+  const [voices, setVoices] = useState([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const updateVoices = () => {
+        setVoices(window.speechSynthesis.getVoices());
+      };
+      updateVoices();
+      window.speechSynthesis.onvoiceschanged = updateVoices;
+    }
+  }, []);
 
   const langKey = learner?.learning_language || 'en';
   const challengesList = PRACTICE_CHALLENGES[langKey] || PRACTICE_CHALLENGES.en;
@@ -216,7 +253,14 @@ export default function PronunciationPractice() {
       else if (learner?.learning_language === 'ta') langCode = 'ta-IN';
       
       utterance.lang = langCode;
-      utterance.rate = 0.85; // slightly slower for clean modeling
+
+      // Find matching voice for language
+      const voice = voices.find(v => v.lang.toLowerCase() === langCode.toLowerCase() || v.lang.toLowerCase().startsWith(learner?.learning_language?.toLowerCase()));
+      if (voice) {
+        utterance.voice = voice;
+      }
+
+      utterance.rate = 0.8; // slightly slower for children's learning speed
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -336,24 +380,24 @@ export default function PronunciationPractice() {
         <section className={styles.difficultyTabs}>
           <button 
             className={`${styles.tabBtn} ${difficulty === 'basic' ? styles.activeTabBasic : ''}`}
-            onClick={() => { setDifficulty('basic'); setChallengeIdx(0); setFeedback(null); }}
+            onClick={() => handleSelectTab('basic')}
             type="button"
           >
             🟢 Basic Words
           </button>
           <button 
             className={`${styles.tabBtn} ${difficulty === 'intermediate' ? styles.activeTabInter : ''}`}
-            onClick={() => { setDifficulty('intermediate'); setChallengeIdx(0); setFeedback(null); }}
+            onClick={() => handleSelectTab('intermediate')}
             type="button"
           >
-            🟡 Everyday Phrases
+            🟡 Everyday Phrases {!hasFeatureAccess('Pro') && '🔒'}
           </button>
           <button 
             className={`${styles.tabBtn} ${difficulty === 'advanced' ? styles.activeTabAdv : ''}`}
-            onClick={() => { setDifficulty('advanced'); setChallengeIdx(0); setFeedback(null); }}
+            onClick={() => handleSelectTab('advanced')}
             type="button"
           >
-            🔴 Advanced Sentences
+            🔴 Advanced Sentences {!hasFeatureAccess('Premium') && '🔒'}
           </button>
         </section>
 

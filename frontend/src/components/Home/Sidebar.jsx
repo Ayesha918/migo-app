@@ -2,7 +2,8 @@
 
 import { useNavigate, useLocation } from 'react-router-dom';
 import owl from '../../assets/images/owl.png';
-import { Home as HomeIcon, Compass, TrendingUp, Trophy, ClipboardCheck, LogOut, Mic, BookOpen, ShieldCheck, Users, Bell, CreditCard, Award, HelpCircle } from 'lucide-react';
+import { Home as HomeIcon, Compass, TrendingUp, Trophy, ClipboardCheck, LogOut, Mic, BookOpen, ShieldCheck, Users, Bell, CreditCard, Award, HelpCircle, Lock } from 'lucide-react';
+import { useLearner } from '../../services/LearnerContext';
 import useTranslate from '../../services/useTranslate';
 import styles from './Sidebar.module.css';
 
@@ -17,7 +18,6 @@ const menuItems = [
   { title: 'Library', key: 'library', icon: BookOpen, route: '/library' },
   { title: 'Community', key: 'community', icon: Users, route: '/community' },
   { title: 'Notifications', key: 'notifications', icon: Bell, route: '/notifications' },
-  { title: 'Subscription', key: 'subscription', icon: CreditCard, route: '/subscription' },
   { title: 'Certifications', key: 'certifications', icon: Award, route: '/certifications' },
   { title: 'Help & Support', key: 'helpSupport', icon: HelpCircle, route: '/support' },
 ];
@@ -26,6 +26,7 @@ export default function Sidebar({ onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const t = useTranslate();
+  const { learner, hasFeatureAccess } = useLearner();
 
   return (
     <aside className={styles.sidebar}>
@@ -44,14 +45,27 @@ export default function Sidebar({ onLogout }) {
           const Icon = item.icon;
           const isActive = location.pathname === item.route;
 
+          let isLocked = false;
+          if (learner) {
+            if (item.key === 'aiScorePrediction') {
+              isLocked = !hasFeatureAccess('Pro');
+            } else if (item.key === 'certifications') {
+              isLocked = !hasFeatureAccess('Premium');
+            }
+          }
+
           return (
             <button
               key={item.title}
               className={`${styles.navItem} ${isActive ? styles.activeNavItem : ''}`}
               onClick={() => navigate(item.route)}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
             >
-              <Icon size={22} />
-              <span>{t(item.key)}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Icon size={22} />
+                <span>{t(item.key)}</span>
+              </div>
+              {isLocked && <Lock size={14} style={{ color: 'var(--text-light)', opacity: 0.7 }} />}
             </button>
           );
         })}
