@@ -23,17 +23,23 @@ import dogReflectionCover from '../../assets/images/dog_reflection_cover.jpg';
 import monkeyCrocodileCover from '../../assets/images/monkey_crocodile_cover.jpg';
 import emperorsClothesCover from '../../assets/images/emperors_clothes_cover.jpg';
 
-const COVER_MAP = {
-  '/src/assets/images/lost_wallet_cover.jpg': lostWalletCover,
-  '/src/assets/images/tortoise_hare_cover.jpg': tortoiseHareCover,
-  '/src/assets/images/panchatantra_cover.jpg': panchatantraCover,
-  '/src/assets/images/grandma_stories_cover.jpg': grandmaStoriesCover,
-  '/src/assets/images/honest_woodcutter_cover.jpg': honestWoodcutterCover,
-  '/src/assets/images/elephant_tailor_cover.jpg': elephantTailorCover,
-  '/src/assets/images/fox_crow_cover.jpg': foxCrowCover,
-  '/src/assets/images/dog_reflection_cover.jpg': dogReflectionCover,
-  '/src/assets/images/monkey_crocodile_cover.jpg': monkeyCrocodileCover,
-  '/src/assets/images/emperors_clothes_cover.jpg': emperorsClothesCover,
+const getCoverByTitle = (title) => {
+  const t = (title || '').toLowerCase();
+  if (t.includes('lost wallet')) return lostWalletCover;
+  if (t.includes('tortoise') && t.includes('hare')) return tortoiseHareCover;
+  if (t.includes('ஆமையும் முயலும்')) return tortoiseHareCover;
+  if (t.includes('panchatantra') || t.includes('पंचतंत्र') || t.includes('ತೆನಾಲಿ') || t.includes('தெனாலிராமன்') || t.includes('tenali')) {
+    if (t.includes('monkey') || t.includes('crocodile') || t.includes('croc')) return monkeyCrocodileCover;
+    return panchatantraCover;
+  }
+  if (t.includes('grandma')) return grandmaStoriesCover;
+  if (t.includes('woodcutter') || t.includes('ಕಟ್ಟಿಗೆ ಕಡಿಯುವವನು')) return honestWoodcutterCover;
+  if (t.includes('elephant') && t.includes('tailor')) return elephantTailorCover;
+  if (t.includes('হাতি और दर्जी') || t.includes('हाथी और दर्जी')) return elephantTailorCover;
+  if (t.includes('fox') && t.includes('crow')) return foxCrowCover;
+  if (t.includes('dog') && t.includes('reflection')) return dogReflectionCover;
+  if (t.includes('emperor') && t.includes('clothes')) return emperorsClothesCover;
+  return panchatantraCover; // fallback
 };
 
 const LANGUAGE_LABELS = {
@@ -155,12 +161,13 @@ export default function Library() {
 
   // Helper to render book cover illustration beautifully
   const renderBookCover = (book, customClass = '') => {
-    const resolvedSrc = COVER_MAP[book.cover_image_path] || COVER_MAP['/src/assets/images/panchatantra_cover.jpg'];
+    const resolvedSrc = getCoverByTitle(book.title);
     return (
       <img
         src={resolvedSrc}
         alt={book.title}
         className={customClass || styles.bookCoverImage}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         onError={(e) => {
           e.target.src = panchatantraCover;
         }}
