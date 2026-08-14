@@ -73,6 +73,8 @@ export default function Library() {
   // Navigation / Modal View states
   const [selectedBook, setSelectedBook] = useState(null);
   const [readingBook, setReadingBook] = useState(null);
+  const [libraryMode, setLibraryMode] = useState('books');
+  const [selectedChart, setSelectedChart] = useState(null);
 
   const handleReadBook = (book, startAudio = false) => {
     if (!book) return;
