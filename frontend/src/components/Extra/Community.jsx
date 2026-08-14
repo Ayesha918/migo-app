@@ -5,6 +5,7 @@ import { fetchCommunityPosts, createCommunityPost, toggleLikePost } from '../../
 import Sidebar from '../Home/Sidebar';
 import Header from '../Home/Header';
 import styles from './Extra.module.css';
+import StudyGroups from './StudyGroups';
 
 export default function Community() {
   const { learner, logout } = useLearner();
@@ -163,13 +164,7 @@ export default function Community() {
             </div>
           </div>
         ) : (
-          <div className={styles.sectionBox} style={{ maxWidth: '680px', width: '100%', margin: '0 auto', textAlign: 'center', padding: '40px 20px' }}>
-            <span style={{ fontSize: '48px' }}>📚</span>
-            <h3 style={{ border: 'none', padding: 0, marginTop: '12px' }}>Study Groups</h3>
-            <p style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: '15px' }}>
-              Join study circles with other neo-learners matching your target language levels! (Coming soon)
-            </p>
-          </div>
+          <StudyGroups learner={learner} />
         )}
       </main>
     </div>
