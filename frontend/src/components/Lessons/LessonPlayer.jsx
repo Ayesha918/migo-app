@@ -4,7 +4,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Volume2, Mic, MicOff, CheckCircle2, Star, ArrowRight, ArrowLeft,
-  Award, Sparkles, RefreshCw, Play, Info, Eye, Type, Trash, HelpCircle, FileText, XCircle
+  Award, Sparkles, RefreshCw, Play, Info, Eye, Type, Trash, HelpCircle, FileText, XCircle,
+  AlertCircle, CheckCircle
 } from 'lucide-react';
 import { useLearner } from '../../services/LearnerContext';
 import useTranslate from '../../services/useTranslate';
@@ -23,6 +24,143 @@ const SPEECH_LANG_MAP = {
   ta: 'ta-IN',
   te: 'te-IN',
   ml: 'ml-IN',
+};
+
+const getRecommendedLessons = (wrongQuestionIndices, lang) => {
+  const recommendations = [];
+  const hasVocabError = wrongQuestionIndices.some(idx => idx === 0 || idx === 1 || idx === 8);
+  const hasGrammarError = wrongQuestionIndices.some(idx => idx === 2 || idx === 3);
+  const hasReadingError = wrongQuestionIndices.some(idx => idx === 4 || idx === 5 || idx === 9);
+  const hasSpellingError = wrongQuestionIndices.some(idx => idx === 6 || idx === 7);
+
+  if (lang === 'hi') {
+    if (hasVocabError) {
+      recommendations.push({
+        title: 'Hindi Vocabulary Practice',
+        description: 'Practice basic nouns, animal cards, and object names in Hindi.',
+        link: '/library'
+      });
+    }
+    if (hasGrammarError) {
+      recommendations.push({
+        title: 'Hindi Sentence Construction',
+        description: 'Practice forming simple present tense sentences in Hindi.',
+        link: '/home'
+      });
+    }
+    if (hasReadingError) {
+      recommendations.push({
+        title: 'Hindi Comprehension: Panchatantra Stories',
+        description: 'Read moral stories page-by-page and complete quizzes in Hindi.',
+        link: '/library'
+      });
+    }
+    if (hasSpellingError) {
+      recommendations.push({
+        title: 'Hindi Consonant Blends (संयुक्त अक्षर)',
+        description: 'Practice reading and writing compound Hindi character spellings.',
+        link: '/pronunciation'
+      });
+    }
+  } else if (lang === 'kn') {
+    if (hasVocabError) {
+      recommendations.push({
+        title: 'Kannada Nouns & Basic Vocabulary',
+        description: 'Study naming words, colors, and numbers in Kannada.',
+        link: '/library'
+      });
+    }
+    if (hasGrammarError) {
+      recommendations.push({
+        title: 'Kannada Basic Grammar & Pronouns',
+        description: 'Learn simple verb structures and basic pronouns in Kannada.',
+        link: '/home'
+      });
+    }
+    if (hasReadingError) {
+      recommendations.push({
+        title: 'Kannada Fables: The Honest Woodcutter',
+        description: 'Read moral stories and test comprehension in Kannada.',
+        link: '/library'
+      });
+    }
+    if (hasSpellingError) {
+      recommendations.push({
+        title: 'Kannada Phonics: Varnamala Pronunciation',
+        description: 'Use the interactive charts shelf to master letter sounds.',
+        link: '/library'
+      });
+    }
+  } else if (lang === 'ta') {
+    if (hasVocabError) {
+      recommendations.push({
+        title: 'Tamil Essential Words Vocabulary',
+        description: 'Review everyday items, animals, and object naming words.',
+        link: '/library'
+      });
+    }
+    if (hasGrammarError) {
+      recommendations.push({
+        title: 'Tamil Sentence Grammar',
+        description: 'Understand subject-verb matches and word arrangements in Tamil.',
+        link: '/home'
+      });
+    }
+    if (hasReadingError) {
+      recommendations.push({
+        title: 'Tamil Reading Practice: Aesop Stories',
+        description: 'Read translated moral stories page-by-page in Tamil.',
+        link: '/library'
+      });
+    }
+    if (hasSpellingError) {
+      recommendations.push({
+        title: 'Tamil Phonics pronunciation',
+        description: 'Practice speaking key letters with target mic check cards.',
+        link: '/pronunciation'
+      });
+    }
+  } else {
+    // English default
+    if (hasVocabError) {
+      recommendations.push({
+        title: 'English CVC Phonics Words',
+        description: 'Review consonants and short vowel sounds like a, e, i, o, u.',
+        link: '/library'
+      });
+    }
+    if (hasGrammarError) {
+      recommendations.push({
+        title: 'Basic English Nouns & Verbs',
+        description: 'Identify subject naming words and verb action words.',
+        link: '/home'
+      });
+    }
+    if (hasReadingError) {
+      recommendations.push({
+        title: 'English Reading Aloud: Aesop Fables',
+        description: 'Improve phrasing, grammar pauses, and sentence flow.',
+        link: '/library'
+      });
+    }
+    if (hasSpellingError) {
+      recommendations.push({
+        title: 'English Digraphs & Syllables (th, sh, ch)',
+        description: 'Identify and speak complex digraph sound combinations.',
+        link: '/pronunciation'
+      });
+    }
+  }
+
+  if (recommendations.length === 0) {
+    recommendations.push({
+      title: 'Vocabulary Practice',
+      description: 'Review common vocabulary words to improve accuracy.',
+      link: '/library'
+    });
+  }
+
+  return recommendations.slice(0, 2);
 };
 
 const ALPHABETS = {
@@ -1196,24 +1334,58 @@ export default function LessonPlayer() {
     };
 
     if (assessmentFinished) {
+      // Find indices of questions answered incorrectly
+      const wrongIndices = [];
+      qList.forEach((q, idx) => {
+        const ans = assessmentAnswers[idx];
+        if (q && (ans === null || ans !== q.correct_index)) {
+          wrongIndices.push(idx);
+        }
+      });
+
+      const handleRetakeAssessment = () => {
+        setAssessmentAnswers(Array(10).fill(null));
+        setAssessmentFinished(false);
+        setCurrentQuizIndex(0);
+        setAssessmentTimeLeft(900);
+      };
+
+      const handleExitWithoutPassing = () => {
+        navigate('/home');
+      };
+
+      const recLessons = getRecommendedLessons(wrongIndices, learner?.learning_language || 'en');
+
       return (
         <div className={styles.container} style={{ background: '#FFFDF9', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px' }}>
           <div style={{ maxWidth: '1100px', width: '100%' }}>
             
             {/* Assessment Result Banner */}
-            <div style={{ background: 'linear-gradient(135deg, #FFF0DB, #FFE2BC)', border: '2.5px solid var(--color-orange)', borderRadius: '24px', padding: '24px 32px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 8px 30px rgba(255, 122, 0, 0.05)' }}>
+            <div style={{ 
+              background: isPassed ? 'linear-gradient(135deg, #FFF0DB, #FFE2BC)' : 'linear-gradient(135deg, #FFEBEE, #FFCDD2)', 
+              border: `2.5px solid ${isPassed ? 'var(--color-orange)' : '#D32F2F'}`, 
+              borderRadius: '24px', 
+              padding: '24px 32px', 
+              marginBottom: '24px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between', 
+              boxShadow: '0 8px 30px rgba(0,0,0,0.05)' 
+            }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <span style={{ fontSize: '48px' }}>🎉</span>
+                <span style={{ fontSize: '48px' }}>{isPassed ? '🎉' : '💪'}</span>
                 <div style={{ textAlign: 'left' }}>
-                  <h1 style={{ fontSize: '28px', fontWeight: 900, color: 'var(--color-orange-dark)', margin: 0 }}>
-                    {lesson.title} Passed!
+                  <h1 style={{ fontSize: '28px', fontWeight: 900, color: isPassed ? 'var(--color-orange-dark)' : '#C62828', margin: 0 }}>
+                    {isPassed ? `${lesson.title} Passed!` : `${lesson.title} - Keep Practicing!`}
                   </h1>
                   <p style={{ fontSize: '15px', color: 'var(--text-dark)', margin: '4px 0 0 0', fontWeight: 700 }}>
-                    Excellent work, {learner?.name || 'Literacy Graduate'}! You completed the final checkpoint.
+                    {isPassed 
+                      ? `Excellent work, ${learner?.name || 'Literacy Graduate'}! You completed the final checkpoint.`
+                      : `Don't worry, ${learner?.name || 'Student'}! Every attempt is a step closer to success.`}
                   </p>
                 </div>
               </div>
-              <div style={{ fontSize: '32px' }}>🏆</div>
+              <div style={{ fontSize: '32px' }}>{isPassed ? '🏆' : '📚'}</div>
             </div>
 
             {/* Main results columns */}
@@ -1224,7 +1396,7 @@ export default function LessonPlayer() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--color-peach-light)', paddingBottom: '16px' }}>
                   <div>
                     <h3 style={{ fontSize: '14px', fontWeight: 900, color: 'var(--color-orange-dark)', textTransform: 'uppercase', margin: 0 }}>Your Final Score</h3>
-                    <h2 style={{ fontSize: '44px', fontWeight: 950, color: isPassed ? '#2E7D32' : 'var(--color-orange-dark)', margin: '4px 0 0 0' }}>
+                    <h2 style={{ fontSize: '44px', fontWeight: 950, color: isPassed ? '#2E7D32' : '#C62828', margin: '4px 0 0 0' }}>
                       {correctCount} / 10
                     </h2>
                   </div>
@@ -1237,8 +1409,10 @@ export default function LessonPlayer() {
                 <div style={{ display: 'flex', gap: '16px', background: 'var(--color-cream-bg)', padding: '16px', borderRadius: '16px', border: '1.5px solid var(--color-peach-light)', alignItems: 'center' }}>
                   <span style={{ fontSize: '40px' }}>🦉</span>
                   <div>
-                    <p style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-dark)', margin: 0, lineHeight: '1.5' }}>
-                      "Excellent work! You are one step closer to becoming a master learner. Go ahead and start the next level!"
+                    <p style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-dark)', margin: 0, lineHeight: '1.5' }}>
+                      {isPassed 
+                        ? '"Excellent work! You are one step closer to becoming a master learner. Go ahead and start the next level!"'
+                        : '"You did your best! Don\'t give up. Review the questions you missed and recommendations below, then try again to unlock the next level!"'}
                     </p>
                   </div>
                 </div>
@@ -1270,84 +1444,228 @@ export default function LessonPlayer() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
                   <div style={{ background: '#FFF9F2', border: '1.5px dashed var(--color-peach)', borderRadius: '16px', padding: '12px', textAlign: 'center' }}>
                     <span style={{ fontSize: '20px' }}>✨</span>
-                    <h5 style={{ margin: '4px 0 0 0', fontSize: '12px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>+250 XP</h5>
+                    <h5 style={{ margin: '4px 0 0 0', fontSize: '12px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>+{isPassed ? 250 : 50} XP</h5>
                   </div>
                   <div style={{ background: '#FFF9F2', border: '1.5px dashed var(--color-peach)', borderRadius: '16px', padding: '12px', textAlign: 'center' }}>
                     <span style={{ fontSize: '20px' }}>🔥</span>
-                    <h5 style={{ margin: '4px 0 0 0', fontSize: '12px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>8 Day Streak</h5>
+                    <h5 style={{ margin: '4px 0 0 0', fontSize: '12px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>{isPassed ? '8 Day Streak' : 'Keep it up!'}</h5>
                   </div>
                 </div>
               </div>
 
-              {/* Right Column: Graduation Certificate Box */}
-              <div className={styles.card} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px', background: '#FFFFFF' }}>
-                
-                {/* Visual Certificate Frame */}
-                <div style={{ width: '100%', border: '8px double var(--color-orange)', borderRadius: '16px', padding: '20px', background: '#FFFDF9', position: 'relative', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
-                  <div style={{ textAlign: 'center', border: '2px solid var(--color-peach)', padding: '16px', background: '#FFFFFF', borderRadius: '8px' }}>
-                    <span style={{ fontSize: '20px', display: 'block', marginBottom: '8px' }}>🦉 MiGo Buddy</span>
-                    <h3 style={{ fontSize: '20px', fontWeight: 950, color: 'var(--color-orange-dark)', margin: '0 0 8px 0', letterSpacing: '1px' }}>
-                      CERTIFICATE OF ACHIEVEMENT
-                    </h3>
-                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px 0' }}>This is proudly presented to:</p>
-                    <h2 style={{ fontSize: '24px', fontWeight: 950, color: 'var(--text-dark)', textDecoration: 'underline', textDecorationColor: 'var(--color-orange)', textUnderlineOffset: '6px', margin: '0 0 16px 0' }}>
-                      {learner?.name || 'Literacy Graduate'}
-                    </h2>
-                    <p style={{ fontSize: '12px', color: 'var(--text-dark)', lineHeight: '1.6', margin: '0 0 16px 0', fontWeight: 800 }}>
-                      for successfully completing the <strong style={{ color: 'var(--color-orange-dark)' }}>{lesson.difficulty.toUpperCase()} LEVEL</strong> final assessment, demonstrating great dedication and knowledge.
-                    </p>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: 'var(--text-muted)', marginTop: '20px', fontWeight: 700 }}>
-                      <div>
-                        <div style={{ borderBottom: '1px solid #CBD5E1', width: '80px', paddingBottom: '4px', marginBottom: '4px' }}>05th August 2026</div>
-                        <span>Date</span>
-                      </div>
-                      <div style={{ fontSize: '28px' }}>🏅</div>
-                      <div>
-                        <div style={{ borderBottom: '1px solid #CBD5E1', width: '80px', paddingBottom: '4px', marginBottom: '4px', fontFamily: 'cursive', color: 'var(--color-orange)' }}>MiGo Buddy</div>
-                        <span>Learning Companion</span>
+              {/* Right Column: Graduation Certificate OR Locked Warning */}
+              {isPassed ? (
+                /* PASSED VIEW: Graduation Certificate Box */
+                <div className={styles.card} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px', background: '#FFFFFF' }}>
+                  
+                  {/* Visual Certificate Frame */}
+                  <div style={{ width: '100%', border: '8px double var(--color-orange)', borderRadius: '16px', padding: '20px', background: '#FFFDF9', position: 'relative', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
+                    <div style={{ textAlign: 'center', border: '2px solid var(--color-peach)', padding: '16px', background: '#FFFFFF', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '20px', display: 'block', marginBottom: '8px' }}>🦉 MiGo Buddy</span>
+                      <h3 style={{ fontSize: '20px', fontWeight: 950, color: 'var(--color-orange-dark)', margin: '0 0 8px 0', letterSpacing: '1px' }}>
+                        CERTIFICATE OF ACHIEVEMENT
+                      </h3>
+                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px 0' }}>This is proudly presented to:</p>
+                      <h2 style={{ fontSize: '24px', fontWeight: 950, color: 'var(--text-dark)', textDecoration: 'underline', textDecorationColor: 'var(--color-orange)', textUnderlineOffset: '6px', margin: '0 0 16px 0' }}>
+                        {learner?.name || 'Literacy Graduate'}
+                      </h2>
+                      <p style={{ fontSize: '12px', color: 'var(--text-dark)', lineHeight: '1.6', margin: '0 0 16px 0', fontWeight: 800 }}>
+                        for successfully completing the <strong style={{ color: 'var(--color-orange-dark)' }}>{lesson.difficulty.toUpperCase()} LEVEL</strong> final assessment, demonstrating great dedication and knowledge.
+                      </p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: 'var(--text-muted)', marginTop: '20px', fontWeight: 700 }}>
+                        <div>
+                          <div style={{ borderBottom: '1px solid #CBD5E1', width: '80px', paddingBottom: '4px', marginBottom: '4px' }}>05th August 2026</div>
+                          <span>Date</span>
+                        </div>
+                        <div style={{ fontSize: '28px' }}>🏅</div>
+                        <div>
+                          <div style={{ borderBottom: '1px solid #CBD5E1', width: '80px', paddingBottom: '4px', marginBottom: '4px', fontFamily: 'cursive', color: 'var(--color-orange)' }}>MiGo Buddy</div>
+                          <span>Learning Companion</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '24px' }}>
-                  <button
-                    onClick={() => window.print()}
-                    style={{
-                      flex: 1,
-                      padding: '12px 24px',
-                      background: '#FFFFFF',
-                      border: '2px solid var(--color-peach)',
-                      color: 'var(--color-orange-dark)',
-                      borderRadius: '12px',
-                      fontWeight: 900,
-                      cursor: 'pointer'
-                    }}
-                    type="button"
-                  >
-                    💾 Download PDF
-                  </button>
-                  <button
-                    onClick={handleFinishAssessment}
-                    style={{
-                      flex: 1.5,
-                      padding: '12px 24px',
-                      background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      borderRadius: '12px',
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(255,122,0,0.3)'
-                    }}
-                    type="button"
-                  >
-                    Unlock {lesson.difficulty === 'beginner' ? 'Intermediate' : lesson.difficulty === 'intermediate' ? 'Advanced' : 'Next'} Level ➔
-                  </button>
+                  <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '24px' }}>
+                    <button
+                      onClick={() => window.print()}
+                      style={{
+                        flex: 1,
+                        padding: '12px 24px',
+                        background: '#FFFFFF',
+                        border: '2px solid var(--color-peach)',
+                        color: 'var(--color-orange-dark)',
+                        borderRadius: '12px',
+                        fontWeight: 900,
+                        cursor: 'pointer'
+                      }}
+                      type="button"
+                    >
+                      💾 Download PDF
+                    </button>
+                    <button
+                      onClick={handleFinishAssessment}
+                      style={{
+                        flex: 1.5,
+                        padding: '12px 24px',
+                        background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 15px rgba(255,122,0,0.3)'
+                      }}
+                      type="button"
+                    >
+                      Unlock {lesson.difficulty === 'beginner' ? 'Intermediate' : lesson.difficulty === 'intermediate' ? 'Advanced' : 'Next'} Level ➔
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* FAILED VIEW: Level remains locked, no certificate */
+                <div className={styles.card} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px', background: '#FFFFFF', border: '3px solid #FFCDD2' }}>
+                  
+                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#FFEBEE', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                    <AlertCircle size={40} color="#D32F2F" />
+                  </div>
+                  
+                  <h3 style={{ fontSize: '20px', fontWeight: 950, color: '#C62828', margin: '0 0 8px 0', border: 'none', padding: 0 }}>
+                    Assessment Locked
+                  </h3>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5, margin: '0 0 24px 0', fontWeight: 700 }}>
+                    You scored <strong style={{ color: '#D32F2F' }}>{correctCount} / 10</strong>. A passing score of at least <strong>{passingScore} / 10</strong> is required to unlock the next learning level block. 
+                  </p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+                    <button
+                      onClick={handleRetakeAssessment}
+                      style={{
+                        width: '100%',
+                        padding: '14px',
+                        background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 15px rgba(255,122,0,0.25)',
+                        fontSize: '14px'
+                      }}
+                      type="button"
+                    >
+                      🔄 Retake Assessment
+                    </button>
+                    <button
+                      onClick={handleExitWithoutPassing}
+                      style={{
+                        width: '100%',
+                        padding: '14px',
+                        background: '#FFFFFF',
+                        border: '2.5px solid var(--color-peach)',
+                        color: 'var(--color-orange-dark)',
+                        borderRadius: '12px',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                      type="button"
+                    >
+                      🗺️ Back to Dashboard
+                    </button>
+                  </div>
+                </div>
+              )}
 
             </div>
+
+            {/* FULL REVIEW SECTION AND RECOMMENDATIONS */}
+            <div className={styles.card} style={{ padding: '28px', textAlign: 'left', background: '#FFFFFF', border: '2.5px solid var(--color-peach-light)' }}>
+              
+              <h3 style={{ fontSize: '18px', fontWeight: 950, color: 'var(--color-orange-dark)', borderBottom: '2.5px dashed var(--color-peach)', paddingBottom: '10px', margin: '0 0 20px 0' }}>
+                🔍 Checkup Review & Performance Analysis
+              </h3>
+
+              {/* Mistakes review */}
+              <div style={{ marginBottom: '28px' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px' }}>
+                  {wrongIndices.length === 0 ? '🎉 Perfect Score! No mistakes' : `Reviewing ${wrongIndices.length} incorrect answers:`}
+                </h4>
+
+                {wrongIndices.length === 0 ? (
+                  <div style={{ padding: '16px', borderRadius: '12px', border: '2px solid #A9F5C5', backgroundColor: '#EAFCEF', color: '#27AE60', fontWeight: 800, fontSize: '13.5px' }}>
+                    Congratulations! You answered every question correctly. You are ready to start the next level of lessons.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {wrongIndices.map((qIdx, index) => {
+                      const q = qList[qIdx];
+                      const ans = assessmentAnswers[qIdx];
+                      return (
+                        <div key={qIdx} style={{ padding: '16px', borderRadius: '14px', border: '2px solid var(--color-peach-light)', backgroundColor: '#FFFDF9' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 900, color: 'var(--color-orange-dark)', textTransform: 'uppercase' }}>Question {qIdx + 1}</span>
+                          <h5 style={{ fontSize: '14.5px', fontWeight: 900, color: 'var(--text-dark)', margin: '4px 0 10px 0' }}>{q.question}</h5>
+                          
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px', fontWeight: 800 }}>
+                            <div style={{ color: '#D32F2F', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span>❌ Your Answer:</span>
+                              <strong>{ans !== null ? q.options[ans] : 'Unanswered'}</strong>
+                            </div>
+                            <div style={{ color: '#2E7D32', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span>✅ Correct Answer:</span>
+                              <strong>{q.options[q.correct_index]}</strong>
+                            </div>
+                          </div>
+
+                          {q.explanation && (
+                            <p style={{ margin: '10px 0 0 0', fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic', fontWeight: 700, borderLeft: '3px solid var(--color-orange)', paddingLeft: '8px' }}>
+                              💡 Explanation: {q.explanation}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Practice Recommendations */}
+              {wrongIndices.length > 0 && (
+                <div>
+                  <h4 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Sparkles size={16} color="var(--color-orange)" />
+                    <span>Recommended Practice Lessons</span>
+                  </h4>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    {recLessons.map((rec, rIdx) => (
+                      <div 
+                        key={rIdx} 
+                        onClick={() => navigate(rec.link)}
+                        style={{ 
+                          padding: '16px', 
+                          border: '2px solid var(--color-peach-light)', 
+                          borderRadius: '12px', 
+                          backgroundColor: '#FFFBF5', 
+                          cursor: 'pointer', 
+                          transition: 'all 0.15s ease' 
+                        }}
+                      >
+                        <h5 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 900, color: 'var(--color-orange-dark)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>{rec.title}</span>
+                          <span style={{ fontSize: '11px', textDecoration: 'underline' }}>Go Practice ➔</span>
+                        </h5>
+                        <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)', fontWeight: 650, lineHeight: 1.3 }}>
+                          {rec.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            </div>
+
           </div>
         </div>
       );
