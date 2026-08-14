@@ -254,11 +254,8 @@ export default function PronunciationPractice() {
 
       const utterance = new SpeechSynthesisUtterance(currentChallenge.text);
       
-      let langCode = 'en-US';
-      if (learner?.learning_language === 'hi') langCode = 'hi-IN';
-      else if (learner?.learning_language === 'kn') langCode = 'kn-IN';
-      else if (learner?.learning_language === 'ta') langCode = 'ta-IN';
-      
+      const langMap = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN', te: 'te-IN' };
+      const langCode = langMap[learner?.learning_language] || 'en-US';
       utterance.lang = langCode;
 
       // Find matching voice for language (with null safety protection)

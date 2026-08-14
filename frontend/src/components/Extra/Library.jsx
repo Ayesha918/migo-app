@@ -341,12 +341,8 @@ export default function Library() {
 
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Explicitly set language tag based on story book language
-    let langTag = 'en-US';
-    if (readingBook.language === 'hi') langTag = 'hi-IN';
-    else if (readingBook.language === 'kn') langTag = 'kn-IN';
-    else if (readingBook.language === 'ta') langTag = 'ta-IN';
-    
+    const langMap = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN', te: 'te-IN' };
+    const langTag = langMap[readingBook.language] || 'en-US';
     utterance.lang = langTag;
 
     // Use populated voices state list
@@ -391,17 +387,13 @@ export default function Library() {
     if (!synthRef.current) return;
     synthRef.current.cancel();
 
-    let langTag = 'en-US';
-    let phrase = `${letter} for ${word}`;
+    const langMap = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN', te: 'te-IN' };
+    const langTag = langMap[lang] || 'en-US';
     
+    let phrase = `${letter} for ${word}`;
     if (lang === 'hi') {
-      langTag = 'hi-IN';
       phrase = `${letter} से ${word}`;
-    } else if (lang === 'kn') {
-      langTag = 'kn-IN';
-      phrase = `${letter} ${word}`;
-    } else if (lang === 'ta') {
-      langTag = 'ta-IN';
+    } else if (lang === 'kn' || lang === 'ta' || lang === 'te') {
       phrase = `${letter} ${word}`;
     }
 

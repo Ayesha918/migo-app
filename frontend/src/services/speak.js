@@ -21,14 +21,14 @@ function pickFemaleVoice(lang) {
     cachedVoices = window.speechSynthesis.getVoices();
   }
 
-  const langPrefix = lang.split('-')[0]; // 'en-US' -> 'en'
+  const langPrefix = lang ? lang.split('-')[0].toLowerCase() : 'en';
 
   // Common naming patterns browsers use for female voices
   const femaleHints = ['female', 'zira', 'samantha', 'susan', 'victoria', 'karen', 'moira', 'tessa', 'google us english', 'google uk english female'];
 
-  const matchesLang = (voice) => voice.lang.toLowerCase().startsWith(langPrefix);
+  const matchesLang = (voice) => voice && voice.lang && voice.lang.toLowerCase().startsWith(langPrefix);
   const soundsFemale = (voice) =>
-    femaleHints.some((hint) => voice.name.toLowerCase().includes(hint));
+    voice && voice.name && femaleHints.some((hint) => voice.name.toLowerCase().includes(hint));
 
   // 1. Best case: a voice matching both language and female naming pattern
   let voice = cachedVoices.find((v) => matchesLang(v) && soundsFemale(v));
