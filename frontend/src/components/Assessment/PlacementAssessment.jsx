@@ -107,12 +107,12 @@ export default function PlacementAssessment() {
 
     // 1. Speak the instruction in the user's known language accent
     if (instructionText) {
-      speak(instructionText, knownSpeechLang);
+      speak(instructionText, knownSpeechLang, 0.95, true);
     }
     
     // 2. Speak the target content in the preferred/learning language accent
     if (targetText) {
-      speak(targetText, speechLang);
+      speak(targetText, speechLang, 0.95, false);
     }
   }, [currentIndex, loading, questions, speechLang, knownSpeechLang]);
 

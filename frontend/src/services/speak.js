@@ -47,13 +47,20 @@ function pickFemaleVoice(lang) {
  * @param {string} text - The text to speak.
  * @param {string} lang - BCP-47 language code (e.g. 'en-US', 'hi-IN', 'kn-IN', 'ar-SA').
  */
-function speak(text, lang = 'en-US', rate = 0.95) {
+function speak(text, lang = 'en-US', rate = 0.95, cancelFirst = true) {
   if (!window.speechSynthesis) {
     console.warn('SpeechSynthesis not supported in this browser.');
     return;
   }
 
-  window.speechSynthesis.cancel();
+  // Ensure speech synthesis is not paused
+  if (window.speechSynthesis.paused) {
+    window.speechSynthesis.resume();
+  }
+
+  if (cancelFirst) {
+    window.speechSynthesis.cancel();
+  }
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = lang;
