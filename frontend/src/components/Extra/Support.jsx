@@ -509,29 +509,28 @@ export default function Support() {
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <span style={{ fontSize: '42px' }}>📄</span>
                 <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--color-orange-dark)', marginTop: '8px' }}>MiGo Documentation</h2>
-                <p style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Read guides on literacy concepts and voice engine parameters.</p>
+                <p style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Find clear information and instructions to help you use MiGo effectively.</p>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left', maxHeight: '450px', overflowY: 'auto', paddingRight: '6px' }}>
                 <div>
-                  <h4 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--color-orange-dark)', borderBottom: '1.5px dashed var(--color-peach-light)', paddingBottom: '4px', margin: '0 0 8px 0' }}>📖 Reading Comprehension Guidelines</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 650, lineHeight: 1.5, margin: 0 }}>
-                    Our library contains multi-page fables translated across regional BCP-47 language codes (English, Hindi, Kannada, Tamil). For best results, encourage learners to split fables page-by-page and complete quizzes after reading.
+                  <h4 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--color-orange-dark)', borderBottom: '1.5px dashed var(--color-peach-light)', paddingBottom: '4px', margin: '0 0 8px 0' }}>📖 Reading & Learning</h4>
+                  <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.5, margin: 0 }}>
+                    Read lessons page by page in English, Hindi, Kannada, or Tamil. Complete the quiz after finishing the reading to check your understanding.
                   </p>
                 </div>
 
                 <div>
-                  <h4 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--color-orange-dark)', borderBottom: '1.5px dashed var(--color-peach-light)', paddingBottom: '4px', margin: '0 0 8px 0' }}>🎙️ Voice Phonics Synthesis & Recognition</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 650, lineHeight: 1.5, margin: 0 }}>
-                    MiGo features browser Web Speech API bindings. Pronunciation tutor checkpoints matching target characters/syllables expect clear, slow speech input. Check browser mic permissions if check boxes fail to load.
+                  <h4 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--color-orange-dark)', borderBottom: '1.5px dashed var(--color-peach-light)', paddingBottom: '4px', margin: '0 0 8px 0' }}>🎙️ Voice & Pronunciation</h4>
+                  <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.5, margin: 0 }}>
+                    Use the microphone to practice pronunciation and speaking. Make sure microphone permission is enabled for the best experience.
                   </p>
                 </div>
 
                 <div>
-                  <h4 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--color-orange-dark)', borderBottom: '1.5px dashed var(--color-peach-light)', paddingBottom: '4px', margin: '0 0 8px 0' }}>🏆 Experience Points (XP) & Certificates Rules</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 650, lineHeight: 1.5, margin: 0 }}>
-                    * **Placement Certificate**: Granted instantly upon initial evaluation setup.<br />
-                    * **Perfect Starter Certificate**: Granted when a student completes 3 active roadmap lessons and logs 15 minutes of learning time.
+                  <h4 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--color-orange-dark)', borderBottom: '1.5px dashed var(--color-peach-light)', paddingBottom: '4px', margin: '0 0 8px 0' }}>🏆 XP & Certificates</h4>
+                  <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.5, margin: 0 }}>
+                    Earn XP by completing lessons and learning activities. Certificates are awarded when you complete the required learning milestones.
                   </p>
                 </div>
               </div>

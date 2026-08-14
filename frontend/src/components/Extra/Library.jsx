@@ -58,6 +58,118 @@ const READ_PROGRESS = {
   'The Fox and the Crow': 70
 };
 
+const CHARTS_DATA = [
+  {
+    id: 'english',
+    title: 'English Alphabet Chart',
+    subtitle: 'A to Z Alphabet illustration cards',
+    desc: 'Learn the English alphabet from A to Z with phonetic emojis and interactive text-to-speech words.',
+    flag: '🇬🇧',
+    lang: 'en',
+    colors: ['#FF6B6B', '#4D96FF', '#6BCB77', '#FFA1F5', '#9F7AEA', '#EC4899', '#06B6D4'],
+    items: [
+      { letter: 'A', word: 'Apple', emoji: '🍎' },
+      { letter: 'B', word: 'Ball', emoji: '⚽' },
+      { letter: 'C', word: 'Cat', emoji: '🐱' },
+      { letter: 'D', word: 'Dog', emoji: '🐶' },
+      { letter: 'E', word: 'Elephant', emoji: '🐘' },
+      { letter: 'F', word: 'Fish', emoji: '🐟' },
+      { letter: 'G', word: 'Grapes', emoji: '🍇' },
+      { letter: 'H', word: 'Hat', emoji: '👒' },
+      { letter: 'I', word: 'Ice Cream', emoji: '🍦' },
+      { letter: 'J', word: 'Jug', emoji: '🥛' },
+      { letter: 'K', word: 'Kite', emoji: '🪁' },
+      { letter: 'L', word: 'Lion', emoji: '🦁' },
+      { letter: 'M', word: 'Monkey', emoji: '🐒' },
+      { letter: 'N', word: 'Nest', emoji: '🪹' },
+      { letter: 'O', word: 'Orange', emoji: '🍊' },
+      { letter: 'P', word: 'Parrot', emoji: '🦜' },
+      { letter: 'Q', word: 'Queen', emoji: '👑' },
+      { letter: 'R', word: 'Rabbit', emoji: '🐇' },
+      { letter: 'S', word: 'Sun', emoji: '☀️' },
+      { letter: 'T', word: 'Train', emoji: '🚆' },
+      { letter: 'U', word: 'Umbrella', emoji: '🌂' },
+      { letter: 'V', word: 'Van', emoji: '🚐' },
+      { letter: 'W', word: 'Watch', emoji: '⌚' },
+      { letter: 'X', word: 'Xylophone', emoji: '🎹' },
+      { letter: 'Y', word: 'Yak', emoji: '🐂' },
+      { letter: 'Z', word: 'Zebra', emoji: '🦓' }
+    ]
+  },
+  {
+    id: 'hindi',
+    title: 'हिन्दी स्वर माला (Varnamala)',
+    subtitle: 'Vowels and Illustrated Word Cards',
+    desc: 'Practice Hindi vowels from अ to अः with phonetics, English translation, and interactive audio.',
+    flag: '🇮🇳',
+    lang: 'hi',
+    colors: ['#FF7A00', '#FF4D4D', '#10B981', '#3B82F6', '#9F7AEA', '#EC4899'],
+    items: [
+      { letter: 'अ', word: 'अनार', translation: 'Pomegranate', emoji: '🍎' },
+      { letter: 'आ', word: 'आम', translation: 'Mango', emoji: '🥭' },
+      { letter: 'इ', word: 'इमली', translation: 'Tamarind', emoji: '🫘' },
+      { letter: 'ई', word: 'ईख', translation: 'Sugarcane', emoji: '🎋' },
+      { letter: 'उ', word: 'उल्लू', translation: 'Owl', emoji: '🦉' },
+      { letter: 'ऊ', word: 'ऊन', translation: 'Wool', emoji: '🧶' },
+      { letter: 'ऋ', word: 'ऋषि', translation: 'Sage', emoji: '🧘' },
+      { letter: 'ए', word: 'एड़ी', translation: 'Heel', emoji: '🦶' },
+      { letter: 'ऐ', word: 'ऐनक', translation: 'Spectacles', emoji: '👓' },
+      { letter: 'ओ', word: 'ओखली', translation: 'Mortar', emoji: '🥣' },
+      { letter: 'औ', word: 'औरत', translation: 'Woman', emoji: '👩' },
+      { letter: 'अं', word: 'अंगूर', translation: 'Grapes', emoji: '🍇' },
+      { letter: 'अः', word: 'खाली', translation: 'Aha', emoji: '😄' }
+    ]
+  },
+  {
+    id: 'kannada',
+    title: 'ಕನ್ನಡ ವರ್ಣಮಾಲೆ (Varnamala)',
+    subtitle: 'Kannada Vowels with Illustrated Words',
+    desc: 'Learn Kannada vowels (ಸ್ವರಗಳು) from ಅ to ಅಂ with illustrations and spoken audio recordings.',
+    flag: '🇮🇳',
+    lang: 'kn',
+    colors: ['#FFA1F5', '#3B82F6', '#FF7A00', '#10B981', '#9F7AEA', '#FF6B6B'],
+    items: [
+      { letter: 'ಅ', word: 'ಅರಸ', translation: 'King', emoji: '👑' },
+      { letter: 'ಆ', word: 'ಆಮೆ', translation: 'Turtle', emoji: '🐢' },
+      { letter: 'ಇ', word: 'ಇಲಿ', translation: 'Rat', emoji: '🐀' },
+      { letter: 'ಈ', word: 'ಈಶ್ವರ', translation: 'Shiva', emoji: '🔱' },
+      { letter: 'ಉ', word: 'ಉಡುಪು', translation: 'Dress', emoji: '👗' },
+      { letter: 'ಊ', word: 'ಊಟ', translation: 'Meal', emoji: '🍲' },
+      { letter: 'ಋ', word: 'ಋಷಿ', translation: 'Sage', emoji: '🧘' },
+      { letter: 'ಎ', word: 'ಎಲೆ', translation: 'Leaf', emoji: '🍃' },
+      { letter: 'ಏ', word: 'ಏಣಿ', translation: 'Ladder', emoji: '🪜' },
+      { letter: 'ಐ', word: 'ಐದು', translation: 'Five', emoji: '🖐️' },
+      { letter: 'ಒ', word: 'ಒಂಟೆ', translation: 'Camel', emoji: '🐫' },
+      { letter: 'ಓ', word: 'ಓಲೆ', translation: 'Earring', emoji: '👂' },
+      { letter: 'ಔ', word: 'ಔಷಧ', translation: 'Medicine', emoji: '🧪' },
+      { letter: 'ಅಂ', word: 'ಅಂಗಿ', translation: 'Shirt', emoji: '👕' }
+    ]
+  },
+  {
+    id: 'tamil',
+    title: 'தமிழ் உயிர் எழுத்துக்கள்',
+    subtitle: 'Tamil Vowels with Illustrated Words',
+    desc: 'Practice Tamil vowels (உயிர் எழுத்துக்கள்) from அ to ஔ with illustrations and phonetic voices.',
+    flag: '🇮🇳',
+    lang: 'ta',
+    colors: ['#3B82F6', '#6BCB77', '#FF9F43', '#EC4899', '#9F7AEA', '#06B6D4'],
+    items: [
+      { letter: 'அ', word: 'அணில்', translation: 'Squirrel', emoji: '🐿️' },
+      { letter: 'ஆ', word: 'ஆடு', translation: 'Goat', emoji: '🐐' },
+      { letter: 'இ', word: 'இலை', translation: 'Leaf', emoji: '🍃' },
+      { letter: 'ஈ', word: 'ஈ', translation: 'Housefly', emoji: '🪰' },
+      { letter: 'உ', word: 'உரல்', translation: 'Mortar', emoji: '🥣' },
+      { letter: 'ஊ', word: 'ஊஞ்சல்', translation: 'Swing', emoji: '🎡' },
+      { letter: 'எ', word: 'எலி', translation: 'Rat', emoji: '🐀' },
+      { letter: 'ஏ', word: 'ஏணி', translation: 'Ladder', emoji: '🪜' },
+      { letter: 'ஐ', word: 'ஐந்து', translation: 'Five', emoji: '🖐️' },
+      { letter: 'ஒ', word: 'ஒட்டகம்', translation: 'Camel', emoji: '🐫' },
+      { letter: 'ஓ', word: 'ஓடம்', translation: 'Boat', emoji: '⛵' },
+      { letter: 'ஔ', word: 'ஔவையார்', translation: 'Poetess', emoji: '👵' }
+    ]
+  }
+];
+
 export default function Library() {
   const { learner, logout, hasFeatureAccess, triggerUpgradeModal } = useLearner();
   const [books, setBooks] = useState([]);
@@ -266,6 +378,36 @@ export default function Library() {
         startReadAloud(currentPages[currentPageIndex]);
       }
     }
+  };
+
+  const speakChartCard = (letter, word, lang) => {
+    if (!synthRef.current) return;
+    synthRef.current.cancel();
+
+    let langTag = 'en-US';
+    let phrase = `${letter} for ${word}`;
+    
+    if (lang === 'hi') {
+      langTag = 'hi-IN';
+      phrase = `${letter} से ${word}`;
+    } else if (lang === 'kn') {
+      langTag = 'kn-IN';
+      phrase = `${letter} ${word}`;
+    } else if (lang === 'ta') {
+      langTag = 'ta-IN';
+      phrase = `${letter} ${word}`;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(phrase);
+    utterance.lang = langTag;
+
+    const voice = voices.find(v => v.lang.toLowerCase() === langTag.toLowerCase() || v.lang.toLowerCase().startsWith(lang.toLowerCase()));
+    if (voice) {
+      utterance.voice = voice;
+    }
+    
+    utterance.rate = 0.8;
+    synthRef.current.speak(utterance);
   };
 
   return (
