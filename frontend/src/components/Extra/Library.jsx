@@ -293,7 +293,49 @@ export default function Library() {
                 </div>
               </div>
 
-              {/* Search & Child-friendly Filters */}
+              {/* Collection Mode Toggles */}
+              <div style={{ display: 'flex', gap: '12px', margin: '20px 0 10px 0' }}>
+                <button
+                  onClick={() => setLibraryMode('books')}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '20px',
+                    border: '3px solid var(--color-peach)',
+                    backgroundColor: libraryMode === 'books' ? 'var(--color-orange)' : '#FFFFFF',
+                    color: libraryMode === 'books' ? '#FFFFFF' : 'var(--color-orange-dark)',
+                    fontSize: '14px',
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    boxShadow: libraryMode === 'books' ? 'var(--shadow-soft)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                  type="button"
+                >
+                  📚 Read Storybooks
+                </button>
+                <button
+                  onClick={() => setLibraryMode('charts')}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '20px',
+                    border: '3px solid var(--color-peach)',
+                    backgroundColor: libraryMode === 'charts' ? 'var(--color-orange)' : '#FFFFFF',
+                    color: libraryMode === 'charts' ? '#FFFFFF' : 'var(--color-orange-dark)',
+                    fontSize: '14px',
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    boxShadow: libraryMode === 'charts' ? 'var(--shadow-soft)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                  type="button"
+                >
+                  🎨 Interactive Learning Charts
+                </button>
+              </div>
+
+              {libraryMode === 'books' ? (
+                <>
+                  {/* Search & Child-friendly Filters */}
               <div className={styles.searchFilterArea} style={{ marginTop: '20px' }}>
                 <div className={styles.searchBarWrapper}>
                   <Search size={20} className={styles.searchIcon} style={{ color: 'var(--color-orange)', left: '16px', position: 'absolute' }} />
@@ -627,6 +669,39 @@ export default function Library() {
 
                 </div>
               )}
+                </>
+              ) : (
+                /* Interactive Learning Charts View */
+                <div style={{ marginTop: '30px' }}>
+                  <p style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: '15px', marginBottom: '24px', backgroundColor: '#FFFDF9', padding: '16px', borderRadius: '12px', border: '1.5px dashed var(--color-peach)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Sparkles size={18} color="var(--color-orange)" />
+                    <span>Click on any chart to open its interactive letters, illustration words, and phonetic audio cards. Perfect for starter learners!</span>
+                  </p>
+                  
+                  <div className={styles.cardsGrid} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+                    {CHARTS_DATA.map((chart) => (
+                      <div 
+                        key={chart.id} 
+                        className={styles.certificateCard} 
+                        style={{ cursor: 'pointer', border: '3.5px solid var(--color-peach)', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }} 
+                        onClick={() => setSelectedChart(chart)}
+                      >
+                        <div className={styles.certificateStamp} style={{ fontSize: '32px', margin: '0 auto 12px', width: '70px', height: '70px', borderStyle: 'solid', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {chart.flag}
+                        </div>
+                        <h4 className={styles.certificateTitle} style={{ fontSize: '18px', fontWeight: 900, marginBottom: '6px' }}>{chart.title}</h4>
+                        <p className={styles.certificateSub} style={{ fontSize: '13px', fontWeight: 750, color: 'var(--text-muted)', marginBottom: '12px' }}>{chart.subtitle}</p>
+                        <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 600, height: '60px', overflow: 'hidden', marginBottom: '16px', lineHeight: 1.4 }}>
+                          {chart.desc}
+                        </p>
+                        <button className={styles.certificateBtn} style={{ marginTop: 'auto', width: '100%', borderRadius: '20px' }} type="button">
+                          Open Interactive Chart ➔
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </motion.div>
           ) : (
             /* ==========================================
@@ -928,6 +1003,127 @@ export default function Library() {
                 </div>
               </div>
 
+            </div>
+          </div>
+        )}
+
+        {selectedChart && (
+          <div className={styles.certModalOverlay} onClick={() => setSelectedChart(null)}>
+            <div 
+              className={styles.certModalContent} 
+              onClick={(e) => e.stopPropagation()} 
+              style={{ 
+                maxWidth: '900px', 
+                width: '95%', 
+                maxHeight: '90vh', 
+                overflowY: 'auto',
+                border: '6px double var(--color-peach)',
+                borderRadius: '24px',
+                padding: '30px'
+              }}
+            >
+              <button 
+                className={styles.certModalClose} 
+                onClick={() => setSelectedChart(null)} 
+                type="button"
+                style={{ fontSize: '32px', top: '16px', right: '20px' }}
+              >
+                &times;
+              </button>
+
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <span style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>{selectedChart.flag}</span>
+                <h1 style={{ fontSize: '28px', fontWeight: 900, color: 'var(--color-orange-dark)', margin: 0 }}>
+                  {selectedChart.title}
+                </h1>
+                <p style={{ color: 'var(--text-muted)', fontWeight: 800, margin: '8px 0 0 0', fontSize: '14.5px' }}>
+                  {selectedChart.subtitle} • Click on any card to hear it read aloud!
+                </p>
+              </div>
+
+              {/* Grid of Alphabet/Varnamala cards */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+                gap: '12px',
+                padding: '10px'
+              }}>
+                {selectedChart.items.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => speakChartCard(item.letter, item.word, selectedChart.lang)}
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      border: '3px solid var(--color-peach-light)',
+                      borderRadius: '16px',
+                      padding: '18px 12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      boxShadow: 'var(--shadow-soft)',
+                      outline: 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.borderColor = 'var(--color-orange)';
+                      e.currentTarget.style.backgroundColor = '#FFFDF9';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.borderColor = 'var(--color-peach-light)';
+                      e.currentTarget.style.backgroundColor = '#FFFFFF';
+                    }}
+                    type="button"
+                  >
+                    {/* Big colorful letter */}
+                    <span style={{
+                      fontSize: '38px',
+                      fontWeight: 950,
+                      color: selectedChart.colors[idx % selectedChart.colors.length],
+                      marginBottom: '8px',
+                      lineHeight: 1
+                    }}>
+                      {item.letter}
+                    </span>
+
+                    {/* Emoji Illustration */}
+                    <span style={{
+                      fontSize: '32px',
+                      marginBottom: '8px',
+                      display: 'block'
+                    }} role="img" aria-label={item.word}>
+                      {item.emoji}
+                    </span>
+
+                    {/* Word label */}
+                    <span style={{
+                      fontSize: '14px',
+                      fontWeight: 850,
+                      color: 'var(--text-dark)'
+                    }}>
+                      {item.word}
+                    </span>
+
+                    {/* Phonetic / Translation */}
+                    {item.translation && (
+                      <span style={{
+                        fontSize: '11.5px',
+                        fontWeight: 750,
+                        color: 'var(--text-muted)',
+                        marginTop: '3px',
+                        backgroundColor: 'var(--color-peach-light)',
+                        padding: '1px 6px',
+                        borderRadius: '8px'
+                      }}>
+                        {item.translation}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
