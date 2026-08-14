@@ -35,9 +35,7 @@ export default function Support() {
   const [faqSearchQuery, setFaqSearchQuery] = useState('');
 
   // Modal view states
-  const [activeModal, setActiveModal] = useState(null); // 'getting-started' | 'videos' | 'documentation' | null
-  const [simulatedVideo, setSimulatedVideo] = useState(null);
-  const [videoStep, setVideoStep] = useState(0);
+  const [activeModal, setActiveModal] = useState(null); // 'getting-started' | 'documentation' | null
 
   // Floating MiGo Helper states
   const [isHelperOpen, setIsHelperOpen] = useState(false);
@@ -130,10 +128,7 @@ export default function Support() {
     }, 400);
   };
 
-  const handlePlayVideo = (title) => {
-    setSimulatedVideo(title);
-    setVideoStep(0);
-  };
+
 
   return (
     <div className={styles.pageLayout} style={{ position: 'relative' }}>
@@ -216,19 +211,7 @@ export default function Support() {
               <span style={{ marginTop: 'auto', fontSize: '12px', fontWeight: 900, color: 'var(--color-orange)' }}>Open Guide ➔</span>
             </div>
             
-            {/* Card 2 */}
-            <div 
-              className={styles.sectionBox} 
-              style={{ display: 'flex', flexDirection: 'column', gap: '8px', cursor: 'pointer', transition: 'transform 0.15s ease', border: '3px solid var(--color-peach-light)' }}
-              onClick={() => setActiveModal('videos')}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <span style={{ fontSize: '28px' }}>🎥</span>
-              <h4 style={{ fontWeight: 850, color: 'var(--color-orange-dark)' }}>Video Tutorials</h4>
-              <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600 }}>Watch step-by-step video guides.</p>
-              <span style={{ marginTop: 'auto', fontSize: '12px', fontWeight: 900, color: 'var(--color-orange)' }}>Watch Videos ➔</span>
-            </div>
+
 
             {/* Card 3 */}
             <div 
@@ -408,209 +391,7 @@ export default function Support() {
           </div>
         )}
 
-        {/* MODAL 2: VIDEO TUTORIALS */}
-        {activeModal === 'videos' && (
-          <div className={styles.certModalOverlay} onClick={() => setActiveModal(null)}>
-            <div className={styles.certModalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px', border: '5px double var(--color-peach)', padding: '30px' }}>
-              <button className={styles.certModalClose} onClick={() => setActiveModal(null)} type="button">&times;</button>
-              
-              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <span style={{ fontSize: '42px' }}>🎥</span>
-                <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--color-orange-dark)', marginTop: '8px' }}>Video Tutorials</h2>
-                <p style={{ color: 'var(--text-muted)', fontWeight: 700 }}>Watch quick guides on how to use MiGo features effectively!</p>
-              </div>
 
-              {simulatedVideo ? (
-                /* INTERACTIVE SIMULATED VIDEO PLAYER SCREEN */
-                <div style={{ backgroundColor: '#1A1A1A', borderRadius: '16px', border: '4px solid var(--color-peach)', padding: '20px', color: '#FFFFFF', textAlign: 'left', minHeight: '340px', display: 'flex', flexDirection: 'column' }}>
-                  
-                  {/* Player Topbar */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #333333', paddingBottom: '10px', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#FF4D4D', animation: 'pulse 1.2s infinite' }} />
-                      <span style={{ fontSize: '13px', fontWeight: 800, color: '#AAAAAA' }}>AI Simulation Playback</span>
-                    </div>
-                    <button
-                      onClick={() => setSimulatedVideo(null)}
-                      style={{ padding: '4px 10px', borderRadius: '8px', border: '1.5px solid #555555', color: '#FFFFFF', backgroundColor: 'transparent', fontSize: '11px', cursor: 'pointer', fontWeight: 800 }}
-                      type="button"
-                    >
-                      ✕ Stop & Close
-                    </button>
-                  </div>
-
-                  {/* Player Video Canvas Content */}
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D0D0D', borderRadius: '12px', padding: '20px', border: '1px solid #222222', minHeight: '180px', position: 'relative' }}>
-                    
-                    {/* Visual Slide Content */}
-                    <div style={{ width: '100%', textAlign: 'center' }}>
-                      <span style={{ fontSize: '48px', display: 'block', marginBottom: '8px' }}>
-                        {simulatedVideo === 'Complete App Tour' ? (
-                          videoStep === 0 ? '🗺️' : videoStep === 1 ? '📚' : '📖'
-                        ) : simulatedVideo === 'Voice Phonics Practice' ? (
-                          videoStep === 0 ? '🎙️' : videoStep === 1 ? '🔓' : '🏆'
-                        ) : (
-                          videoStep === 0 ? '⏱️' : videoStep === 1 ? '🔮' : '🎖️'
-                        )}
-                      </span>
-                      <h4 style={{ color: 'var(--color-peach)', fontSize: '16px', fontWeight: 900, margin: '0 0 6px 0' }}>
-                        {simulatedVideo === 'Complete App Tour' ? (
-                          videoStep === 0 ? 'Step 1: The Dashboard Roadmap' : videoStep === 1 ? 'Step 2: Interactive Fable Lessons' : 'Step 3: The Digital Library Shelf'
-                        ) : simulatedVideo === 'Voice Phonics Practice' ? (
-                          videoStep === 0 ? 'Step 1: Locate the Microphone' : videoStep === 1 ? 'Step 2: Microphone Permissions' : 'Step 3: Color-coded Validation'
-                        ) : (
-                          videoStep === 0 ? 'Step 1: Track Daily Minutes' : videoStep === 1 ? 'Step 2: RandomForest Predictions' : 'Step 3: Unlock Certificates'
-                        )}
-                      </h4>
-                      <p style={{ color: '#CCCCCC', fontSize: '13px', lineHeight: 1.4, margin: '0 auto', maxWidth: '420px', fontWeight: 650 }}>
-                        {simulatedVideo === 'Complete App Tour' ? (
-                          videoStep === 0 ? 'Welcome to MiGo! The main dashboard displays a map of learning level blocks. Tap a block to view available lessons.' : videoStep === 1 ? 'Read moral fables translated across regional fables. Each lesson includes target vocabulary list and phonetics check cards.' : 'Visit the Library from the sidebar. Segment between standard Storybooks or the new Interactive Phonics Alphabet charts!'
-                        ) : simulatedVideo === 'Voice Phonics Practice' ? (
-                          videoStep === 0 ? 'Inside pronunciation lessons, look for the microphone button placed under key vocabulary letters and syllables.' : videoStep === 1 ? 'Click "Allow" when the browser asks for microphone access so the speech recognizer can capture your voice.' : 'Speak clearly. The engine rates your pronunciation instantly: Orange represents Great, while grey hints to Try Again.'
-                        ) : (
-                          videoStep === 0 ? 'Open the Predictions panel to view expected score gains. Use the drag-and-drop simulator to forecast learning results.' : videoStep === 1 ? 'The ML model forecasts custom scores for Reading, Writing, and Speaking based on cumulative learning statistics.' : 'Once you achieve required milestones (e.g. 15 minutes and 3 completed lessons), your locked certificate instantly enables for PDF viewing!'
-                        )}
-                      </p>
-                    </div>
-
-                    {/* Step Visualizer Panel */}
-                    <div style={{ marginTop: '20px', width: '100%', maxWidth: '380px', backgroundColor: '#1E1E1E', padding: '12px', borderRadius: '8px', border: '1px solid #333333', fontSize: '12px', color: '#AAAAAA', fontWeight: 700 }}>
-                      {simulatedVideo === 'Complete App Tour' ? (
-                        videoStep === 0 ? (
-                          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', alignItems: 'center' }}>
-                            <span style={{ backgroundColor: 'var(--color-orange)', padding: '2px 8px', borderRadius: '4px', color: '#FFF' }}>Level 1</span> ➔ 
-                            <span style={{ border: '1px dashed #555', padding: '2px 8px', borderRadius: '4px' }}>Level 2 (Locked)</span>
-                          </div>
-                        ) : videoStep === 1 ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
-                            <span>📚 Lesson: The Honest Woodcutter</span>
-                            <span style={{ color: '#E8FAEF', fontSize: '11px' }}>Vocabulary words: Integrity, Axe, Reward</span>
-                          </div>
-                        ) : (
-                          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                            <span style={{ border: '1px solid var(--color-orange)', padding: '2px 6px', borderRadius: '10px', color: 'var(--color-orange)' }}>📚 Storybooks</span>
-                            <span style={{ border: '1px solid #555', padding: '2px 6px', borderRadius: '10px' }}>🎨 Charts</span>
-                          </div>
-                        )
-                      ) : simulatedVideo === 'Voice Phonics Practice' ? (
-                        videoStep === 0 ? (
-                          <span style={{ fontSize: '18px', border: '2px solid var(--color-orange)', padding: '4px 12px', borderRadius: '20px', color: 'var(--color-orange)', animation: 'pulse 1.5s infinite', cursor: 'default' }}>🎙️ Tap to Speak</span>
-                        ) : videoStep === 1 ? (
-                          <div style={{ border: '1px solid #FF4D4D', padding: '6px', borderRadius: '6px', backgroundColor: '#2D1414', fontSize: '11px', color: '#FFAAAA' }}>
-                            🔒 Mic Access: Requesting permission...
-                          </div>
-                        ) : (
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                            <span style={{ backgroundColor: '#27AE60', color: '#FFF', padding: '2px 6px', borderRadius: '4px' }}>Great! 95%</span>
-                            <span style={{ backgroundColor: '#E0E0E0', color: '#333', padding: '2px 6px', borderRadius: '4px' }}>Try Again</span>
-                          </div>
-                        )
-                      ) : (
-                        videoStep === 0 ? (
-                          <span>Study slider time set: <strong>45 Minutes / Day</strong></span>
-                        ) : videoStep === 1 ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px' }}>
-                            <span>📈 Expected gain: +24% Writing accuracy</span>
-                            <span>📈 Expected gain: +18% Pronunciation level</span>
-                          </div>
-                        ) : (
-                          <span style={{ color: '#6BCB77' }}>🎉 Certificate Unlocked! Status: Validated</span>
-                        )
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Player Controls */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', gap: '12px' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        onClick={() => setVideoStep(prev => Math.max(0, prev - 1))}
-                        disabled={videoStep === 0}
-                        style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', backgroundColor: videoStep === 0 ? '#333333' : '#444444', color: videoStep === 0 ? '#888888' : '#FFFFFF', fontSize: '12px', cursor: videoStep === 0 ? 'default' : 'pointer', fontWeight: 800 }}
-                        type="button"
-                      >
-                        ⏮️ Previous
-                      </button>
-                      <button
-                        onClick={() => setVideoStep(prev => Math.min(2, prev + 1))}
-                        disabled={videoStep === 2}
-                        style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', backgroundColor: videoStep === 2 ? '#333333' : 'var(--color-orange)', color: '#FFFFFF', fontSize: '12px', cursor: videoStep === 2 ? 'default' : 'pointer', fontWeight: 800 }}
-                        type="button"
-                      >
-                        Next Step ➔
-                      </button>
-                    </div>
-
-                    {/* Step indicators */}
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      {[0, 1, 2].map(idx => (
-                        <div key={idx} style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: videoStep === idx ? 'var(--color-orange)' : '#444444', transition: 'all 0.15s ease' }} />
-                      ))}
-                    </div>
-                  </div>
-
-                </div>
-              ) : (
-                /* VIDEO LIST GRID */
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-                  {/* Video item 1 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', border: '1.5px solid var(--color-peach-light)', borderRadius: '12px', textAlign: 'left', backgroundColor: '#FFFFFF' }}>
-                    <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-peach-light)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Play size={20} color="var(--color-orange)" fill="var(--color-orange)" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <h5 style={{ fontSize: '14.5px', fontWeight: 850, margin: '0 0 2px 0', color: 'var(--text-dark)' }}>Video 1: Complete App Tour (2:30)</h5>
-                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 650, margin: 0 }}>Learn how to navigate the dashboard roadmap, library, and support pages.</p>
-                    </div>
-                    <button 
-                      onClick={() => handlePlayVideo('Complete App Tour')}
-                      style={{ padding: '6px 12px', borderRadius: '12px', border: '2px solid var(--color-orange)', color: 'var(--color-orange)', backgroundColor: 'transparent', fontWeight: 850, fontSize: '11px', cursor: 'pointer' }}
-                      type="button"
-                    >
-                      Play
-                    </button>
-                  </div>
-
-                  {/* Video item 2 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', border: '1.5px solid var(--color-peach-light)', borderRadius: '12px', textAlign: 'left', backgroundColor: '#FFFFFF' }}>
-                    <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-peach-light)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Play size={20} color="var(--color-orange)" fill="var(--color-orange)" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <h5 style={{ fontSize: '14.5px', fontWeight: 850, margin: '0 0 2px 0', color: 'var(--text-dark)' }}>Video 2: Voice Phonics Practice (3:15)</h5>
-                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 650, margin: 0 }}>Tips for clear voice pronunciation checking in Indian regional languages.</p>
-                    </div>
-                    <button 
-                      onClick={() => handlePlayVideo('Voice Phonics Practice')}
-                      style={{ padding: '6px 12px', borderRadius: '12px', border: '2px solid var(--color-orange)', color: 'var(--color-orange)', backgroundColor: 'transparent', fontWeight: 850, fontSize: '11px', cursor: 'pointer' }}
-                      type="button"
-                    >
-                      Play
-                    </button>
-                  </div>
-
-                  {/* Video item 3 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', border: '1.5px solid var(--color-peach-light)', borderRadius: '12px', textAlign: 'left', backgroundColor: '#FFFFFF' }}>
-                    <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-peach-light)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Play size={20} color="var(--color-orange)" fill="var(--color-orange)" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <h5 style={{ fontSize: '14.5px', fontWeight: 850, margin: '0 0 2px 0', color: 'var(--text-dark)' }}>Video 3: Certifications & Predictions (1:45)</h5>
-                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 650, margin: 0 }}>How to unlock credentials and check your RandomForest ML timeline.</p>
-                    </div>
-                    <button 
-                      onClick={() => handlePlayVideo('Certifications & Predictions')}
-                      style={{ padding: '6px 12px', borderRadius: '12px', border: '2px solid var(--color-orange)', color: 'var(--color-orange)', backgroundColor: 'transparent', fontWeight: 850, fontSize: '11px', cursor: 'pointer' }}
-                      type="button"
-                    >
-                      Play
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* MODAL 3: DOCUMENTATION */}
         {activeModal === 'documentation' && (
