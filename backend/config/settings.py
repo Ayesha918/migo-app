@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 import os
 IS_RENDER = os.environ.get('RENDER', 'false') == 'true'
-DATABASE_URL = config('DATABASE_URL', default=None)
+DATABASE_URL = os.environ.get('POSTGRES_URL') or os.environ.get('DATABASE_URL') or config('DATABASE_URL', default=None)
 DB_NAME = config('DB_NAME', default=None)
 
 if DATABASE_URL:
