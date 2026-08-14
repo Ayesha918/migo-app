@@ -9,7 +9,7 @@ import owl from '../../assets/images/owl.png';
 import styles from './PlacementAssessment.module.css';
 import useTranslate from '../../services/useTranslate';
 
-const LANG_SPEECH_CODES = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN' };
+const LANG_SPEECH_CODES = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN', te: 'te-IN' };
 
 export default function PlacementAssessment() {
   const location = useLocation();
@@ -27,6 +27,7 @@ export default function PlacementAssessment() {
 
   const preferredLang = learner?.learning_language || 'en';
   const knownLang = learner?.known_language || 'en';
+
   const speechLang = LANG_SPEECH_CODES[preferredLang] || 'en-US';
   const knownSpeechLang = LANG_SPEECH_CODES[knownLang] || 'en-US';
 
@@ -79,8 +80,8 @@ export default function PlacementAssessment() {
     } else {
       speakText = `${t('comprehensionCheck')}. ${currentQ.passage_text ? 'Read the story and answer: ' : ''}${currentQ.question_text}`;
     }
-    speak(speakText, knownSpeechLang);
-  }, [currentIndex, loading, questions]);
+    speak(speakText, speechLang);
+  }, [currentIndex, loading, questions, speechLang]);
 
   if (!learner) {
     return (
