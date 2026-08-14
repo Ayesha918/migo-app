@@ -37,7 +37,12 @@ function ReadingAssessment({ learner }) {
   
   const handleSpeak = () => {
     if (currentQuestion) {
-      speak(currentQuestion.question_text, LANG_SPEECH_CODES[preferredLang] || 'en-US');
+      const rawText = currentQuestion.question_text || "";
+      let targetText = rawText;
+      if (rawText.includes(':')) {
+        targetText = rawText.split(':')[1].trim();
+      }
+      speak(targetText, LANG_SPEECH_CODES[preferredLang] || 'en-US');
     }
   };
 

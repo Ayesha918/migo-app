@@ -71,17 +71,50 @@ export default function PlacementAssessment() {
     if (loading || questions.length === 0 || currentIndex >= questions.length) return;
     const currentQ = questions[currentIndex];
 
-    let speakText = "";
-    if (currentQ.assessment_type === 'reading') {
-      const qText = formatQuestionText(currentQ.question_text);
-      speakText = `${t('readingCheck')}, ${currentIndex + 1}. ${qText}`;
-    } else if (currentQ.assessment_type === 'writing') {
-      speakText = `${t('writingCheck')}. ${currentQ.question_text}`;
-    } else {
-      speakText = `${t('comprehensionCheck')}. ${currentQ.passage_text ? 'Read the story and answer: ' : ''}${currentQ.question_text}`;
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
     }
-    speak(speakText, speechLang);
-  }, [currentIndex, loading, questions, speechLang]);
+
+    let instructionText = "";
+    let targetText = "";
+
+    if (currentQ.assessment_type === 'reading') {
+      instructionText = `${t('readingCheck')}, ${currentIndex + 1}. ${t('whichPictureMatches') || 'Which picture matches:'}`;
+      
+      const rawText = currentQ.question_text || "";
+      if (rawText.includes(':')) {
+        targetText = rawText.split(':')[1].trim();
+      } else {
+        targetText = rawText;
+      }
+    } else if (currentQ.assessment_type === 'writing') {
+      instructionText = `${t('writingCheck')}. ${t('writeShortResponse') || 'Write the word:'}`;
+      
+      const rawText = currentQ.question_text || "";
+      if (rawText.includes(':')) {
+        targetText = rawText.split(':')[1].trim();
+      } else {
+        targetText = rawText;
+      }
+    } else {
+      instructionText = `${t('comprehensionCheck')}.`;
+      if (currentQ.passage_text) {
+        targetText = `${currentQ.passage_text}. ${currentQ.question_text}`;
+      } else {
+        targetText = currentQ.question_text;
+      }
+    }
+
+    // 1. Speak the instruction in the user's known language accent
+    if (instructionText) {
+      speak(instructionText, knownSpeechLang);
+    }
+    
+    // 2. Speak the target content in the preferred/learning language accent
+    if (targetText) {
+      speak(targetText, speechLang);
+    }
+  }, [currentIndex, loading, questions, speechLang, knownSpeechLang]);
 
   if (!learner) {
     return (
