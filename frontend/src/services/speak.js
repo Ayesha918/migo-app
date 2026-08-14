@@ -76,4 +76,57 @@ function speak(text, lang = 'en-US', rate = 0.95, cancelFirst = true) {
   window.speechSynthesis.speak(utterance);
 }
 
+/**
+ * Speaks a list of utterances sequentially.
+ * @param {Array<{text: string, lang: string}>} items - Array of text items to speak sequentially.
+ * @param {number} rate - Speed rate of narration.
+ */
+export function speakSequence(items, rate = 0.85) {
+  if (!window.speechSynthesis || !items || items.length === 0) return;
+
+  // Make sure to cancel any current speech
+  window.speechSynthesis.cancel();
+  if (window.speechSynthesis.paused) {
+    window.speechSynthesis.resume();
+  }
+
+  let index = 0;
+
+  const playNext = () => {
+    if (index >= items.length) return;
+    const current = items[index];
+    if (!current || !current.text) {
+      index++;
+      playNext();
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(current.text);
+    utterance.lang = current.lang || 'en-US';
+    utterance.rate = rate;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    const femaleVoice = pickFemaleVoice(utterance.lang);
+    if (femaleVoice) {
+      utterance.voice = femaleVoice;
+    }
+
+    utterance.onend = () => {
+      index++;
+      playNext();
+    };
+
+    utterance.onerror = (e) => {
+      console.warn('Speech synthesis sequential item failed:', e);
+      index++;
+      playNext();
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  playNext();
+}
+
 export default speak;

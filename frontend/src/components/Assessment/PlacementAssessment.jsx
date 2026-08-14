@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchQuestions, submitAssessment, fetchDashboardSummary } from '../../services/api';
-import speak from '../../services/speak';
+import speak, { speakSequence } from '../../services/speak';
 import VirtualKeyboard from './VirtualKeyboard';
 import owl from '../../assets/images/owl.png';
 import styles from './PlacementAssessment.module.css';
@@ -66,14 +66,9 @@ export default function PlacementAssessment() {
       .finally(() => setLoading(false));
   }, [learner, preferredLang]);
 
-  // Audio narrator guidance on loading/moving index
-  useEffect(() => {
+  const triggerNarration = () => {
     if (loading || questions.length === 0 || currentIndex >= questions.length) return;
     const currentQ = questions[currentIndex];
-
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
 
     let instructionText = "";
     let targetText = "";
@@ -105,16 +100,25 @@ export default function PlacementAssessment() {
       }
     }
 
-    // 1. Speak the instruction in the user's known language accent
+    const playlist = [];
     if (instructionText) {
-      speak(instructionText, knownSpeechLang, 0.95, true);
+      playlist.push({ text: instructionText, lang: knownSpeechLang });
     }
-    
-    // 2. Speak the target content in the preferred/learning language accent
     if (targetText) {
-      speak(targetText, speechLang, 0.95, false);
+      playlist.push({ text: targetText, lang: speechLang });
     }
-  }, [currentIndex, loading, questions, speechLang, knownSpeechLang]);
+
+    speakSequence(playlist, 0.85);
+  };
+
+  // Audio narrator guidance on loading/moving index (safely caught for autoplay policies)
+  useEffect(() => {
+    try {
+      triggerNarration();
+    } catch (err) {
+      console.warn('Autoplay speech block caught:', err);
+    }
+  }, [currentIndex, loading, questions]);
 
   if (!learner) {
     return (
@@ -231,8 +235,27 @@ export default function PlacementAssessment() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <div className={styles.stepHeader}>
-                {getCheckHeader(currentQuestion.assessment_type)} ({currentIndex + 1}/{questions.length})
+              <div className={styles.stepHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{getCheckHeader(currentQuestion.assessment_type)} ({currentIndex + 1}/{questions.length})</span>
+                <button
+                  onClick={triggerNarration}
+                  style={{
+                    backgroundColor: 'var(--color-peach-light)',
+                    border: '2px solid var(--color-peach)',
+                    color: 'var(--color-orange-dark)',
+                    fontSize: '13px',
+                    padding: '6px 12px',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontWeight: 900
+                  }}
+                  type="button"
+                >
+                  🔊 Listen
+                </button>
               </div>
 
               {currentQuestion.passage_text && (
