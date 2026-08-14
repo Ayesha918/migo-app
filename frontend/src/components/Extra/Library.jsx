@@ -350,8 +350,15 @@ export default function Library() {
     utterance.lang = langTag;
 
     // Use populated voices state list
-    // Try to find a voice that matches this language tag or code
-    let voice = voices.find(v => v.lang.toLowerCase() === langTag.toLowerCase() || v.lang.toLowerCase().startsWith(readingBook.language.toLowerCase()));
+    let currentVoices = voices || [];
+    if (currentVoices.length === 0 && window.speechSynthesis) {
+      currentVoices = window.speechSynthesis.getVoices() || [];
+    }
+    
+    let voice = currentVoices.find(v => v && v.lang && (
+      v.lang.toLowerCase() === langTag.toLowerCase() || 
+      v.lang.toLowerCase().startsWith(readingBook.language.toLowerCase())
+    ));
     
     if (voice) {
       utterance.voice = voice;
@@ -401,7 +408,15 @@ export default function Library() {
     const utterance = new SpeechSynthesisUtterance(phrase);
     utterance.lang = langTag;
 
-    const voice = voices.find(v => v.lang.toLowerCase() === langTag.toLowerCase() || v.lang.toLowerCase().startsWith(lang.toLowerCase()));
+    let currentVoices = voices || [];
+    if (currentVoices.length === 0 && window.speechSynthesis) {
+      currentVoices = window.speechSynthesis.getVoices() || [];
+    }
+
+    const voice = currentVoices.find(v => v && v.lang && (
+      v.lang.toLowerCase() === langTag.toLowerCase() || 
+      v.lang.toLowerCase().startsWith(lang.toLowerCase())
+    ));
     if (voice) {
       utterance.voice = voice;
     }

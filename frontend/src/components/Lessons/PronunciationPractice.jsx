@@ -245,6 +245,13 @@ export default function PronunciationPractice() {
   const speakExpectedText = () => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
+      
+      // Dynamic fallback load if voices state is empty on initial render
+      let currentVoices = voices || [];
+      if (currentVoices.length === 0) {
+        currentVoices = window.speechSynthesis.getVoices() || [];
+      }
+
       const utterance = new SpeechSynthesisUtterance(currentChallenge.text);
       
       let langCode = 'en-US';
@@ -254,8 +261,13 @@ export default function PronunciationPractice() {
       
       utterance.lang = langCode;
 
-      // Find matching voice for language
-      const voice = voices.find(v => v.lang.toLowerCase() === langCode.toLowerCase() || v.lang.toLowerCase().startsWith(learner?.learning_language?.toLowerCase()));
+      // Find matching voice for language (with null safety protection)
+      const targetLang = (learner?.learning_language || 'en').toLowerCase();
+      const voice = currentVoices.find(v => v && v.lang && (
+        v.lang.toLowerCase() === langCode.toLowerCase() || 
+        v.lang.toLowerCase().startsWith(targetLang)
+      ));
+      
       if (voice) {
         utterance.voice = voice;
       }
