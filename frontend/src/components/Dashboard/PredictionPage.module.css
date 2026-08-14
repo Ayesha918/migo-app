@@ -192,8 +192,8 @@
 }
 
 .updateBadge {
-  background-color: #E8F8F0;
-  color: #27AE60;
+  background-color: #FFF4E6;
+  color: #FF7A00;
   font-size: 11px;
   font-weight: 800;
   padding: 4px 10px;
@@ -233,14 +233,14 @@
 .scoreItem h2 {
   font-size: 44px;
   font-weight: 900;
-  color: #10B981; /* Green color from image */
+  color: #FF7A00; /* Orange color from theme */
   line-height: 1;
 }
 
 .scoreItem h3 {
   font-size: 28px;
   font-weight: 850;
-  color: #10B981;
+  color: #FF7A00;
 }
 
 .confidenceCircleWrapper {
@@ -354,8 +354,8 @@
 }
 
 .stepDotCompleted {
-  border-color: #10B981;
-  background-color: #10B981;
+  border-color: #FF7A00;
+  background-color: #FF7A00;
   color: #FFFFFF;
 }
 
@@ -409,7 +409,7 @@
 .stepScore {
   font-size: 15px;
   font-weight: 900;
-  color: #10B981;
+  color: #FF7A00;
   margin-top: 2px;
 }
 
@@ -537,8 +537,8 @@
 }
 
 .scenarioTag {
-  background-color: #E8F8F0;
-  color: #27AE60;
+  background-color: #FFF4E6;
+  color: #FF7A00;
   font-size: 9px;
   font-weight: 800;
   padding: 2px 8px;
@@ -548,7 +548,7 @@
 .scenarioScore {
   font-size: 16px;
   font-weight: 900;
-  color: #27AE60;
+  color: #FF7A00;
 }
 
 .disclaimerText {
@@ -579,8 +579,8 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background-color: #E8F8F0;
-  color: #27AE60;
+  background-color: #FFF4E6;
+  color: #FF7A00;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -406,7 +406,7 @@ export default function PredictionPage() {
                   
                   <div className={styles.timelineGrid}>
                     <div className={styles.timelineConnectorLine} />
-                    <div className={styles.timelineConnectorActive} style={{ width: `${Math.min(100, (totalMins / 60) * 10)}%` }} />
+                    <div className={styles.timelineConnectorActive} style={{ width: `${Math.min(100, (totalMins / 60) * 100)}%` }} />
 
                     {/* Node 1 */}
                     <div className={styles.timelineStepNode}>
@@ -423,52 +423,52 @@ export default function PredictionPage() {
 
                     {/* Node 2 */}
                     <div className={styles.timelineStepNode}>
-                      <div className={`${styles.stepDot} ${totalMins >= 120 ? styles.stepDotCompleted : (totalMins >= 30 && totalMins < 120 ? styles.stepDotActive : '')}`}>
-                        {totalMins >= 120 ? <Check size={14} color="#FFFFFF" strokeWidth={3} /> : <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: totalMins >= 30 ? '#FFFFFF' : 'transparent' }} />}
+                      <div className={`${styles.stepDot} ${totalMins >= 15 ? styles.stepDotCompleted : (totalMins >= 5 && totalMins < 15 ? styles.stepDotActive : '')}`}>
+                        {totalMins >= 15 ? <Check size={14} color="#FFFFFF" strokeWidth={3} /> : <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: totalMins >= 5 ? '#FFFFFF' : 'transparent' }} />}
                       </div>
-                      <div className={`${styles.stepCard} ${totalMins >= 30 && totalMins < 120 ? styles.stepCardActive : ''}`}>
-                        <span className={styles.stepTitle}>2 Hours</span>
-                        <span className={styles.stepDesc}>Projections</span>
-                        <span className={styles.stepDate}>{totalMins >= 120 ? 'Reached' : 'Upcoming'}</span>
-                        <span className={styles.stepScore}>{p.predicted_reading_2h && p.predicted_writing_2h ? Math.round((p.predicted_reading_2h + p.predicted_writing_2h) / 2) : 62}%</span>
+                      <div className={`${styles.stepCard} ${totalMins >= 5 && totalMins < 15 ? styles.stepCardActive : ''}`}>
+                        <span className={styles.stepTitle}>15 Minutes</span>
+                        <span className={styles.stepDesc}>Study Growth</span>
+                        <span className={styles.stepDate}>{totalMins >= 15 ? 'Reached' : 'Upcoming'}</span>
+                        <span className={styles.stepScore}>{p.predicted_reading_15m && p.predicted_writing_15m ? Math.round((p.predicted_reading_15m + p.predicted_writing_15m) / 2) : 62}%</span>
                       </div>
                     </div>
 
                     {/* Node 3 */}
                     <div className={styles.timelineStepNode}>
-                      <div className={`${styles.stepDot} ${totalMins >= 300 ? styles.stepDotCompleted : (totalMins >= 120 && totalMins < 300 ? styles.stepDotActive : '')}`}>
-                        {totalMins >= 300 ? <Check size={14} color="#FFFFFF" strokeWidth={3} /> : <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: totalMins >= 120 ? '#FFFFFF' : 'transparent' }} />}
+                      <div className={`${styles.stepDot} ${totalMins >= 30 ? styles.stepDotCompleted : (totalMins >= 15 && totalMins < 30 ? styles.stepDotActive : '')}`}>
+                        {totalMins >= 30 ? <Check size={14} color="#FFFFFF" strokeWidth={3} /> : <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: totalMins >= 15 ? '#FFFFFF' : 'transparent' }} />}
                       </div>
-                      <div className={`${styles.stepCard} ${totalMins >= 120 && totalMins < 300 ? styles.stepCardActive : ''}`}>
-                        <span className={styles.stepTitle}>5 Hours</span>
-                        <span className={styles.stepDesc}>Projections</span>
-                        <span className={styles.stepDate}>{totalMins >= 300 ? 'Reached' : 'Upcoming'}</span>
-                        <span className={styles.stepScore}>{p.predicted_reading_5h && p.predicted_writing_5h ? Math.round((p.predicted_reading_5h + p.predicted_writing_5h) / 2) : 75}%</span>
+                      <div className={`${styles.stepCard} ${totalMins >= 15 && totalMins < 30 ? styles.stepCardActive : ''}`}>
+                        <span className={styles.stepTitle}>30 Minutes</span>
+                        <span className={styles.stepDesc}>Study Growth</span>
+                        <span className={styles.stepDate}>{totalMins >= 30 ? 'Reached' : 'Upcoming'}</span>
+                        <span className={styles.stepScore}>{p.predicted_reading_30m && p.predicted_writing_30m ? Math.round((p.predicted_reading_30m + p.predicted_writing_30m) / 2) : 75}%</span>
                       </div>
                     </div>
 
                     {/* Node 4 */}
                     <div className={styles.timelineStepNode}>
-                      <div className={`${styles.stepDot} ${totalMins >= 600 ? styles.stepDotCompleted : (totalMins >= 300 && totalMins < 600 ? styles.stepDotActive : '')}`}>
-                        {totalMins >= 600 ? <Check size={14} color="#FFFFFF" strokeWidth={3} /> : <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: totalMins >= 300 ? '#FFFFFF' : 'transparent' }} />}
+                      <div className={`${styles.stepDot} ${totalMins >= 45 ? styles.stepDotCompleted : (totalMins >= 30 && totalMins < 45 ? styles.stepDotActive : '')}`}>
+                        {totalMins >= 45 ? <Check size={14} color="#FFFFFF" strokeWidth={3} /> : <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: totalMins >= 30 ? '#FFFFFF' : 'transparent' }} />}
                       </div>
-                      <div className={`${styles.stepCard} ${totalMins >= 300 && totalMins < 600 ? styles.stepCardActive : ''}`}>
-                        <span className={styles.stepTitle}>10 Hours</span>
-                        <span className={styles.stepDesc}>Projections</span>
-                        <span className={styles.stepDate}>{totalMins >= 600 ? 'Reached' : 'Upcoming'}</span>
-                        <span className={styles.stepScore}>{p.predicted_reading_10h && p.predicted_writing_10h ? Math.round((p.predicted_reading_10h + p.predicted_writing_10h) / 2) : 88}%</span>
+                      <div className={`${styles.stepCard} ${totalMins >= 30 && totalMins < 45 ? styles.stepCardActive : ''}`}>
+                        <span className={styles.stepTitle}>45 Minutes</span>
+                        <span className={styles.stepDesc}>Study Growth</span>
+                        <span className={styles.stepDate}>{totalMins >= 45 ? 'Reached' : 'Upcoming'}</span>
+                        <span className={styles.stepScore}>{p.predicted_reading_60m && p.predicted_writing_60m ? Math.round((p.predicted_reading_60m + p.predicted_writing_60m) / 2) : 88}%</span>
                       </div>
                     </div>
 
                     {/* Node 5 */}
                     <div className={styles.timelineStepNode}>
-                      <div className={`${styles.stepDot} ${totalMins >= 900 ? styles.stepDotCompleted : (totalMins >= 600 && totalMins < 900 ? styles.stepDotActive : '')}`}>
-                        {totalMins >= 900 ? <Check size={14} color="#FFFFFF" strokeWidth={3} /> : <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: totalMins >= 600 ? '#FFFFFF' : 'transparent' }} />}
+                      <div className={`${styles.stepDot} ${totalMins >= 60 ? styles.stepDotCompleted : (totalMins >= 45 && totalMins < 60 ? styles.stepDotActive : '')}`}>
+                        {totalMins >= 60 ? <Check size={14} color="#FFFFFF" strokeWidth={3} /> : <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: totalMins >= 45 ? '#FFFFFF' : 'transparent' }} />}
                       </div>
-                      <div className={`${styles.stepCard} ${totalMins >= 600 && totalMins < 900 ? styles.stepCardActive : ''}`}>
+                      <div className={`${styles.stepCard} ${totalMins >= 45 && totalMins < 60 ? styles.stepCardActive : ''}`}>
                         <span className={styles.stepTitle}>Target</span>
-                        <span className={styles.stepDesc}>Mastery Goal</span>
-                        <span className={styles.stepDate}>Estimated</span>
+                        <span className={styles.stepDesc}>Daily Goal</span>
+                        <span className={styles.stepDate}>{totalMins >= 60 ? 'Mastered!' : 'Estimated'}</span>
                         <span className={styles.stepScore}>100%</span>
                       </div>
                     </div>
@@ -501,7 +501,7 @@ export default function PredictionPage() {
                     <input
                       type="range"
                       min="0"
-                      max="180"
+                      max="60"
                       step="5"
                       value={simulationMins}
                       onChange={(e) => setSimulationMins(Number(e.target.value))}
@@ -516,8 +516,8 @@ export default function PredictionPage() {
                     />
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 800, color: 'var(--text-muted)', marginTop: '4px' }}>
                       <span>0m (Baseline)</span>
-                      <span>90m (1.5 Hours)</span>
-                      <span>180m (3 Hours)</span>
+                      <span>30m (30 Min)</span>
+                      <span>60m (1 Hour Target)</span>
                     </div>
                   </div>
 
@@ -545,10 +545,10 @@ export default function PredictionPage() {
                         <div style={{ width: '100%' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '13px', color: 'var(--text-dark)' }}>
                             <span>Expected Writing Score</span>
-                            <span style={{ color: 'var(--color-mint)', fontWeight: 900 }}>{simulatedData?.current_writing_score || currentWrite}%</span>
+                            <span style={{ color: 'var(--color-orange)', fontWeight: 900 }}>{simulatedData?.current_writing_score || currentWrite}%</span>
                           </div>
                           <div style={{ height: '8px', backgroundColor: 'var(--color-peach-light)', borderRadius: '4px', marginTop: '6px', overflow: 'hidden' }}>
-                            <div style={{ width: `${simulatedData?.current_writing_score || currentWrite}%`, height: '100%', backgroundColor: 'var(--color-mint)' }} />
+                            <div style={{ width: `${simulatedData?.current_writing_score || currentWrite}%`, height: '100%', backgroundColor: 'var(--color-orange)' }} />
                           </div>
                         </div>
                       </div>
