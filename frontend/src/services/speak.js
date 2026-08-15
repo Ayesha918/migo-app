@@ -45,8 +45,49 @@ function pickFemaleVoice(lang) {
 }
 
 /**
- * Plays speech using Google Translate TTS service as a fallback when native voice packages are missing or disabled.
- * Proxies the request through our backend /api/users/tts to bypass browser Referer checks and CORS locks.
+ * Speaks the text using browser's native SpeechSynthesis API as the final fallback.
+ */
+function speakNativeVoice(text, lang, onEndCallback, onErrorCallback) {
+  if (typeof window === 'undefined' || !window.speechSynthesis) {
+    if (onErrorCallback) onErrorCallback(new Error("speechSynthesis not supported"));
+    return;
+  }
+
+  if (window.speechSynthesis.paused) {
+    window.speechSynthesis.resume();
+  }
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang;
+  utterance.rate = 0.85;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+
+  const nativeVoice = pickFemaleVoice(lang);
+  if (nativeVoice) {
+    utterance.voice = nativeVoice;
+  }
+
+  activeUtterances.push(utterance);
+
+  utterance.onend = () => {
+    activeUtterances = activeUtterances.filter(u => u !== utterance);
+    if (onEndCallback) onEndCallback();
+  };
+
+  utterance.onerror = (e) => {
+    activeUtterances = activeUtterances.filter(u => u !== utterance);
+    console.warn("Native SpeechSynthesis failed:", e);
+    if (onErrorCallback) onErrorCallback(e);
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+/**
+ * Plays speech using Google Translate TTS service.
+ * Proxies the request through our backend /api/users/tts to bypass browser Referer checks.
+ * Falls back immediately to native SpeechSynthesis if the proxy times out (e.g. Render server asleep) or fails.
  */
 function speakViaAudioFallback(text, lang, onEndCallback, onErrorCallback) {
   if (currentFallbackAudio) {
@@ -62,7 +103,31 @@ function speakViaAudioFallback(text, lang, onEndCallback, onErrorCallback) {
   audio.src = url;
   currentFallbackAudio = audio;
 
+  let fallbackTriggered = false;
+
+  const triggerNativeFallback = () => {
+    if (fallbackTriggered) return;
+    fallbackTriggered = true;
+    
+    if (currentFallbackAudio === audio) {
+      currentFallbackAudio.pause();
+      currentFallbackAudio = null;
+    }
+    console.warn("TTS audio proxy delayed or failed, falling back to native voice.");
+    speakNativeVoice(text, lang, onEndCallback, onErrorCallback);
+  };
+
+  // Fallback timeout: if the audio does not start playing within 2.5 seconds, trigger native TTS
+  const timeoutId = setTimeout(() => {
+    triggerNativeFallback();
+  }, 2500);
+
+  audio.onplaying = () => {
+    clearTimeout(timeoutId);
+  };
+
   audio.onended = () => {
+    clearTimeout(timeoutId);
     if (currentFallbackAudio === audio) {
       currentFallbackAudio = null;
     }
@@ -70,16 +135,14 @@ function speakViaAudioFallback(text, lang, onEndCallback, onErrorCallback) {
   };
 
   audio.onerror = (e) => {
-    if (currentFallbackAudio === audio) {
-      currentFallbackAudio = null;
-    }
-    console.warn("Google TTS audio fallback failed:", e);
-    if (onErrorCallback) onErrorCallback(e);
+    clearTimeout(timeoutId);
+    triggerNativeFallback();
   };
 
   audio.play().catch((err) => {
-    console.warn("Audio autoplay blocked by browser policy:", err);
-    if (onErrorCallback) onErrorCallback(err);
+    clearTimeout(timeoutId);
+    console.warn("Audio autoplay blocked by browser:", err);
+    triggerNativeFallback();
   });
 }
 
@@ -112,7 +175,7 @@ function speak(text, lang = 'en-US', rate = 0.95, cancelFirst = true, onStart = 
 
   const nativeVoice = shouldAlwaysStream ? null : pickFemaleVoice(lang);
   if (!nativeVoice) {
-    console.log(`Streaming regional/fallback TTS audio for ${lang}.`);
+    console.log(`Routing regional/fallback TTS audio for ${lang}.`);
     if (onStart) onStart();
     speakViaAudioFallback(text, lang, onEnd, onError);
     return;
@@ -185,7 +248,7 @@ export function speakSequence(items, rate = 0.85) {
     const nativeVoice = shouldAlwaysStream ? null : pickFemaleVoice(currentLang);
 
     if (!nativeVoice) {
-      console.log(`speakSequence: Streaming regional/fallback TTS audio for ${currentLang}`);
+      console.log(`speakSequence: Routing regional/fallback TTS audio for ${currentLang}`);
       speakViaAudioFallback(
         current.text,
         currentLang,
