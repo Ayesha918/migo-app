@@ -509,7 +509,7 @@ def generate_ai_recommendation(learner, skills, completed):
         Provide an encouraging 2-sentence feedback tip in English on what they should focus on next.
         """
         response = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="qwen/qwen3.6-27b",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
             max_tokens=100,

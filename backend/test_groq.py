@@ -5,7 +5,7 @@ from decouple import config
 client = Groq(api_key=config('GROQ_API_KEY'))
 
 response = client.chat.completions.create(
-    model="llama-3.3-70b-versatile",
+    model="qwen/qwen3.6-27b",
     messages=[
         {"role": "user", "content": "Say hello in one short sentence."}
     ]
