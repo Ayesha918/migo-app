@@ -4,6 +4,9 @@
 let activeUtterances = [];
 let currentFallbackAudio = null;
 
+// Languages that will always stream from Google Translate TTS for high-quality regional voices
+const ALWAYS_STREAM_LANGS = ['hi', 'kn', 'ta', 'te'];
+
 /**
  * Picks the best available female-sounding voice for a given language.
  * Falls back to any voice matching the language, then to the browser default.
@@ -42,7 +45,7 @@ function pickFemaleVoice(lang) {
 }
 
 /**
- * Plays speech using Google Translate TTS service as a fallback when native voice packages are missing.
+ * Plays speech using Google Translate TTS service as a fallback when native voice packages are missing or disabled.
  */
 function speakViaAudioFallback(text, lang, onEndCallback, onErrorCallback) {
   if (currentFallbackAudio) {
@@ -53,7 +56,10 @@ function speakViaAudioFallback(text, lang, onEndCallback, onErrorCallback) {
   const langPrefix = lang ? lang.split('-')[0].toLowerCase() : 'en';
   const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langPrefix}&client=tw-ob&q=${encodeURIComponent(text)}`;
   
-  const audio = new Audio(url);
+  // Create audio element with no-referrer attribute to prevent Google 403 blocks
+  const audio = document.createElement('audio');
+  audio.referrerPolicy = 'no-referrer';
+  audio.src = url;
   currentFallbackAudio = audio;
 
   audio.onended = () => {
@@ -101,9 +107,12 @@ function speak(text, lang = 'en-US', rate = 0.95, cancelFirst = true, onStart = 
     }
   }
 
-  const nativeVoice = pickFemaleVoice(lang);
+  const langPrefix = lang ? lang.split('-')[0].toLowerCase() : 'en';
+  const shouldAlwaysStream = ALWAYS_STREAM_LANGS.includes(langPrefix);
+
+  const nativeVoice = shouldAlwaysStream ? null : pickFemaleVoice(lang);
   if (!nativeVoice) {
-    console.log(`No native voice found for ${lang}. Falling back to Google Translate TTS.`);
+    console.log(`Streaming regional/fallback TTS audio for ${lang}.`);
     if (onStart) onStart();
     speakViaAudioFallback(text, lang, onEnd, onError);
     return;
@@ -170,10 +179,13 @@ export function speakSequence(items, rate = 0.85) {
     }
 
     const currentLang = current.lang || 'en-US';
-    const nativeVoice = pickFemaleVoice(currentLang);
+    const langPrefix = currentLang.split('-')[0].toLowerCase();
+    const shouldAlwaysStream = ALWAYS_STREAM_LANGS.includes(langPrefix);
+
+    const nativeVoice = shouldAlwaysStream ? null : pickFemaleVoice(currentLang);
 
     if (!nativeVoice) {
-      console.log(`speakSequence: No native voice for ${currentLang}. Using Google Translate fallback.`);
+      console.log(`speakSequence: Streaming regional/fallback TTS audio for ${currentLang}`);
       speakViaAudioFallback(
         current.text,
         currentLang,
