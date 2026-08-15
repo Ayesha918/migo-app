@@ -46,6 +46,7 @@ function pickFemaleVoice(lang) {
 
 /**
  * Plays speech using Google Translate TTS service as a fallback when native voice packages are missing or disabled.
+ * Proxies the request through our backend /api/users/tts to bypass browser Referer checks and CORS locks.
  */
 function speakViaAudioFallback(text, lang, onEndCallback, onErrorCallback) {
   if (currentFallbackAudio) {
@@ -54,11 +55,10 @@ function speakViaAudioFallback(text, lang, onEndCallback, onErrorCallback) {
   }
 
   const langPrefix = lang ? lang.split('-')[0].toLowerCase() : 'en';
-  const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langPrefix}&client=tw-ob&q=${encodeURIComponent(text)}`;
+  const baseAPI = (import.meta.env && import.meta.env.VITE_API_URL) || 'https://migo-app-1.onrender.com/api';
+  const url = `${baseAPI}/users/tts?text=${encodeURIComponent(text)}&lang=${langPrefix}`;
   
-  // Create audio element with no-referrer attribute to prevent Google 403 blocks
   const audio = document.createElement('audio');
-  audio.referrerPolicy = 'no-referrer';
   audio.src = url;
   currentFallbackAudio = audio;
 

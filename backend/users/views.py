@@ -601,3 +601,37 @@ def google_login(request):
 
     except Exception as e:
         return Response({'error': f"Failed to verify Google token: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+import requests
+import urllib.parse
+from django.http import HttpResponse, HttpResponseBadRequest
+
+def tts_proxy(request):
+    """
+    GET /api/users/tts?text=...&lang=...
+    Proxies Google Translate TTS requests through the Django backend
+    to bypass browser Referer checks and CORS issues.
+    """
+    text = request.GET.get('text', '').strip()
+    lang = request.GET.get('lang', 'en').strip()
+    if not text:
+        return HttpResponseBadRequest("Missing 'text' parameter.")
+    
+    lang_prefix = lang.split('-')[0].split('_')[0].lower()
+    url = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_prefix}&client=tw-ob&q={urllib.parse.quote(text)}"
+    
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            django_response = HttpResponse(response.content, content_type='audio/mpeg')
+            django_response['Access-Control-Allow-Origin'] = '*'
+            return django_response
+        else:
+            return HttpResponse(f"Google TTS returned status {response.status_code}", status=response.status_code)
+    except Exception as e:
+        return HttpResponse(f"Error fetching TTS: {str(e)}", status=500)
