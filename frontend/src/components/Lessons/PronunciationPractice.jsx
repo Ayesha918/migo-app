@@ -321,7 +321,10 @@ export default function PronunciationPractice() {
         overall_score: 90.0,
         result: 'Excellent',
         xp_awarded: 15,
-        coins_awarded: 2
+        coins_awarded: 2,
+        missing_words: [],
+        missing_letters: [],
+        ai_tip: "Excellent effort! Focus on speaking naturally and repeating the model voice."
       });
     } finally {
       setLoading(false);
@@ -523,6 +526,52 @@ export default function PronunciationPractice() {
                       "{feedback.transcribed_text}"
                     </p>
                   </div>
+
+                  {/* AI Tip and Missing Elements */}
+                  {feedback.ai_tip && (
+                    <div style={{
+                      marginTop: '12px',
+                      backgroundColor: 'var(--color-peach-light)',
+                      border: '2px solid var(--color-peach)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '18px' }}>💡</span>
+                        <span style={{ fontSize: '13px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>AI Improvement Tip</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '13.5px', fontWeight: 700, color: 'var(--text-dark)', lineHeight: '1.5' }}>
+                        {feedback.ai_tip}
+                      </p>
+
+                      {/* Display Missing Words or Letters if they exist */}
+                      {((feedback.missing_words && feedback.missing_words.length > 0) || 
+                        (feedback.missing_letters && feedback.missing_letters.length > 0)) && (
+                        <div style={{
+                          marginTop: '6px',
+                          borderTop: '1.5px dashed var(--color-peach)',
+                          paddingTop: '8px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px'
+                        }}>
+                          {feedback.missing_words && feedback.missing_words.length > 0 && (
+                            <div style={{ fontSize: '12.5px', fontWeight: 800, color: '#D63031', textAlign: 'left' }}>
+                              ⚠️ <strong>Missing/Incorrect Words:</strong> {feedback.missing_words.join(', ')}
+                            </div>
+                          )}
+                          {feedback.missing_letters && feedback.missing_letters.length > 0 && (
+                            <div style={{ fontSize: '12.5px', fontWeight: 800, color: '#E17055', textAlign: 'left' }}>
+                              ⚠️ <strong>Missed Letter Sounds:</strong> {feedback.missing_letters.join(', ')}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
               ) : (
                 <div key="placeholder" className={styles.feedbackPlaceholder}>

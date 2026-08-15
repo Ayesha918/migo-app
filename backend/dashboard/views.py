@@ -382,6 +382,45 @@ def upload_speech(request):
         )
         LearnerAchievement.objects.get_or_create(learner=learner, achievement=badge)
 
+    # Calculate missing words and letters
+    expected_words = [w.strip() for w in cleaned_expected.split() if w.strip()]
+    transcribed_words = [w.strip() for w in cleaned_transcribed.split() if w.strip()]
+    
+    missing_words = []
+    for w in expected_words:
+        if w not in transcribed_words:
+            missing_words.append(w)
+            
+    missing_letters = []
+    if len(expected_words) == 1 and len(transcribed_words) >= 1:
+        exp_word = expected_words[0]
+        trans_word = transcribed_words[0]
+        for char in exp_word:
+            if char not in trans_word:
+                missing_letters.append(char)
+                
+    ai_tip = ""
+    if overall_score >= 90.0:
+        ai_tip = "Perfect! Your pronunciation is incredibly accurate. Keep it up!"
+    elif overall_score >= 70.0:
+        if missing_words:
+            missing_str = ", ".join(missing_words)
+            ai_tip = f"Good job! Try to focus more on speaking these specific words: {missing_str}."
+        elif missing_letters:
+            missing_str = ", ".join(missing_letters)
+            ai_tip = f"Very close! Try to clearly emphasize the sound of these letters: '{missing_str}'."
+        else:
+            ai_tip = "Nice effort! Focus on speaking a bit more clearly and smoothly."
+    else:
+        if missing_words:
+            missing_str = ", ".join(missing_words)
+            ai_tip = f"Keep practicing! You missed these words: {missing_str}. Speak slower and try again."
+        elif missing_letters:
+            missing_str = ", ".join(missing_letters)
+            ai_tip = f"Let's practice again! Focus on pronouncing the sounds for: '{missing_str}' clearly."
+        else:
+            ai_tip = "Try reading along with the Model Audio first, then repeat slowly to capture all sounds."
+
     return Response({
         'attempt_id': attempt.attempt_id,
         'transcribed_text': transcript,
@@ -394,7 +433,10 @@ def upload_speech(request):
         'overall_score': overall_score,
         'result': result_status,
         'xp_awarded': xp_to_add,
-        'coins_awarded': coins_to_add
+        'coins_awarded': coins_to_add,
+        'missing_words': missing_words,
+        'missing_letters': missing_letters,
+        'ai_tip': ai_tip
     }, status=status.HTTP_201_CREATED)
 
 
