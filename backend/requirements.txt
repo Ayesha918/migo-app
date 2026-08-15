@@ -9,3 +9,4 @@ groq
 numpy
 whitenoise
 psycopg2-binary
+requests
