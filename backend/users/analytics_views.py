@@ -177,7 +177,7 @@ def get_user_analytics(request):
 @api_view(['GET'])
 def get_predictions_dashboard(request):
     """
-    GET /api/predictions?learner_id=MG000001
+    GET /api/predictions?learner_id=MG000001&study_duration_seconds=1200
     """
     learner_id = request.query_params.get('learner_id', '').strip()
     try:
@@ -187,6 +187,13 @@ def get_predictions_dashboard(request):
 
     # Calculate actual cumulative study time
     total_seconds = StudySession.objects.filter(learner=learner).aggregate(total=Sum('duration_seconds'))['total'] or 0.0
+
+    study_duration_param = request.query_params.get('study_duration_seconds')
+    if study_duration_param:
+        try:
+            total_seconds = float(study_duration_param)
+        except ValueError:
+            pass
 
     prediction = predict_learner_trajectory(learner, total_seconds)
     return Response(prediction, status=status.HTTP_200_OK)

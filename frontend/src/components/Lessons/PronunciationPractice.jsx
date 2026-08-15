@@ -1,5 +1,6 @@
 // src/components/Lessons/PronunciationPractice.jsx
 import { useState, useEffect, useRef } from 'react';
+import speak from '../../services/speak';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -243,34 +244,10 @@ export default function PronunciationPractice() {
 
   // Speaks target text to learner
   const speakExpectedText = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      
-      // Dynamic fallback load if voices state is empty on initial render
-      let currentVoices = voices || [];
-      if (currentVoices.length === 0) {
-        currentVoices = window.speechSynthesis.getVoices() || [];
-      }
-
-      const utterance = new SpeechSynthesisUtterance(currentChallenge.text);
-      
+    if (currentChallenge) {
       const langMap = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN', te: 'te-IN' };
       const langCode = langMap[learner?.learning_language] || 'en-US';
-      utterance.lang = langCode;
-
-      // Find matching voice for language (with null safety protection)
-      const targetLang = (learner?.learning_language || 'en').toLowerCase();
-      const voice = currentVoices.find(v => v && v.lang && (
-        v.lang.toLowerCase() === langCode.toLowerCase() || 
-        v.lang.toLowerCase().startsWith(targetLang)
-      ));
-      
-      if (voice) {
-        utterance.voice = voice;
-      }
-
-      utterance.rate = 0.8; // slightly slower for children's learning speed
-      window.speechSynthesis.speak(utterance);
+      speak(currentChallenge.text, langCode, 0.8);
     }
   };
 

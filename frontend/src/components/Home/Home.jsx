@@ -31,7 +31,7 @@ const SPEECH_LANG_MAP = {
 
 function Home() {
   const navigate = useNavigate();
-  const { learner, logout } = useLearner();
+  const { learner, logout, hasFeatureAccess, triggerUpgradeModal } = useLearner();
   const t = useTranslate();
 
   const [path, setPath] = useState([]);
@@ -98,6 +98,22 @@ function Home() {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const handlePlayLesson = (entry) => {
+    if (!entry) return;
+    const dayNum = entry.day_number || 1;
+    if (!hasFeatureAccess('Pro') && dayNum > 3) {
+      triggerUpgradeModal('Pro', `Lessons Day ${dayNum} and beyond`, () => {
+        navigate('/lesson-player', {
+          state: { entry, path },
+        });
+      });
+      return;
+    }
+    navigate('/lesson-player', {
+      state: { entry, path },
+    });
   };
 
   const handleMascotSpeak = () => {
@@ -287,11 +303,7 @@ function Home() {
                 className={styles.continueBtn}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.96 }}
-                onClick={() =>
-                  navigate('/lesson-player', {
-                    state: { entry: currentEntry, path: path },
-                  })
-                }
+                onClick={() => handlePlayLesson(currentEntry)}
               >
                 <Play size={28} fill="#FFFFFF" color="#FFFFFF" />
                 <span>CONTINUE LEARNING</span>
@@ -322,11 +334,7 @@ function Home() {
             learningPath={path}
             currentLesson={currentEntry}
             completedCount={completedCount}
-            onLessonClick={(entryNode) =>
-              navigate('/lesson-player', {
-                state: { entry: entryNode, path: path },
-              })
-            }
+            onLessonClick={(entryNode) => handlePlayLesson(entryNode)}
           />
         </section>
       </main>

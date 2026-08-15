@@ -126,11 +126,10 @@ export default function Dashboard() {
   }, [learner]);
 
   const handleSpeakRecommendation = () => {
-    if (summary?.ai_recommendation && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(summary.ai_recommendation);
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
+    if (summary?.ai_recommendation) {
+      const langMap = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN', te: 'te-IN' };
+      const knownLangCode = langMap[learner?.known_language] || 'en-US';
+      speak(summary.ai_recommendation, knownLangCode, 0.9);
     }
   };
 

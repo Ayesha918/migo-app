@@ -1,5 +1,6 @@
 // src/components/Extra/Library.jsx
 import { useState, useEffect, useRef } from 'react';
+import speak from '../../services/speak';
 import { useLearner } from '../../services/LearnerContext';
 import { fetchBooks } from '../../services/api';
 import Sidebar from '../Home/Sidebar';
@@ -336,45 +337,25 @@ export default function Library() {
   const currentPages = getStoryPages(readingBook);
 
   const startReadAloud = (text) => {
-    if (!synthRef.current) return;
-    synthRef.current.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    
     const langMap = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN', te: 'te-IN' };
     const langTag = langMap[readingBook.language] || 'en-US';
-    utterance.lang = langTag;
 
-    // Use populated voices state list
-    let currentVoices = voices || [];
-    if (currentVoices.length === 0 && window.speechSynthesis) {
-      currentVoices = window.speechSynthesis.getVoices() || [];
-    }
-    
-    let voice = currentVoices.find(v => v && v.lang && (
-      v.lang.toLowerCase() === langTag.toLowerCase() || 
-      v.lang.toLowerCase().startsWith(readingBook.language.toLowerCase())
-    ));
-    
-    if (voice) {
-      utterance.voice = voice;
-    }
-    
-    utterance.rate = 0.8; // slower reading speed for children's comprehension
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = (e) => {
-      console.error('Speech synthesis error:', e);
-      setIsSpeaking(false);
-    };
-
-    synthRef.current.speak(utterance);
+    speak(
+      text,
+      langTag,
+      0.8,
+      true,
+      () => setIsSpeaking(true),
+      () => setIsSpeaking(false),
+      () => setIsSpeaking(false)
+    );
   };
 
   const toggleSpeech = () => {
     if (isSpeaking) {
-      synthRef.current.cancel();
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
       setIsSpeaking(false);
     } else {
       if (currentPages[currentPageIndex]) {
@@ -384,9 +365,6 @@ export default function Library() {
   };
 
   const speakChartCard = (letter, word, lang) => {
-    if (!synthRef.current) return;
-    synthRef.current.cancel();
-
     const langMap = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN', te: 'te-IN' };
     const langTag = langMap[lang] || 'en-US';
     
@@ -397,24 +375,7 @@ export default function Library() {
       phrase = `${letter} ${word}`;
     }
 
-    const utterance = new SpeechSynthesisUtterance(phrase);
-    utterance.lang = langTag;
-
-    let currentVoices = voices || [];
-    if (currentVoices.length === 0 && window.speechSynthesis) {
-      currentVoices = window.speechSynthesis.getVoices() || [];
-    }
-
-    const voice = currentVoices.find(v => v && v.lang && (
-      v.lang.toLowerCase() === langTag.toLowerCase() || 
-      v.lang.toLowerCase().startsWith(lang.toLowerCase())
-    ));
-    if (voice) {
-      utterance.voice = voice;
-    }
-    
-    utterance.rate = 0.8;
-    synthRef.current.speak(utterance);
+    speak(phrase, langTag, 0.8, true);
   };
 
   return (

@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { Type, Volume2, HelpCircle, Play, X } from 'lucide-react';
 import styles from './AccessibilityToggles.module.css';
 
+import speak from '../../services/speak';
+
 export default function AccessibilityToggles() {
   const [zoomLevel, setZoomLevel] = useState(1.0); // 1.0, 1.15, 1.3
   const [panelOpen, setPanelOpen] = useState(false);
@@ -19,15 +21,13 @@ export default function AccessibilityToggles() {
     else setZoomLevel(1.0);
   };
 
-  // Speaks entered text to learner
+  // Speaks entered text to learner using the unified speak helper
   const speakText = () => {
     if (!readerText.trim()) return;
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(readerText);
-      utterance.rate = 0.85; // slower speed for clean literacy modeling
-      window.speechSynthesis.speak(utterance);
-    }
+    const learner = JSON.parse(localStorage.getItem('learner'));
+    const langMap = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN', te: 'te-IN' };
+    const langCode = langMap[learner?.learning_language || learner?.known_language] || 'en-US';
+    speak(readerText, langCode, 0.85);
   };
 
   return (

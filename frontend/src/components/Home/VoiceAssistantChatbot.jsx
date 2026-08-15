@@ -16,15 +16,42 @@ const QUICK_QUESTIONS = [
 ];
 
 export default function VoiceAssistantChatbot() {
-  const { learner } = useLearner();
+  const { learner, hasFeatureAccess, triggerUpgradeModal } = useLearner();
   const [isOpen, setIsOpen] = useState(false);
   const [inputText, setInputText] = useState('');
+  
+  const isPremiumTutor = learner?.subscription_tier === 'Premium';
+
   const [messages, setMessages] = useState([
     {
       sender: 'bot',
-      text: `Hoot! Hi ${learner?.name || 'friend'}! 🦉 I am MiGo, your AI Voice Assistant! How can I help you today?`,
+      text: isPremiumTutor 
+        ? `Hoot! Hello ${learner?.name || 'friend'}! 🦉 Welcome to your Advanced AI Tutoring session. What shall we learn today?`
+        : `Hoot! Hi ${learner?.name || 'friend'}! 🦉 I am MiGo, your AI Voice Assistant! How can I help you today?`,
     },
   ]);
+
+  const checkMessageLimit = () => {
+    if (hasFeatureAccess('Pro')) return true;
+
+    const today = new Date().toDateString();
+    const savedDate = localStorage.getItem('migo_ai_chat_date');
+    let count = parseInt(localStorage.getItem('migo_ai_chat_count') || '0', 10);
+
+    if (savedDate !== today) {
+      localStorage.setItem('migo_ai_chat_date', today);
+      localStorage.setItem('migo_ai_chat_count', '0');
+      count = 0;
+    }
+
+    return count < 5;
+  };
+
+  const incrementMessageCount = () => {
+    if (hasFeatureAccess('Pro')) return;
+    const count = parseInt(localStorage.getItem('migo_ai_chat_count') || '0', 10);
+    localStorage.setItem('migo_ai_chat_count', (count + 1).toString());
+  };
 
   const speechLang = learner?.learning_language === 'hi' ? 'hi-IN' : learner?.learning_language === 'kn' ? 'kn-IN' : learner?.learning_language === 'ta' ? 'ta-IN' : 'en-US';
 
@@ -52,8 +79,21 @@ export default function VoiceAssistantChatbot() {
     const text = textToSend || inputText;
     if (!text.trim()) return;
 
+    if (!checkMessageLimit()) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: "🦉 Hoot! You've reached your limit of 5 messages per day on the Free plan. Upgrade to the Pro or Premium Plan to unlock unlimited questions and tutoring guides!",
+          isLimitNotice: true,
+        },
+      ]);
+      return;
+    }
+
     setMessages((prev) => [...prev, { sender: 'user', text }]);
     if (!textToSend) setInputText('');
+    incrementMessageCount();
 
     setTimeout(() => {
       handleBotResponse(text);
@@ -81,12 +121,17 @@ export default function VoiceAssistantChatbot() {
             transition={{ duration: 0.2 }}
           >
             {/* Window Header */}
-            <div className={styles.chatHeader}>
+            <div 
+              className={styles.chatHeader}
+              style={isPremiumTutor ? { background: 'linear-gradient(135deg, var(--color-purple), var(--color-orange))' } : {}}
+            >
               <div className={styles.botInfo}>
                 <img src={owl} alt="MiGo Mascot" className={styles.headerOwlImg} />
                 <div>
-                  <h3>MiGo Voice Assistant</h3>
-                  <span className={styles.onlineBadge}>● Online & Listening</span>
+                  <h3>{isPremiumTutor ? 'MiGo AI Tutor ✨' : 'MiGo Voice Assistant'}</h3>
+                  <span className={styles.onlineBadge}>
+                    {isPremiumTutor ? '● Premium Active' : '● Online & Listening'}
+                  </span>
                 </div>
               </div>
               <button className={styles.closeBtn} onClick={() => setIsOpen(false)}>
@@ -104,9 +149,28 @@ export default function VoiceAssistantChatbot() {
                   {msg.sender === 'bot' && <img src={owl} alt="Owl" className={styles.msgOwlImg} />}
                   <div className={`${styles.bubble} ${msg.sender === 'user' ? styles.userBubble : styles.botBubble}`}>
                     <span>{msg.text}</span>
-                    {msg.sender === 'bot' && (
+                    {msg.sender === 'bot' && !msg.isLimitNotice && (
                       <button className={styles.speakMiniBtn} onClick={() => speak(msg.text, speechLang)}>
                         <Volume2 size={14} />
+                      </button>
+                    )}
+                    {msg.isLimitNotice && (
+                      <button 
+                        onClick={() => triggerUpgradeModal('Pro', 'Unlimited AI Assistant', () => setIsOpen(false))}
+                        style={{
+                          display: 'block',
+                          marginTop: '8px',
+                          backgroundColor: 'var(--color-orange)',
+                          color: '#FFF',
+                          padding: '6px 12px',
+                          borderRadius: '12px',
+                          fontSize: '12px',
+                          fontWeight: '800',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Preview Pro Plan ➔
                       </button>
                     )}
                   </div>
@@ -129,6 +193,7 @@ export default function VoiceAssistantChatbot() {
                 type="button"
                 className={`${styles.micBtn} ${listening ? styles.micListening : ''}`}
                 onClick={startListening}
+                disabled={!checkMessageLimit()}
                 title="Tap to speak your question"
               >
                 {listening ? <Mic size={20} color="#FFF" /> : <MicOff size={20} color="#FF7A00" />}
@@ -137,13 +202,19 @@ export default function VoiceAssistantChatbot() {
               <input
                 type="text"
                 className={styles.textInput}
-                placeholder="Ask MiGo anything..."
+                placeholder={!checkMessageLimit() ? "Free tier limit reached..." : "Ask MiGo anything..."}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                disabled={!checkMessageLimit()}
               />
 
-              <button type="button" className={styles.sendBtn} onClick={() => handleSend()}>
+              <button 
+                type="button" 
+                className={styles.sendBtn} 
+                onClick={() => handleSend()}
+                disabled={!checkMessageLimit()}
+              >
                 <Send size={18} />
               </button>
             </div>

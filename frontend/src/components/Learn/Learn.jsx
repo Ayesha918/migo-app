@@ -39,7 +39,7 @@ const LEVEL_CONFIGS = {
 };
 
 export default function Learn() {
-  const { learner } = useLearner();
+  const { learner, hasFeatureAccess, triggerUpgradeModal } = useLearner();
   const navigate = useNavigate();
 
   const [activeLevelDetails, setActiveLevelDetails] = useState(null); // 'beginner', 'intermediate', 'advanced'
@@ -89,19 +89,30 @@ export default function Learn() {
     return userLevelVal < reqLevelVal;
   };
 
+  const handlePlayLesson = (lessonEntry, lessonPath) => {
+    if (!lessonEntry) return;
+    const dayNum = lessonEntry.day_number || 1;
+    if (!hasFeatureAccess('Pro') && dayNum > 3) {
+      triggerUpgradeModal('Pro', `Lessons Day ${dayNum} and beyond`, () => {
+        navigate('/lesson-player', { state: { entry: lessonEntry, path: lessonPath } });
+      });
+      return;
+    }
+    navigate('/lesson-player', { state: { entry: lessonEntry, path: lessonPath } });
+  };
+
   const playLesson = (lesson) => {
     if (lesson.status === 'locked') return;
-    // Pass standard entry structure expected by LessonPlayer
-    navigate('/lesson-player', { state: { entry: lesson, path: levelLessons } });
+    handlePlayLesson(lesson, levelLessons);
   };
 
   const startSmartReview = () => {
     if (levelLessons.length > 0) {
       const activeOrCompleted = levelLessons.find(l => l.status !== 'locked') || levelLessons[0];
-      navigate('/lesson-player', { state: { entry: activeOrCompleted, path: levelLessons } });
+      handlePlayLesson(activeOrCompleted, levelLessons);
     } else if (learningPath.length > 0) {
       const activeOrCompleted = learningPath.find(l => l.status !== 'locked') || learningPath[0];
-      navigate('/lesson-player', { state: { entry: activeOrCompleted, path: learningPath } });
+      handlePlayLesson(activeOrCompleted, learningPath);
     } else {
       navigate('/lesson-player', { state: { dayNumber: 1 } });
     }
@@ -289,7 +300,7 @@ export default function Learn() {
                               color: isLocked ? '#7F8C8D' : 'var(--color-orange-dark)' 
                             }}
                             disabled={isLocked}
-                            onClick={() => navigate('/lesson-player', { state: { entry: entryItem, path: learningPath } })}
+                            onClick={() => handlePlayLesson(entryItem, learningPath)}
                             type="button"
                           >
                             {isLocked ? 'Locked' : entryItem.status === 'completed' ? 'Review' : 'Continue'}

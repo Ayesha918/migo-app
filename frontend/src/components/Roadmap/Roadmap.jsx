@@ -43,7 +43,7 @@ const ROADMAP_STAGES = [
 
 export default function Roadmap() {
   const navigate = useNavigate();
-  const { learner, logout } = useLearner();
+  const { learner, logout, hasFeatureAccess, triggerUpgradeModal } = useLearner();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -155,10 +155,20 @@ export default function Roadmap() {
                   }
                 }
 
+                let subLocked = false;
+                let requiredTierForStage = 'Free';
+                if (stage.level === 'intermediate') {
+                  requiredTierForStage = 'Pro';
+                  subLocked = !hasFeatureAccess('Pro');
+                } else if (stage.level === 'advanced') {
+                  requiredTierForStage = 'Premium';
+                  subLocked = !hasFeatureAccess('Premium');
+                }
+
                 const progressPct = Math.round((stageCompleted / stageTotal) * 100);
                 const isCurrent = stageStatus === 'current';
                 const isCompleted = stageStatus === 'completed';
-                const isLocked = stageStatus === 'locked';
+                const isLocked = stageStatus === 'locked' || subLocked;
 
                 return (
                   <motion.div
@@ -187,8 +197,8 @@ export default function Roadmap() {
                         </span>
                       )}
                       {isLocked && (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 900, backgroundColor: '#ECEFF1', color: '#455A64', padding: '4px 8px', borderRadius: '12px', border: '1px solid #CFD8DC' }}>
-                          <Lock size={10} /> Locked
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 900, backgroundColor: subLocked ? '#FFEBEB' : '#ECEFF1', color: subLocked ? '#C0392B' : '#455A64', padding: '4px 8px', borderRadius: '12px', border: subLocked ? '1px solid #FADBD8' : '1px solid #CFD8DC' }}>
+                          <Lock size={10} /> {subLocked ? 'Plan Locked' : 'Locked'}
                         </span>
                       )}
                     </div>
@@ -232,16 +242,24 @@ export default function Roadmap() {
                     <button
                       className={styles.stageStartBtn}
                       style={{
-                        background: isLocked
-                          ? '#CBD5E1'
-                          : (isCompleted ? '#4CAF50' : 'linear-gradient(135deg, var(--color-orange), #FF9F43)'),
-                        cursor: isLocked ? 'not-allowed' : 'pointer'
+                        background: subLocked 
+                          ? 'linear-gradient(135deg, var(--color-orange), #FF9F43)'
+                          : (isLocked ? '#CBD5E1' : (isCompleted ? '#4CAF50' : 'linear-gradient(135deg, var(--color-orange), #FF9F43)')),
+                        cursor: (isLocked && !subLocked) ? 'not-allowed' : 'pointer'
                       }}
-                      disabled={isLocked}
-                      onClick={() => navigate('/home')}
+                      disabled={isLocked && !subLocked}
+                      onClick={() => {
+                        if (subLocked) {
+                          triggerUpgradeModal(requiredTierForStage, `${stage.title}`);
+                        } else {
+                          navigate('/home');
+                        }
+                      }}
                     >
                       <span>
-                        {isCompleted ? 'Review Stage' : isCurrent ? 'Continue Journey' : isLocked ? 'Stage Locked' : 'Start Stage'}
+                        {subLocked 
+                          ? `Preview ${requiredTierForStage} to Unlock` 
+                          : (isCompleted ? 'Review Stage' : isCurrent ? 'Continue Journey' : isLocked ? 'Stage Locked' : 'Start Stage')}
                       </span>
                     </button>
                   </motion.div>
