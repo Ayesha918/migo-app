@@ -1,4 +1,8 @@
 # backend/users/views.py
+import secrets
+from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -78,37 +82,92 @@ def search_learner(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+def send_verification_email(phone_account, frontend_url):
+    token = secrets.token_urlsafe(32)
+    phone_account.verification_token = token
+    phone_account.verification_token_created_at = timezone.now()
+    phone_account.save()
+
+    verification_link = f"{frontend_url}/verify-email?token={token}"
+
+    subject = "Verify your Migo Account"
+    message = (
+        f"Hi there!\n\n"
+        f"Thank you for registering on Migo. Please verify your email address by clicking the link below:\n\n"
+        f"{verification_link}\n\n"
+        f"This link will expire in 24 hours.\n\n"
+        f"Happy learning!\n"
+        f"The Migo Team"
+    )
+    send_mail(
+        subject,
+        message,
+        settings.EMAIL_HOST_USER or "noreply@migo.com",
+        [phone_account.phone_number],
+        fail_silently=True
+    )
+
+def send_password_reset_email(phone_account, frontend_url):
+    token = secrets.token_urlsafe(32)
+    phone_account.password_reset_token = token
+    phone_account.password_reset_token_created_at = timezone.now()
+    phone_account.save()
+
+    reset_link = f"{frontend_url}/reset-password?token={token}"
+
+    subject = "Reset your Migo Password"
+    message = (
+        f"Hi there!\n\n"
+        f"We received a request to reset your password. You can reset it by clicking the link below:\n\n"
+        f"{reset_link}\n\n"
+        f"This link will expire in 1 hour.\n\n"
+        f"If you did not request this, please ignore this email.\n\n"
+        f"The Migo Team"
+    )
+    send_mail(
+        subject,
+        message,
+        settings.EMAIL_HOST_USER or "noreply@migo.com",
+        [phone_account.phone_number],
+        fail_silently=True
+    )
+
 @api_view(['POST'])
 def signup_account(request):
-    """
-    POST /api/users/signup
-    Body: { email, password }
-    Creates a new PhoneAccount (email identifier) with hashed password.
-    """
     email = request.data.get('email')
     password = request.data.get('password')
+    frontend_url = request.data.get('frontend_url') or request.headers.get('Origin') or 'http://localhost:5173'
 
     if not email or not password:
         return Response({'error': 'Email address and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
     normalized = email.strip().lower()
 
-    if PhoneAccount.objects.filter(phone_number=normalized).exists():
-        return Response({'error': 'An account with this email address already exists. Please log in.'}, status=status.HTTP_400_BAD_REQUEST)
+    existing = PhoneAccount.objects.filter(phone_number=normalized).first()
+    if existing:
+        if existing.is_verified:
+            return Response({'error': 'An account with this email address already exists. Please log in.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            send_verification_email(existing, frontend_url)
+            return Response({
+                'success': True,
+                'email': normalized,
+                'message': 'Account is unverified. A new verification email has been sent.'
+            }, status=status.HTTP_200_OK)
 
     hashed_password = make_password(password)
-    PhoneAccount.objects.create(phone_number=normalized, password=hashed_password)
+    phone_account = PhoneAccount.objects.create(
+        phone_number=normalized,
+        password=hashed_password,
+        is_verified=False
+    )
+    send_verification_email(phone_account, frontend_url)
 
     return Response({'success': True, 'email': normalized}, status=status.HTTP_201_CREATED)
 
 
 @api_view(['POST'])
 def login_account(request):
-    """
-    POST /api/users/login
-    Body: { email, password, device_id }
-    Authenticates email and password. Registers trusted device session.
-    """
     email = request.data.get('email')
     password = request.data.get('password')
     device_id = request.data.get('device_id')
@@ -128,6 +187,12 @@ def login_account(request):
 
     if not check_password(password, phone_account.password):
         return Response({'error': 'Invalid email address or password.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not phone_account.is_verified:
+        return Response({
+            'error': 'Your email address is not verified. Please verify it before logging in.',
+            'unverified': True
+        }, status=status.HTTP_403_FORBIDDEN)
 
     if device_id:
         DeviceSession.objects.get_or_create(phone_account=phone_account, device_id=device_id)
@@ -580,7 +645,13 @@ def google_login(request):
             normalized = email.strip().lower()
             
             # Get or create PhoneAccount (using email identifier)
-            phone_account, created = PhoneAccount.objects.get_or_create(phone_number=normalized)
+            phone_account, created = PhoneAccount.objects.get_or_create(
+                phone_number=normalized,
+                defaults={'is_verified': True}
+            )
+            if not created and not phone_account.is_verified:
+                phone_account.is_verified = True
+                phone_account.save()
             
             # Register device session if device_id is provided
             if device_id:
@@ -648,3 +719,99 @@ def tts_proxy(request):
             return HttpResponse(f"Google TTS returned status {response.status_code}", status=response.status_code)
     except Exception as e:
         return HttpResponse(f"Error fetching TTS: {str(e)}", status=500)
+
+
+@api_view(['POST'])
+def verify_email(request):
+    token = request.data.get('token')
+
+    if not token:
+        return Response({'error': 'Verification token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        phone_account = PhoneAccount.objects.get(verification_token=token)
+    except PhoneAccount.DoesNotExist:
+        return Response({'error': 'The verification link is invalid.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if phone_account.verification_token_created_at:
+        elapsed = timezone.now() - phone_account.verification_token_created_at
+        if elapsed.total_seconds() > 86400:  # 24 hours
+            return Response({'error': 'The verification link has expired. Please request a new one.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    phone_account.is_verified = True
+    phone_account.verification_token = None
+    phone_account.verification_token_created_at = None
+    phone_account.save()
+
+    return Response({'success': True, 'message': 'Email verified successfully!'}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def resend_verification(request):
+    email = request.data.get('email')
+    frontend_url = request.data.get('frontend_url') or request.headers.get('Origin') or 'http://localhost:5173'
+
+    if not email:
+        return Response({'error': 'Email address is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    normalized = email.strip().lower()
+
+    try:
+        phone_account = PhoneAccount.objects.get(phone_number=normalized)
+    except PhoneAccount.DoesNotExist:
+        return Response({'error': 'No account exists with this email address.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if phone_account.is_verified:
+        return Response({'error': 'This account is already verified. Please log in.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    send_verification_email(phone_account, frontend_url)
+    return Response({'success': True, 'message': 'Verification email resent.'}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def forgot_password(request):
+    email = request.data.get('email')
+    frontend_url = request.data.get('frontend_url') or request.headers.get('Origin') or 'http://localhost:5173'
+
+    if not email:
+        return Response({'error': 'Email address is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    normalized = email.strip().lower()
+
+    try:
+        phone_account = PhoneAccount.objects.get(phone_number=normalized)
+        if phone_account.password:  # Only allow password accounts to reset
+            send_password_reset_email(phone_account, frontend_url)
+    except PhoneAccount.DoesNotExist:
+        pass  # Generic response to prevent account enumeration
+
+    return Response({
+        'success': True,
+        'message': 'If an account exists for this email, a password reset link has been sent.'
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def reset_password(request):
+    token = request.data.get('token')
+    password = request.data.get('password')
+
+    if not token or not password:
+        return Response({'error': 'Reset token and new password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        phone_account = PhoneAccount.objects.get(password_reset_token=token)
+    except PhoneAccount.DoesNotExist:
+        return Response({'error': 'The password reset link is invalid or has already been used.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if phone_account.password_reset_token_created_at:
+        elapsed = timezone.now() - phone_account.password_reset_token_created_at
+        if elapsed.total_seconds() > 3600:  # 1 hour
+            return Response({'error': 'The password reset link has expired.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    phone_account.password = make_password(password)
+    phone_account.password_reset_token = None
+    phone_account.password_reset_token_created_at = None
+    phone_account.save()
+
+    return Response({'success': True, 'message': 'Password has been updated successfully.'}, status=status.HTTP_200_OK)

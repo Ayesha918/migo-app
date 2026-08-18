@@ -17,7 +17,12 @@ export const searchLearnerByName = (name) =>
   api.get('/users/search', { params: { name } });
 
 export const signupAccount = (email, password) =>
-  api.post('/users/signup', { email, password });
+  api.post('/users/signup', { email, password, frontend_url: window.location.origin });
+
+export const verifyEmail = (token) => api.post('/users/verify-email', { token });
+export const resendVerification = (email) => api.post('/users/resend-verification', { email, frontend_url: window.location.origin });
+export const forgotPassword = (email) => api.post('/users/forgot-password', { email, frontend_url: window.location.origin });
+export const resetPassword = (token, password) => api.post('/users/reset-password', { token, password });
 
 export const loginAccount = (email, password, deviceId) =>
   api.post('/users/login', { email, password, device_id: deviceId });

@@ -8,7 +8,7 @@ import StepAge from './StepAge';
 import StepLanguage from './StepLanguage';
 import StepAvatar from './StepAvatar';
 import {
-  registerLearner, fetchPhoneLearners, googleLogin, signupAccount
+  registerLearner, fetchPhoneLearners, googleLogin, signupAccount, resendVerification
 } from '../../services/api';
 import { useLearner } from '../../services/LearnerContext';
 import { Mail, HelpCircle, ArrowLeft, Plus } from 'lucide-react';
@@ -118,13 +118,30 @@ function Register() {
       setSubmitError('Please enter both email and password.');
       return;
     }
+    if (password.length < 6) {
+      setSubmitError('Password must be at least 6 characters long.');
+      return;
+    }
     setSubmitError('');
     setIsSubmitting(true);
     try {
       await signupAccount(emailAddress.trim(), password);
-      setStage('wizard');
+      setStage('verification_pending');
     } catch (err) {
       setSubmitError(err.response?.data?.error || 'Registration failed. Try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setSubmitError('');
+    setIsSubmitting(true);
+    try {
+      await resendVerification(emailAddress.trim().lower());
+      alert('Verification email has been resent successfully!');
+    } catch (err) {
+      setSubmitError(err.response?.data?.error || 'Failed to resend verification email.');
     } finally {
       setIsSubmitting(false);
     }
@@ -273,7 +290,53 @@ function Register() {
         </div>
       )}
 
-      {/* Stage 3: Select or Create Profile (used for Google redirects if profiles exist) */}
+      {/* Verification Pending Stage */}
+      {stage === 'verification_pending' && (
+        <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '20px', marginTop: '40px' }}>
+          <Mail size={64} color="var(--color-orange)" />
+          <h1 className={styles.pageTitle} style={{ marginBottom: '4px' }}>Check Your Email</h1>
+          <p style={{ fontSize: '15px', color: 'var(--text-dark)', fontWeight: 800 }}>
+            We've sent a verification email to:
+          </p>
+          <p style={{ fontSize: '16px', color: 'var(--color-orange-dark)', fontWeight: 900, backgroundColor: 'var(--color-cream-bg)', padding: '10px 18px', borderRadius: '12px', border: '1.5px solid var(--color-peach-light)' }}>
+            {emailAddress}
+          </p>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 700 }}>
+            Please click the verification link in the email to activate your account. If you didn't receive the email, you can request another one below.
+          </p>
+
+          {submitError && <p className={styles.errorText}>{submitError}</p>}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', marginTop: '10px' }}>
+            <button
+              onClick={handleResendVerification}
+              disabled={isSubmitting}
+              className={styles.nextButton}
+              type="button"
+              style={{ width: '100%', position: 'static' }}
+            >
+              {isSubmitting ? 'Resending...' : 'Resend Verification Email'}
+            </button>
+            <button
+              onClick={() => navigate('/login')}
+              type="button"
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '16px',
+                backgroundColor: 'transparent',
+                border: '2.5px solid var(--color-orange)',
+                color: 'var(--color-orange)',
+                fontWeight: 900,
+                fontSize: '15px',
+                cursor: 'pointer'
+              }}
+            >
+              Back to Login
+            </button>
+          </div>
+        </div>
+      )}
       {stage === 'select_learner' && (
         <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', marginTop: '20px' }}>
           <h1 className={styles.pageTitle} style={{ marginBottom: '4px', textAlign: 'center' }}>Who is playing today?</h1>

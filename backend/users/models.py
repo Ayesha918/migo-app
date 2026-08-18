@@ -6,6 +6,11 @@ class PhoneAccount(models.Model):
     phone_number = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255, blank=True, null=True) # stores hashed password
     created_at = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+    verification_token = models.CharField(max_length=255, blank=True, null=True)
+    verification_token_created_at = models.DateTimeField(blank=True, null=True)
+    password_reset_token = models.CharField(max_length=255, blank=True, null=True)
+    password_reset_token_created_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.phone_number

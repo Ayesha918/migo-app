@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   searchLearnerById, searchLearnerByName,
-  loginAccount, checkDevice, googleLogin
+  loginAccount, checkDevice, googleLogin,
+  resendVerification, forgotPassword
 } from '../../services/api';
 import { useLearner } from '../../services/LearnerContext';
 import owl from '../../assets/images/owl.png';
@@ -40,7 +41,10 @@ function Login() {
   const [password, setPassword] = useState('');
   const [loginMode, setLoginMode] = useState('account'); // 'account' (email/password), 'search' (profile search)
   const [isSubmittingOtp, setIsSubmittingOtp] = useState(false);
-  const [linkedLearners, setLinkedLearners] = useState([]);
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
+  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [resetSentMessage, setResetSentMessage] = useState('');
 
   const handleGoogleCredentialResponse = async (response) => {
     try {
@@ -206,6 +210,7 @@ function Login() {
       return;
     }
     setError('');
+    setUnverifiedEmail('');
     setIsSubmittingOtp(true);
     const deviceId = getDeviceId();
     try {
@@ -216,9 +221,44 @@ function Login() {
         setSubStage('select_learner');
       }
     } catch (err) {
+      if (err.response?.data?.unverified) {
+        setUnverifiedEmail(emailAddress.trim());
+      }
       setError(err.response?.data?.error || 'Invalid email address or password.');
     } finally {
       setIsSubmittingOtp(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setError('');
+    setIsSubmittingOtp(true);
+    try {
+      await resendVerification(unverifiedEmail || emailAddress.trim());
+      alert('Verification email has been resent successfully!');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to resend verification email.');
+    } finally {
+      setIsSubmittingOtp(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) {
+      setError('Please enter your email address.');
+      return;
+    }
+    setError('');
+    setIsSendingReset(true);
+    setResetSentMessage('');
+    try {
+      const res = await forgotPassword(resetEmail.trim());
+      setResetSentMessage(res.data.message || 'If an account exists for this email, a password reset link has been sent.');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to request password reset.');
+    } finally {
+      setIsSendingReset(false);
     }
   };
 
@@ -301,7 +341,38 @@ function Login() {
                 onKeyDown={(e) => e.key === 'Enter' && handleLoginAccount()}
               />
 
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-6px' }}>
+                <span
+                  style={{ fontSize: '13px', color: 'var(--color-orange)', cursor: 'pointer', fontWeight: 850, textDecoration: 'underline' }}
+                  onClick={() => { setSubStage('forgot_password'); setError(''); setResetSentMessage(''); }}
+                >
+                  Forgot Password?
+                </span>
+              </div>
+
               {error && <p className={styles.errorText}>{error}</p>}
+
+              {unverifiedEmail && (
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '12px',
+                    backgroundColor: 'transparent',
+                    border: '2.5px solid var(--color-orange)',
+                    color: 'var(--color-orange)',
+                    fontWeight: 900,
+                    fontSize: '13.5px',
+                    cursor: 'pointer',
+                    marginTop: '-4px',
+                    marginBottom: '4px'
+                  }}
+                >
+                  Resend Verification Email
+                </button>
+              )}
 
               <button className={styles.verifyBtn} onClick={handleLoginAccount} disabled={isSubmittingOtp}>
                 {isSubmittingOtp ? 'Logging in...' : 'Sign In'}
@@ -520,6 +591,47 @@ function Login() {
             }}
           >
             Continue
+          </button>
+        </div>
+      )}
+
+      {subStage === 'forgot_password' && (
+        <div className={styles.verifyCard}>
+          <Mail size={56} color="var(--color-orange)" />
+          <h2 className={styles.verifyTitle}>Reset Password</h2>
+          <p className={styles.verifyText}>
+            Enter your registered email address and we will send you a secure link to reset your password.
+          </p>
+
+          <div style={{ width: '100%', marginTop: '10px' }}>
+            <input
+              type="email"
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                fontSize: '16px',
+                fontWeight: 800,
+                border: '2px solid var(--color-peach)',
+                borderRadius: 'var(--radius-sm)',
+                outline: 'none',
+                color: 'var(--text-dark)',
+                textAlign: 'center'
+              }}
+              placeholder="Enter your email"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleForgotPassword(e)}
+            />
+          </div>
+
+          {error && <p className={styles.errorText}>{error}</p>}
+          {resetSentMessage && <p style={{ color: '#107C41', fontSize: '13px', fontWeight: 800, marginTop: '8px' }}>{resetSentMessage}</p>}
+
+          <button className={styles.verifyBtn} onClick={handleForgotPassword} disabled={isSendingReset}>
+            {isSendingReset ? 'Sending link...' : 'Send Reset Link'}
+          </button>
+          <button className={styles.verifyBtnSecondary} onClick={() => setSubStage('search')}>
+            Back to Login
           </button>
         </div>
       )}

@@ -18,4 +18,8 @@ urlpatterns = [
     path('subscription/upgrade', views.upgrade_subscription, name='upgrade_subscription'),
     path('google-login', views.google_login, name='google_login'),
     path('tts', views.tts_proxy, name='tts_proxy'),
+    path('verify-email', views.verify_email, name='verify_email'),
+    path('resend-verification', views.resend_verification, name='resend_verification'),
+    path('forgot-password', views.forgot_password, name='forgot_password'),
+    path('reset-password', views.reset_password, name='reset_password'),
 ]
