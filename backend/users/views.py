@@ -136,7 +136,6 @@ def send_password_reset_email(phone_account, frontend_url):
 def signup_account(request):
     email = request.data.get('email')
     password = request.data.get('password')
-    frontend_url = request.data.get('frontend_url') or request.headers.get('Origin') or 'http://localhost:5173'
 
     if not email or not password:
         return Response({'error': 'Email address and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -145,23 +144,14 @@ def signup_account(request):
 
     existing = PhoneAccount.objects.filter(phone_number=normalized).first()
     if existing:
-        if existing.is_verified:
-            return Response({'error': 'An account with this email address already exists. Please log in.'}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            send_verification_email(existing, frontend_url)
-            return Response({
-                'success': True,
-                'email': normalized,
-                'message': 'Account is unverified. A new verification email has been sent.'
-            }, status=status.HTTP_200_OK)
+        return Response({'error': 'An account with this email address already exists. Please log in.'}, status=status.HTTP_400_BAD_REQUEST)
 
     hashed_password = make_password(password)
-    phone_account = PhoneAccount.objects.create(
+    PhoneAccount.objects.create(
         phone_number=normalized,
         password=hashed_password,
-        is_verified=False
+        is_verified=True
     )
-    send_verification_email(phone_account, frontend_url)
 
     return Response({'success': True, 'email': normalized}, status=status.HTTP_201_CREATED)
 
@@ -187,12 +177,6 @@ def login_account(request):
 
     if not check_password(password, phone_account.password):
         return Response({'error': 'Invalid email address or password.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if not phone_account.is_verified:
-        return Response({
-            'error': 'Your email address is not verified. Please verify it before logging in.',
-            'unverified': True
-        }, status=status.HTTP_403_FORBIDDEN)
 
     if device_id:
         DeviceSession.objects.get_or_create(phone_account=phone_account, device_id=device_id)

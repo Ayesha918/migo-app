@@ -21,8 +21,6 @@ import Notifications from './components/Extra/Notifications';
 import Certifications from './components/Extra/Certifications';
 import { useLearner } from './services/LearnerContext';
 import { startSession, endSession } from './services/api';
-import VerifyEmail from './components/Register/VerifyEmail';
-import ResetPassword from './components/Register/ResetPassword';
 import './App.css';
 
 function App() {
@@ -61,8 +59,6 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/assessment/placement" element={<PlacementAssessment />} />
         <Route path="/assessment/:type" element={<Assessment />} />
