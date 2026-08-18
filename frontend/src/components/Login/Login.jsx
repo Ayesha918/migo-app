@@ -11,7 +11,7 @@ import { useLearner } from '../../services/LearnerContext';
 import owl from '../../assets/images/owl.png';
 import {
   Search, ArrowLeft, User, Hash, Mic, MicOff,
-  ShieldAlert, Mail, Check, HelpCircle
+  ShieldAlert, Mail, Check, HelpCircle, Eye, EyeOff
 } from 'lucide-react';
 import styles from './Login.module.css';
 
@@ -39,6 +39,7 @@ function Login() {
   const emailAddress = phoneNumber;
   const setEmailAddress = setPhoneNumber;
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loginMode, setLoginMode] = useState('account'); // 'account' (email/password), 'search' (profile search)
   const [isSubmittingOtp, setIsSubmittingOtp] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
@@ -332,14 +333,35 @@ function Login() {
                 value={emailAddress}
                 onChange={(e) => setEmailAddress(e.target.value)}
               />
-              <input
-                type="password"
-                style={{ width: '100%', padding: '14px 18px', fontSize: '15px', fontWeight: 800, border: '2px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--text-dark)' }}
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleLoginAccount()}
-              />
+              <div style={{ position: 'relative', width: '100%' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  style={{ width: '100%', padding: '14px 48px 14px 18px', fontSize: '15px', fontWeight: 800, border: '2px solid var(--color-peach)', borderRadius: 'var(--radius-sm)', outline: 'none', color: 'var(--text-dark)' }}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLoginAccount()}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '16px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--color-orange)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: 0
+                  }}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-6px' }}>
                 <span
@@ -505,24 +527,45 @@ function Login() {
           </p>
           
           <div style={{ width: '100%', marginTop: '10px' }}>
-            <input
-              type="password"
-              style={{
-                width: '100%',
-                padding: '14px 18px',
-                fontSize: '16px',
-                fontWeight: 800,
-                border: '2px solid var(--color-peach)',
-                borderRadius: 'var(--radius-sm)',
-                outline: 'none',
-                color: 'var(--text-dark)',
-                textAlign: 'center'
-              }}
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleVerifyPassword()}
-            />
+            <div style={{ position: 'relative', width: '100%' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                style={{
+                  width: '100%',
+                  padding: '14px 48px 14px 18px',
+                  fontSize: '16px',
+                  fontWeight: 800,
+                  border: '2px solid var(--color-peach)',
+                  borderRadius: 'var(--radius-sm)',
+                  outline: 'none',
+                  color: 'var(--text-dark)',
+                  textAlign: 'center'
+                }}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleVerifyPassword()}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--color-orange)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: 0
+                }}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           {error && <p className={styles.errorText}>{error}</p>}

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { resetPassword } from '../../services/api';
-import { KeyRound, CheckCircle2, ArrowRight } from 'lucide-react';
+import { KeyRound, CheckCircle2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import styles from './Register.module.css';
 
 export default function ResetPassword() {
@@ -12,6 +12,7 @@ export default function ResetPassword() {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -71,38 +72,80 @@ export default function ResetPassword() {
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 800 }}>Enter your new password below to update your account access.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', marginTop: '10px' }}>
-              <input
-                type="password"
-                placeholder="Enter new password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '14px 18px',
-                  fontSize: '15px',
-                  fontWeight: 800,
-                  border: '2px solid var(--color-peach)',
-                  borderRadius: '16px',
-                  outline: 'none',
-                  color: 'var(--text-dark)'
-                }}
-              />
-              <input
-                type="password"
-                placeholder="Confirm new password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '14px 18px',
-                  fontSize: '15px',
-                  fontWeight: 800,
-                  border: '2px solid var(--color-peach)',
-                  borderRadius: '16px',
-                  outline: 'none',
-                  color: 'var(--text-dark)'
-                }}
-              />
+              <div style={{ position: 'relative', width: '100%' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter new password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '14px 48px 14px 18px',
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    border: '2px solid var(--color-peach)',
+                    borderRadius: '16px',
+                    outline: 'none',
+                    color: 'var(--text-dark)'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '16px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--color-orange)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: 0
+                  }}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              <div style={{ position: 'relative', width: '100%' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '14px 48px 14px 18px',
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    border: '2px solid var(--color-peach)',
+                    borderRadius: '16px',
+                    outline: 'none',
+                    color: 'var(--text-dark)'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '16px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--color-orange)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: 0
+                  }}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
             {error && <p style={{ fontSize: '12px', color: '#D11A2A', fontWeight: 800, margin: '4px 0' }}>{error}</p>}
