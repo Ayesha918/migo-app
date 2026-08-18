@@ -752,7 +752,45 @@ export default function LessonPlayer() {
 
   if (isAlphabetLesson) {
     if (lesson?.difficulty === 'intermediate' || lesson?.difficulty === 'advanced' || lesson?.skill === 'writing') {
-      slides.push(...(lesson.activities || []));
+      const rawActivities = lesson.activities || [];
+      rawActivities.forEach((act) => {
+        if (act.type === 'paragraph_writing') {
+          slides.push({
+            type: 'learn_concept',
+            title: act.title || 'Learn Concept',
+            subtitle: act.subtitle || 'How to Write',
+            concept_title: act.topic || 'Paragraph Composition',
+            concept_text: act.instruction || 'Learn how to structure your paragraph.',
+            visual: '📝',
+            example_heading: 'Example Structure:',
+            example_text: preferredLanguage === 'kn'
+              ? 'ಪ್ರಸ್ತಾವನೆ -> ಮುಖ್ಯ ವಿವರಣೆ -> ತೀರ್ಮಾನ (ಕನಿಷ್ಠ 15 ಪದಗಳು).'
+              : preferredLanguage === 'hi'
+              ? 'प्रस्तावना -> मुख्य विवरण -> निष्कर्ष (कम से कम 15 शब्द).'
+              : preferredLanguage === 'ta'
+              ? 'அறிமுகம் -> முக்கிய விளக்கம் -> முடிவுரை (குறைந்தது 15 சொற்கள்).'
+              : 'Introduction -> Main Details -> Conclusion (Write at least 15 words).'
+          });
+        } else if (act.type === 'letter_drafting') {
+          slides.push({
+            type: 'learn_concept',
+            title: act.title || 'Learn Concept',
+            subtitle: act.subtitle || 'Letter/Email Drafting',
+            concept_title: act.title || 'How to draft a letter',
+            concept_text: act.instruction || 'Learn the key elements of writing a letter.',
+            visual: '✉️',
+            example_heading: 'Key Elements of a Letter:',
+            example_text: preferredLanguage === 'kn'
+              ? '1. ವಿಳಾಸ/ಸ್ವೀಕೃತಿದಾರ (To)\n2. ವಿಷಯ (Subject)\n3. ಗೌರವ ಸೂಚನೆ (Salutation)\n4. ಪತ್ರದ ಒಡಲು (Body of letter)\n5. ಮುಕ್ತಾಯ (Closing signature)'
+              : preferredLanguage === 'hi'
+              ? '1. पाने वाले का पता (To)\n2. पत्र का विषय (Subject)\n3. आदरणीय संबोधन (Salutation)\n4. मुख्य संदेश (Body of letter)\n5. समापन (Closing signature)'
+              : preferredLanguage === 'ta'
+              ? '1. பெறுநர் முகவரி (To)\n2. கடிதப் பொருள் (Subject)\n3. வாழ்த்துரை (Salutation)\n4. கடிதத்தின் உள்ளடக்கம் (Body of letter)\n5. முடிவுரை (Closing signature)'
+              : '1. Recipient Address (To)\n2. Subject Line (Subject)\n3. Salutation (e.g. Dear Sir/Madam)\n4. Body paragraphs explaining the message\n5. Closing and Signature'
+          });
+        }
+        slides.push(act);
+      });
     } else {
       // 1. Welcome Slide
       slides.push({
@@ -3238,6 +3276,80 @@ export default function LessonPlayer() {
                           {t('nextBtn')}
                         </button>
                       )}
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              if (currentSlide.type === 'learn_concept') {
+                return (
+                  <motion.div
+                    key="learn_concept"
+                    className={styles.card}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    style={{ maxWidth: '680px', width: '100%', padding: '24px' }}
+                  >
+                    <span className={styles.storyboardBadge}>{currentSlide.title}</span>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '8px' }}>
+                      {currentSlide.subtitle}
+                    </h2>
+
+                    <div
+                      style={{
+                        margin: '20px auto',
+                        width: '100px',
+                        height: '100px',
+                        borderRadius: '50%',
+                        background: 'var(--color-cream-bg)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '52px',
+                        border: '3px solid var(--color-peach-light)'
+                      }}
+                    >
+                      {currentSlide.visual || '💡'}
+                    </div>
+
+                    <div style={{ textAlign: 'left', background: 'var(--color-cream-bg)', border: '2px solid var(--color-peach-light)', borderRadius: '16px', padding: '16px 20px', margin: '20px 0' }}>
+                      <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '8px' }}>
+                        {currentSlide.concept_title}
+                      </h3>
+                      <p style={{ fontSize: '13px', color: 'var(--text-dark)', lineHeight: '1.6', fontWeight: 700 }}>
+                        {currentSlide.concept_text}
+                      </p>
+                    </div>
+
+                    {currentSlide.example_text && (
+                      <div style={{ textAlign: 'left', background: '#F0FDF4', border: '2px dashed #4CAF50', borderRadius: '16px', padding: '16px 20px', margin: '20px 0' }}>
+                        <span style={{ fontSize: '11px', color: '#2E7D32', fontWeight: 950, textTransform: 'uppercase' }}>
+                          {currentSlide.example_heading || 'Example/Template:'}
+                        </span>
+                        <p style={{ fontSize: '13px', color: '#2E7D32', lineHeight: '1.6', fontWeight: 850, marginTop: '4px', whiteSpace: 'pre-line' }}>
+                          {currentSlide.example_text}
+                        </p>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', width: '100%' }}>
+                      <button
+                        className={styles.mutedNavBtn}
+                        onClick={() => setSlideIndex(prev => prev - 1)}
+                        type="button"
+                      >
+                        {t('backBtn')}
+                      </button>
+
+                      <button
+                        className={styles.finishLessonBtn}
+                        onClick={() => setSlideIndex(prev => prev + 1)}
+                        style={{ width: 'auto', padding: '12px 36px', backgroundColor: '#FF7A00' }}
+                        type="button"
+                      >
+                        {t('nextBtn')}
+                      </button>
                     </div>
                   </motion.div>
                 );
