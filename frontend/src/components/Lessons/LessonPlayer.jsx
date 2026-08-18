@@ -5209,6 +5209,7 @@ export default function LessonPlayer() {
 
       {showNotes && (
         <LessonDocument
+          lesson={lesson}
           language={preferredLanguage}
           onClose={() => setShowNotes(false)}
         />
