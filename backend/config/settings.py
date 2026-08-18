@@ -90,7 +90,11 @@ DB_NAME = config('DB_NAME', default=None)
 if DATABASE_URL:
     import dj_database_url
     DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True
+        )
     }
 elif DB_NAME and not IS_RENDER:
     DATABASES = {
@@ -107,6 +111,8 @@ elif DB_NAME and not IS_RENDER:
         }
     }
 else:
+    if IS_RENDER:
+        print("WARNING: DATABASE_URL is not set on Render. Falling back to EPHEMERAL SQLite storage. Data will be lost on container restarts!")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

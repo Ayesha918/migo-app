@@ -586,6 +586,19 @@ def google_login(request):
             if device_id:
                 DeviceSession.objects.get_or_create(phone_account=phone_account, device_id=device_id)
 
+            # Auto-create a default learner profile if this account has no learners linked
+            if not phone_account.learners.exists():
+                learner_name = name if name else "Learner"
+                Learner.objects.create(
+                    name=learner_name,
+                    age=10,
+                    known_language='en',
+                    learning_language='kn',
+                    avatar='migo',
+                    phone_account=phone_account,
+                    preferred_language='en'
+                )
+
             # Query existing learners linked to this account
             learners = phone_account.learners.all()
             serializer = LearnerSerializer(learners, many=True)

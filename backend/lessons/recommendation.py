@@ -51,27 +51,51 @@ def get_llm_recommendations(learner):
     batch_lessons = all_lessons[start_idx:end_idx]
     result_ids = []
 
-    if has_writing_weakness:
-        # Separate writing and core lessons inside this page, prioritize mixing writing
-        batch_writing = [l for l in batch_lessons if l.skill == 'writing']
-        batch_core = [l for l in batch_lessons if l.skill != 'writing']
-        result_ids = [l.lesson_id for l in batch_core] + [l.lesson_id for l in batch_writing]
-    else:
-        result_ids = [l.lesson_id for l in batch_lessons]
+    # Identify weaknesses at the current user's level difficulty
+    weaknesses = []
+    if profile.writing_score is not None and profile.writing_score < 70:
+        weaknesses.append({
+            'skills': ['writing', 'sentence_formation'],
+            'score': profile.writing_score
+        })
+    if profile.reading_score is not None and profile.reading_score < 70:
+        weaknesses.append({
+            'skills': ['letter_recognition', 'letter_sounds', 'word_recognition', 'reading_fluency'],
+            'score': profile.reading_score
+        })
+    if profile.comprehension_score is not None and profile.comprehension_score < 70:
+        weaknesses.append({
+            'skills': ['comprehension', 'vocabulary'],
+            'score': profile.comprehension_score
+        })
 
-    # Inject beginner writing lessons if user has extremely low writing score (< 60)
-    if w_score < 60:
-        uncompleted_beg_writing = Lesson.objects.filter(
-            difficulty='beginner',
-            skill='writing',
+    # Sort weaknesses by score (ascending) so the weakest skill is prioritized
+    weaknesses.sort(key=lambda x: x['score'])
+
+    result_ids = [l.lesson_id for l in batch_lessons]
+
+    # Inject up to 2 uncompleted lessons for the weakest areas at the user's actual level
+    injected_ids = []
+    for weak in weaknesses:
+        uncompleted_weak_lessons = Lesson.objects.filter(
+            difficulty=level,
+            skill__in=weak['skills'],
             language=language
+        ).exclude(
+            lesson_id__in=exclude_ids
         ).exclude(
             path_entries__learner=learner,
             path_entries__status='completed'
         ).order_by('order_in_level')[:2]
         
-        beg_writing_ids = [l.lesson_id for l in uncompleted_beg_writing]
-        result_ids = beg_writing_ids + result_ids
+        for l in uncompleted_weak_lessons:
+            injected_ids.append(l.lesson_id)
+        
+        if len(injected_ids) >= 2:
+            break
+
+    # Prioritize the weak-skill lessons by placing them at the beginning
+    result_ids = injected_ids + result_ids
 
     # If the user completed all regular lessons (or this is the final page and they finished it)
     all_regular_completed = (completed_count >= total_lessons_count)

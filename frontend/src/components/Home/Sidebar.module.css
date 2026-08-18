@@ -48,7 +48,7 @@
   flex: 1;
   overflow-y: auto;
   padding-right: 4px;
-  max-height: 520px;
+  max-height: calc(100vh - 380px);
 }
 
 .navMenu::-webkit-scrollbar {
@@ -244,5 +244,59 @@
 @media (max-width: 768px) {
   .sidebarCard {
     display: none; /* Hide on mobile to keep space clean */
+  }
+}
+
+.profileCard {
+  background-color: var(--bg-cream);
+  border: 2px solid var(--color-peach);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-top: auto;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+}
+
+.profileEmoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.profileName {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--text-dark);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.profileLevel {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-orange);
+  text-transform: capitalize;
+  margin-top: 1px;
+}
+
+.profileTier {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+@media (max-width: 768px) {
+  .profileCard {
+    display: none; /* Hide on mobile navbar */
   }
 }

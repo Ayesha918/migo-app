@@ -81,33 +81,6 @@ export default function Landing() {
           <a href="#how-it-works">How It Works</a>
           <a href="#vision">Our Mission</a>
           <a href="#skills">Skills</a>
-          
-          <div className={styles.langSelectContainer}>
-            <button
-              className={styles.langDropdownBtn}
-              onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-              type="button"
-            >
-              <Globe size={18} />
-              <span>Language</span>
-              <ChevronDown size={14} />
-            </button>
-            <AnimatePresence>
-              {showLanguageDropdown && (
-                <motion.div
-                  className={styles.langDropdownMenu}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                >
-                  <button onClick={() => { setActiveLang('en'); localStorage.setItem('migo_ui_language', 'en'); setShowLanguageDropdown(false); }}>English</button>
-                  <button onClick={() => { setActiveLang('hi'); localStorage.setItem('migo_ui_language', 'hi'); setShowLanguageDropdown(false); }}>हिन्दी (Hindi)</button>
-                  <button onClick={() => { setActiveLang('kn'); localStorage.setItem('migo_ui_language', 'kn'); setShowLanguageDropdown(false); }}>ಕನ್ನಡ (Kannada)</button>
-                  <button onClick={() => { setActiveLang('ta'); localStorage.setItem('migo_ui_language', 'ta'); setShowLanguageDropdown(false); }}>தமிழ் (Tamil)</button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </nav>
       </header>
 

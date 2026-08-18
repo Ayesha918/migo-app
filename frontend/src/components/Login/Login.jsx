@@ -50,8 +50,13 @@ function Login() {
       if (res.data.verified) {
         const learnersList = res.data.learners || [];
         if (learnersList.length > 0) {
-          setLinkedLearners(learnersList);
-          setSubStage('select_learner');
+          if (learnersList.length === 1) {
+            setLearner(learnersList[0]);
+            navigate('/home');
+          } else {
+            setLinkedLearners(learnersList);
+            setSubStage('select_learner');
+          }
         } else {
           navigate('/register', { state: { email: res.data.email } });
         }

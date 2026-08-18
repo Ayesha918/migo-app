@@ -7,6 +7,12 @@ import { useLearner } from '../../services/LearnerContext';
 import useTranslate from '../../services/useTranslate';
 import styles from './Sidebar.module.css';
 
+const AVATAR_EMOJI = {
+  boy: '👦', girl: '👧', grandmother: '👵', grandfather: '👴',
+  teacher: '🧑‍🏫', book: '📖', lion: '🦁', tiger: '🐯',
+  apple: '🍎', flower: '🌸', star: '⭐', migo: '🦊',
+};
+
 const menuItems = [
   { title: 'Adventure Map', key: 'adventureMap', icon: HomeIcon, route: '/home' },
   { title: 'Learn (Review)', key: 'learnReview', icon: BookOpen, route: '/learn' },
@@ -89,6 +95,24 @@ export default function Sidebar({ onLogout }) {
           <circle cx="115" cy="5" r="4.5" fill="#FF7A00" />
         </svg>
       </div>
+
+      {/* Profile Progress Card */}
+      {learner && (
+        <div className={styles.profileCard}>
+          <span className={styles.profileEmoji}>
+            {AVATAR_EMOJI[learner.avatar] || '🦊'}
+          </span>
+          <div className={styles.profileInfo}>
+            <span className={styles.profileName}>{learner.name}</span>
+            <span className={styles.profileLevel}>
+              {learner.level || 'beginner'} Level
+            </span>
+            <span className={styles.profileTier}>
+              Tier: {learner.subscription_tier || 'Free'}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Logout */}
       <button className={styles.logoutBtn} onClick={onLogout}>

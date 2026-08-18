@@ -10,27 +10,14 @@ const LANGUAGES = [
 
 function StepLanguage({ knownValue, learningValue, onKnownChange, onLearningChange }) {
   const handleSpeak = () => {
-    speak('Which language are you comfortable with, and which language do you want to learn?');
+    speak('Which language do you want to learn?');
   };
 
   return (
     <>
       <div className={styles.emojiIcon}>🌐</div>
-      <h2 className={styles.question}>I am comfortable with...</h2>
-      <div className={styles.inputRow}>
-        <select className={styles.selectInput} value={knownValue} onChange={(e) => {
-          onKnownChange(e.target.value);
-          // Set UI language dynamically during registration as they select their comfortable language!
-          localStorage.setItem('migo_ui_language', e.target.value);
-        }}>
-          <option value="" disabled>Select a language</option>
-          {LANGUAGES.map((lang) => (
-            <option key={lang.code} value={lang.code}>{lang.label}</option>
-          ))}
-        </select>
-      </div>
 
-      <h2 className={styles.question} style={{ marginTop: 20 }}>I want to learn...</h2>
+      <h2 className={styles.question}>I want to learn...</h2>
       <div className={styles.inputRow}>
         <select className={styles.selectInput} value={learningValue} onChange={(e) => onLearningChange(e.target.value)}>
           <option value="" disabled>Select a language</option>

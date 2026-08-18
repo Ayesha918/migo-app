@@ -8,13 +8,14 @@ import VirtualKeyboard from './VirtualKeyboard';
 import owl from '../../assets/images/owl.png';
 import styles from './PlacementAssessment.module.css';
 import useTranslate from '../../services/useTranslate';
+import { useLearner } from '../../services/LearnerContext';
 
 const LANG_SPEECH_CODES = { en: 'en-US', hi: 'hi-IN', kn: 'kn-IN', ta: 'ta-IN', te: 'te-IN' };
 
 export default function PlacementAssessment() {
   const location = useLocation();
   const navigate = useNavigate();
-  const learner = location.state?.learner;
+  const { learner, setLearner } = useLearner();
   const t = useTranslate();
 
   const [questions, setQuestions] = useState([]);
@@ -197,6 +198,12 @@ export default function PlacementAssessment() {
         const summary = await fetchDashboardSummary(learner.learner_id);
         const updatedLevel = summary.data?.level || 'beginner';
         setAssignedLevel(updatedLevel);
+        
+        // Sync level back to the local learner session context
+        setLearner({
+          ...learner,
+          level: updatedLevel
+        });
 
         speak(`Awesome! Based on your check, you have been placed in the ${updatedLevel} level!`, knownSpeechLang);
         setCurrentIndex(questions.length); // Trigger celebration step

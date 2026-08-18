@@ -52,8 +52,13 @@ function Register() {
         const learnersList = res.data.learners || [];
         setEmailAddress(res.data.email);
         if (learnersList.length > 0) {
-          setLinkedLearners(learnersList);
-          setStage('select_learner');
+          if (learnersList.length === 1) {
+            setLearner(learnersList[0]);
+            navigate('/home');
+          } else {
+            setLinkedLearners(learnersList);
+            setStage('select_learner');
+          }
         } else {
           // Auto-verified with Google: immediately skip OTP check and show profile creation wizard
           setStage('wizard');
@@ -134,7 +139,7 @@ function Register() {
     switch (currentStep) {
       case 0: return formData.name.trim().length > 0;
       case 1: return formData.age !== '' && Number(formData.age) > 0;
-      case 2: return formData.knownLanguage !== '' && formData.learningLanguage !== '';
+      case 2: return formData.learningLanguage !== '';
       case 3: return formData.avatar !== '';
       default: return false;
     }
