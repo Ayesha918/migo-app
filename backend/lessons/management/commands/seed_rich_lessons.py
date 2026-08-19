@@ -1071,7 +1071,7 @@ class Command(BaseCommand):
                     'type': 'welcome',
                     'title': t(bp['title']),
                     'subtitle': t(bp['subtitle']),
-                    'objectives': [t(obj) for obj in bp['objectives']]
+                    'objectives': bp['objectives']
                 }
 
                 def_slide = {
@@ -1875,9 +1875,9 @@ class Command(BaseCommand):
                     'title': t_adv(bp['concept']),
                     'subtitle': t_adv(bp['context']),
                     'objectives': [
-                        t_adv("Learn step by step and master functional skills!"),
-                        t_adv("Read and practice real life scenarios"),
-                        t_adv("Pass the concept checkup challenge")
+                        "Learn step by step and master functional skills!",
+                        "Read and practice real life scenarios",
+                        "Pass the concept checkup challenge"
                     ]
                 }
 
@@ -2545,9 +2545,9 @@ class Command(BaseCommand):
                     'title': t_title,
                     'subtitle': t_desc,
                     'objectives': [
-                        translate_str('Learn step by step and become a great writer!'),
-                        translate_str('Trace letters and write words'),
-                        translate_str('Complete practice exercises')
+                        'Learn step by step and become a great writer!',
+                        'Trace letters and write words',
+                        'Complete practice exercises'
                     ]
                 }
 
@@ -2631,9 +2631,9 @@ class Command(BaseCommand):
                     'title': t_title,
                     'subtitle': t_desc,
                     'objectives': [
-                        translate_str('Improve functional writing skills'),
-                        translate_str('Form correct sentences and grammar'),
-                        translate_str('Write short paragraphs')
+                        'Improve functional writing skills',
+                        'Form correct sentences and grammar',
+                        'Write short paragraphs'
                     ]
                 }
                 

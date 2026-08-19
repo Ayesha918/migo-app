@@ -1,13 +1,18 @@
 /* src/components/Home/Sidebar.module.css */
 
 .sidebar {
-  width: 240px;
+  width: 280px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
   background-color: #FFFFFF;
   border-right: 3px solid var(--color-peach-light);
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.03);
+  overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .logoBox {
@@ -46,9 +51,6 @@
   flex-direction: column;
   gap: 10px;
   flex: 1;
-  overflow-y: auto;
-  padding-right: 4px;
-  max-height: calc(100vh - 380px);
 }
 
 .navMenu::-webkit-scrollbar {
@@ -117,6 +119,8 @@
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
+    height: auto;
+    position: static;
     border-right: none;
     border-bottom: 2px solid var(--color-peach-light);
     padding: 10px 16px;
@@ -125,6 +129,8 @@
     justify-content: space-between;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     background-color: #FFFFFF;
+    overflow-y: visible;
+    flex-shrink: initial;
   }
 
   .logoBox {

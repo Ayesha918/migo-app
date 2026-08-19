@@ -16,6 +16,7 @@ import owl from '../../assets/images/owl.png';
 import treasure from '../../assets/images/treasure.png';
 import LessonDocument from './LessonDocument';
 import styles from './LessonPlayer.module.css';
+import { MIGO_WRITING_STARTERS, getWritingStarterKey, parseTemplateToReact } from './writingHelpers';
 
 const SPEECH_LANG_MAP = {
   en: 'en-US',
@@ -628,6 +629,56 @@ export default function LessonPlayer() {
   const { learner } = useLearner();
   const t = useTranslate();
 
+  if (!learner) {
+    return (
+      <div style={{
+        background: '#FAF9F6',
+        minHeight: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        textAlign: 'center',
+        fontFamily: 'system-ui, sans-serif'
+      }}>
+        <div style={{
+          background: '#FFFFFF',
+          border: '3px solid #FFE0B2',
+          borderRadius: '24px',
+          padding: '40px 32px',
+          maxWidth: '450px',
+          width: '100%',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.04)'
+        }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#FF7A00', margin: '0 0 12px 0' }}>
+            Ready to play?
+          </h2>
+          <p style={{ fontSize: '15px', color: '#4A4A4A', fontWeight: 700, margin: '0 0 24px 0', lineHeight: 1.5 }}>
+            Please select a learner profile or register a new one to access the lesson player!
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              padding: '12px 32px',
+              background: 'linear-gradient(135deg, #FF7A00, #E06B00)',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '16px',
+              fontWeight: 900,
+              fontSize: '15px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(255, 122, 0, 0.2)'
+            }}
+          >
+            Go to Welcome
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const [currentEntry, setCurrentEntry] = useState(location.state?.entry);
   const [learningPath, setLearningPath] = useState(location.state?.path || []);
 
@@ -898,6 +949,65 @@ export default function LessonPlayer() {
       setJumbledSelectedIndices([]);
     }
   }, [slideIndex, lesson, isAlphabetLesson]);
+
+  useEffect(() => {
+    const currentSlide = slides[slideIndex];
+    if (!currentSlide) return;
+
+    const lang = preferredLanguage || 'en';
+    const starters = MIGO_WRITING_STARTERS[lang] || MIGO_WRITING_STARTERS['en'];
+
+    if (currentSlide.type === 'paragraph_writing') {
+      const topicKey = getWritingStarterKey(currentSlide.topic);
+      const data = starters[topicKey] || starters['default'];
+      
+      const initialFilled = {};
+      data.blanks.forEach((b, idx) => {
+        initialFilled[idx] = `[${b.placeholder}]`;
+      });
+      setFilledBlanks(initialFilled);
+      setActiveBlankIdx(null);
+      setCustomBlankInput('');
+
+      // Compile initial template text
+      const parts = data.template.split(/(\[[^\]]+\])/);
+      let counter = 0;
+      const initialText = parts.map(part => {
+        if (part.startsWith('[') && part.endsWith(']')) {
+          return initialFilled[counter++];
+        }
+        return part;
+      }).join('');
+      setParagraphText(initialText);
+      setParagraphSubmitted(false);
+    } else if (currentSlide.type === 'letter_drafting') {
+      const toVal = starters.letter.to;
+      const subVal = starters.letter.subject;
+      setLetterTo(toVal);
+      setLetterSubject(subVal);
+
+      const initialFilled = {};
+      starters.letter.blanks.forEach((b, idx) => {
+        initialFilled[idx] = `[${b.placeholder}]`;
+      });
+      setLetterBlanks(initialFilled);
+      setActiveLetterBlankIdx(null);
+      setCustomBlankInput('');
+
+      // Compile initial template text
+      const parts = starters.letter.body.split(/(\[[^\]]+\])/);
+      let counter = 0;
+      const initialText = parts.map(part => {
+        if (part.startsWith('[') && part.endsWith(']')) {
+          return initialFilled[counter++];
+        }
+        return part;
+      }).join('');
+      setLetterBody(initialText);
+      setLetterSubmitted(false);
+      setActiveWritingStep(1);
+    }
+  }, [slideIndex, lesson]);
 
   useEffect(() => {
     if (!lesson.lesson_id || !lesson.lesson_id.includes('-ASSESS-') || assessmentFinished) return;
@@ -1718,7 +1828,7 @@ export default function LessonPlayer() {
           {/* Assessment Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/home')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1925,10 +2035,94 @@ export default function LessonPlayer() {
     );
   }
 
+  const renderWizardModal = () => {
+    if (!showWizardModal) return null;
+    const lang = preferredLanguage || 'en';
+    const starters = MIGO_WRITING_STARTERS[lang] || MIGO_WRITING_STARTERS['en'];
+    const topicKey = getWritingStarterKey(selectedTopic);
+    const data = starters[topicKey] || starters['default'];
+    const wizardData = data.wizard || starters['default'].wizard;
+    const steps = wizardData.steps;
+    
+    const handleSelectOption = (opt) => {
+      const updatedAnswers = [...wizardAnswers, opt];
+      setWizardAnswers(updatedAnswers);
+      if (wizardStep < steps.length - 1) {
+        setWizardStep(wizardStep + 1);
+      } else {
+        const fullText = updatedAnswers.join(' ');
+        setParagraphText(fullText);
+        setShowWizardModal(false);
+        setWizardStep(0);
+        setWizardAnswers([]);
+      }
+    };
+    
+    return (
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex',
+        alignItems: 'center', justifyContent: 'center', zIndex: 10000,
+        padding: '16px'
+      }}>
+        <div style={{
+          backgroundColor: '#FFFFFF', borderRadius: '24px',
+          border: '4px solid var(--color-peach, #FFE0B2)', padding: '24px',
+          maxWidth: '520px', width: '100%', boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: 'var(--color-orange-dark, #E06B00)' }}>
+              ✨ Help Me Build: Step {wizardStep + 1} of {steps.length}
+            </h3>
+            <button
+              onClick={() => {
+                setShowWizardModal(false);
+                setWizardStep(0);
+                setWizardAnswers([]);
+              }}
+              style={{ background: 'none', border: 'none', fontSize: '16px', fontWeight: 900, cursor: 'pointer', color: 'var(--text-muted)' }}
+              type="button"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <p style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '16px', textAlign: 'left' }}>
+            {steps[wizardStep].question}
+          </p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {steps[wizardStep].options.map((opt, oIdx) => (
+              <button
+                key={oIdx}
+                onClick={() => handleSelectOption(opt)}
+                style={{
+                  padding: '14px 16px',
+                  background: 'var(--color-cream-bg, #FFFDF9)',
+                  border: '2px solid var(--color-peach-light, #FFE0B2)',
+                  borderRadius: '12px',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  color: 'var(--text-dark)',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                type="button"
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
+        <button className={styles.backBtn} onClick={() => navigate('/home')}>
           <ArrowLeft size={24} />
           <span>Adventure Map</span>
         </button>
@@ -3356,13 +3550,22 @@ export default function LessonPlayer() {
               }
 
               if (currentSlide.type === 'letter_drafting') {
-                const defaultTo = currentSlide.to_label || '';
-                const defaultSubject = currentSlide.subject_label || '';
-                const defaultBody = currentSlide.body_placeholder || '';
+                const lang = preferredLanguage || 'en';
+                const starters = MIGO_WRITING_STARTERS[lang] || MIGO_WRITING_STARTERS['en'];
+                const letterData = starters.letter;
 
-                const activeTo = letterTo !== '' ? letterTo : defaultTo;
-                const activeSubject = letterSubject !== '' ? letterSubject : defaultSubject;
-                const activeBody = letterBody !== '' ? letterBody : defaultBody;
+                const compileLetterBodyText = (updatedMap) => {
+                  const parts = letterData.body.split(/(\[[^\]]+\])/);
+                  let counter = 0;
+                  const compiled = parts.map(part => {
+                    if (part.startsWith('[') && part.endsWith(']')) {
+                      const val = updatedMap[counter++];
+                      return val !== undefined ? val : part;
+                    }
+                    return part;
+                  }).join('');
+                  setLetterBody(compiled);
+                };
 
                 return (
                   <motion.div
@@ -3371,10 +3574,10 @@ export default function LessonPlayer() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    style={{ maxWidth: '680px', width: '100%', padding: '24px' }}
+                    style={{ maxWidth: '780px', width: '100%', padding: '24px' }}
                   >
                     <span className={styles.storyboardBadge}>{currentSlide.title}</span>
-                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '6px' }}>
+                    <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '6px' }}>
                       {currentSlide.subtitle}
                     </h2>
 
@@ -3391,11 +3594,11 @@ export default function LessonPlayer() {
                         textAlign: 'left'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1.5px solid #F1F5F9', paddingBottom: '10px' }}>
                         <span style={{ width: '70px', fontSize: '13px', fontWeight: 800, color: 'var(--text-muted)' }}>To:</span>
                         <input
                           type="text"
-                          value={activeTo}
+                          value={letterTo}
                           onChange={(e) => setLetterTo(e.target.value)}
                           disabled={letterSubmitted}
                           style={{
@@ -3409,11 +3612,11 @@ export default function LessonPlayer() {
                         />
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1.5px solid #F1F5F9', paddingBottom: '10px' }}>
                         <span style={{ width: '70px', fontSize: '13px', fontWeight: 800, color: 'var(--text-muted)' }}>Subject:</span>
                         <input
                           type="text"
-                          value={activeSubject}
+                          value={letterSubject}
                           onChange={(e) => setLetterSubject(e.target.value)}
                           disabled={letterSubmitted}
                           style={{
@@ -3427,23 +3630,148 @@ export default function LessonPlayer() {
                         />
                       </div>
 
-                      <textarea
-                        value={activeBody}
-                        onChange={(e) => setLetterBody(e.target.value)}
-                        disabled={letterSubmitted}
-                        style={{
-                          width: '100%',
-                          height: '140px',
-                          border: 'none',
-                          outline: 'none',
-                          resize: 'none',
-                          fontSize: '13px',
-                          fontWeight: 700,
-                          color: 'var(--text-dark)',
-                          lineHeight: '1.6',
-                          paddingTop: '6px'
-                        }}
-                      />
+                      {/* Interactive Guided Letter Body */}
+                      <div style={{ background: '#FFFDF9', border: '1.5px solid #FFE0B2', borderRadius: '16px', padding: '16px 20px', marginTop: '10px', lineHeight: '1.8' }}>
+                        <h4 style={{ margin: '0 0 10px 0', fontSize: '13px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>
+                          📝 Interactive Guided Letter (Tap blanks to fill):
+                        </h4>
+                        <div>
+                          {parseTemplateToReact(letterData.body, letterData.blanks, letterBlanks, activeLetterBlankIdx, setActiveLetterBlankIdx)}
+                        </div>
+                      </div>
+
+                      {/* Suggestions box for letter blanks */}
+                      {activeLetterBlankIdx !== null && (
+                        <div style={{ background: '#FFF8F2', padding: '16px', borderRadius: '16px', border: '2px solid var(--color-peach-light)', marginTop: '8px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <span style={{ fontSize: '12.5px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>
+                              💡 Fill in the blank (Hint: {(letterData.blanks[activeLetterBlankIdx] || {}).hint || 'Choose a word'}):
+                            </span>
+                            <button
+                              onClick={() => setActiveLetterBlankIdx(null)}
+                              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontWeight: 800, cursor: 'pointer', fontSize: '12px' }}
+                              type="button"
+                            >
+                              Close ✕
+                            </button>
+                          </div>
+
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                            {((letterData.blanks[activeLetterBlankIdx] || {}).suggestions || []).map((sug) => (
+                              <button
+                                key={sug}
+                                onClick={() => {
+                                  const updated = { ...letterBlanks, [activeLetterBlankIdx]: sug };
+                                  setLetterBlanks(updated);
+                                  compileLetterBodyText(updated);
+                                  if (activeLetterBlankIdx < letterData.blanks.length - 1) {
+                                    setActiveLetterBlankIdx(activeLetterBlankIdx + 1);
+                                  } else {
+                                    setActiveLetterBlankIdx(null);
+                                  }
+                                }}
+                                style={{
+                                  padding: '8px 16px',
+                                  background: '#FFFFFF',
+                                  border: '1.5px solid var(--color-peach)',
+                                  borderRadius: '20px',
+                                  fontSize: '13px',
+                                  fontWeight: 850,
+                                  color: 'var(--color-orange-dark)',
+                                  cursor: 'pointer'
+                                }}
+                                type="button"
+                              >
+                                {sug}
+                              </button>
+                            ))}
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                              type="text"
+                              placeholder="Or type custom word..."
+                              value={customBlankInput}
+                              onChange={(e) => setCustomBlankInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && customBlankInput.trim() !== '') {
+                                  const updated = { ...letterBlanks, [activeLetterBlankIdx]: customBlankInput.trim() };
+                                  setLetterBlanks(updated);
+                                  compileLetterBodyText(updated);
+                                  setCustomBlankInput('');
+                                  if (activeLetterBlankIdx < letterData.blanks.length - 1) {
+                                    setActiveLetterBlankIdx(activeLetterBlankIdx + 1);
+                                  } else {
+                                    setActiveLetterBlankIdx(null);
+                                  }
+                                }
+                              }}
+                              style={{
+                                flex: 1,
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1.5px solid var(--color-peach-light)',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                outline: 'none'
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                if (customBlankInput.trim() !== '') {
+                                  const updated = { ...letterBlanks, [activeLetterBlankIdx]: customBlankInput.trim() };
+                                  setLetterBlanks(updated);
+                                  compileLetterBodyText(updated);
+                                  setCustomBlankInput('');
+                                  if (activeLetterBlankIdx < letterData.blanks.length - 1) {
+                                    setActiveLetterBlankIdx(activeLetterBlankIdx + 1);
+                                  } else {
+                                    setActiveLetterBlankIdx(null);
+                                  }
+                                }
+                              }}
+                              style={{
+                                padding: '8px 16px',
+                                background: 'var(--color-orange)',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontWeight: 800,
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                              }}
+                              type="button"
+                            >
+                              Insert
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Customize Textarea */}
+                      <div style={{ textAlign: 'left', marginTop: '10px' }}>
+                        <span style={{ fontSize: '12.5px', fontWeight: 900, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                          ✍️ Customize / Add more details to the body:
+                        </span>
+                        <textarea
+                          value={letterBody}
+                          onChange={(e) => setLetterBody(e.target.value)}
+                          disabled={letterSubmitted}
+                          style={{
+                            width: '100%',
+                            height: '140px',
+                            border: '1.5px solid var(--color-peach-light)',
+                            borderRadius: '12px',
+                            outline: 'none',
+                            resize: 'none',
+                            fontSize: '13px',
+                            fontWeight: 700,
+                            color: 'var(--text-dark)',
+                            lineHeight: '1.6',
+                            padding: '12px'
+                          }}
+                        />
+                      </div>
                     </div>
 
                     {!letterSubmitted ? (
@@ -4144,6 +4472,28 @@ export default function LessonPlayer() {
               }
 
               if (currentSlide.type === 'paragraph_writing') {
+                const lang = preferredLanguage || 'en';
+                const starters = MIGO_WRITING_STARTERS[lang] || MIGO_WRITING_STARTERS['en'];
+                const topicKey = getWritingStarterKey(currentSlide.topic);
+                const data = starters[topicKey] || starters['default'];
+
+                const compileText = (updatedMap) => {
+                  const parts = data.template.split(/(\[[^\]]+\])/);
+                  let counter = 0;
+                  const compiled = parts.map(part => {
+                    if (part.startsWith('[') && part.endsWith(']')) {
+                      const val = updatedMap[counter++];
+                      return val !== undefined ? val : part;
+                    }
+                    return part;
+                  }).join('');
+                  setParagraphText(compiled);
+                };
+
+                const hasCapitalization = paragraphText.trim() !== '' && paragraphText[0] === paragraphText[0].toUpperCase();
+                const hasPunctuation = paragraphText.trim() !== '' && (paragraphText.endsWith('.') || paragraphText.endsWith('?') || paragraphText.endsWith('!') || paragraphText.endsWith('।'));
+                const wordCount = paragraphText.trim() === '' ? 0 : paragraphText.trim().split(/\s+/).length;
+
                 return (
                   <motion.div
                     key="paragraph_writing"
@@ -4151,60 +4501,217 @@ export default function LessonPlayer() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    style={{ maxWidth: '780px', width: '100%' }}
+                    style={{ maxWidth: '780px', width: '100%', padding: '24px' }}
                   >
                     <span className={styles.storyboardBadge}>{currentSlide.title}</span>
-                    <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '8px' }}>
+                    <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--text-dark)', marginTop: '8px' }}>
                       {currentSlide.subtitle}
                     </h2>
                     
-                    <div style={{ background: 'var(--color-cream-bg)', border: '2px solid var(--color-peach-light)', borderRadius: '16px', padding: '16px 24px', margin: '20px 0', textAlign: 'left' }}>
+                    <div style={{ background: 'var(--color-cream-bg)', border: '2px solid var(--color-peach-light)', borderRadius: '16px', padding: '16px 24px', margin: '16px 0', textAlign: 'left' }}>
                       <span style={{ fontSize: '11px', color: 'var(--color-orange-dark)', fontWeight: 900, textTransform: 'uppercase' }}>Writing Topic</span>
-                      <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-dark)', margin: '4px 0 0 0' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--text-dark)', margin: '4px 0 0 0' }}>
                         {currentSlide.topic}
                       </h3>
-                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '8px 0 0 0', fontWeight: 700 }}>
+                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0', fontWeight: 700 }}>
                         {currentSlide.instruction}
                       </p>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      <textarea
-                        value={paragraphText}
-                        onChange={(e) => setParagraphText(e.target.value)}
-                        disabled={paragraphSubmitted}
-                        placeholder="Write your paragraph here..."
-                        style={{
-                          width: '100%',
-                          height: '140px',
-                          borderRadius: '16px',
-                          border: '2px solid var(--color-peach-light)',
-                          padding: '14px',
-                          fontSize: '13px',
-                          fontWeight: 700,
-                          resize: 'none',
-                          outline: 'none',
-                          boxShadow: '0 4px 12px rgba(255, 122, 0, 0.02)',
-                          lineHeight: '1.6'
-                        }}
-                      />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      
+                      {/* Step 1: Clickable Blanks Container */}
+                      <div style={{ background: '#FFFDF9', border: '2px solid #FFE0B2', borderRadius: '16px', padding: '16px 20px', textAlign: 'left', lineHeight: '1.8' }}>
+                        <h4 style={{ margin: '0 0 10px 0', fontSize: '13px', fontWeight: 900, color: 'var(--color-orange-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>📝 Guided Structure: Tap blanks to fill</span>
+                        </h4>
+                        <div>
+                          {parseTemplateToReact(data.template, data.blanks, filledBlanks, activeBlankIdx, setActiveBlankIdx)}
+                        </div>
+                      </div>
+
+                      {/* Interactive Suggestions Sub-panel */}
+                      {activeBlankIdx !== null && (
+                        <div style={{ background: '#FFF8F2', padding: '16px', borderRadius: '16px', border: '2px solid var(--color-peach-light)', textAlign: 'left' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <span style={{ fontSize: '12.5px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>
+                              💡 Choose a word for this blank (Hint: {(data.blanks[activeBlankIdx] || {}).hint || 'Choose a word'}):
+                            </span>
+                            <button
+                              onClick={() => setActiveBlankIdx(null)}
+                              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontWeight: 800, cursor: 'pointer', fontSize: '12px' }}
+                              type="button"
+                            >
+                              Close ✕
+                            </button>
+                          </div>
+                          
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                            {((data.blanks[activeBlankIdx] || {}).suggestions || []).map((sug) => (
+                              <button
+                                key={sug}
+                                onClick={() => {
+                                  const updated = { ...filledBlanks, [activeBlankIdx]: sug };
+                                  setFilledBlanks(updated);
+                                  compileText(updated);
+                                  if (activeBlankIdx < data.blanks.length - 1) {
+                                    setActiveBlankIdx(activeBlankIdx + 1);
+                                  } else {
+                                    setActiveBlankIdx(null);
+                                  }
+                                }}
+                                style={{
+                                  padding: '8px 16px',
+                                  background: '#FFFFFF',
+                                  border: '1.5px solid var(--color-peach)',
+                                  borderRadius: '20px',
+                                  fontSize: '13px',
+                                  fontWeight: 850,
+                                  color: 'var(--color-orange-dark)',
+                                  cursor: 'pointer',
+                                  boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+                                }}
+                                type="button"
+                              >
+                                {sug}
+                              </button>
+                            ))}
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                              type="text"
+                              placeholder="Or type custom word..."
+                              value={customBlankInput}
+                              onChange={(e) => setCustomBlankInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && customBlankInput.trim() !== '') {
+                                  const updated = { ...filledBlanks, [activeBlankIdx]: customBlankInput.trim() };
+                                  setFilledBlanks(updated);
+                                  compileText(updated);
+                                  setCustomBlankInput('');
+                                  if (activeBlankIdx < data.blanks.length - 1) {
+                                    setActiveBlankIdx(activeBlankIdx + 1);
+                                  } else {
+                                    setActiveBlankIdx(null);
+                                  }
+                                }
+                              }}
+                              style={{
+                                flex: 1,
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1.5px solid var(--color-peach-light)',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                outline: 'none'
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                if (customBlankInput.trim() !== '') {
+                                  const updated = { ...filledBlanks, [activeBlankIdx]: customBlankInput.trim() };
+                                  setFilledBlanks(updated);
+                                  compileText(updated);
+                                  setCustomBlankInput('');
+                                  if (activeBlankIdx < data.blanks.length - 1) {
+                                    setActiveBlankIdx(activeBlankIdx + 1);
+                                  } else {
+                                    setActiveBlankIdx(null);
+                                  }
+                                }
+                              }}
+                              style={{
+                                padding: '8px 16px',
+                                background: 'var(--color-orange)',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontWeight: 800,
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                              }}
+                              type="button"
+                            >
+                              Insert
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Customize Textarea */}
+                      <div style={{ textAlign: 'left' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '12.5px', fontWeight: 900, color: 'var(--text-muted)' }}>
+                            ✍️ Edit & Expand:
+                          </span>
+                          <button
+                            onClick={() => {
+                              setSelectedTopic(currentSlide.topic);
+                              setShowWizardModal(true);
+                            }}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: 'var(--color-orange-dark)',
+                              fontWeight: 900,
+                              fontSize: '12.5px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                            type="button"
+                          >
+                            ✨ Help Me Build
+                          </button>
+                        </div>
+                        <textarea
+                          value={paragraphText}
+                          onChange={(e) => setParagraphText(e.target.value)}
+                          disabled={paragraphSubmitted}
+                          style={{
+                            width: '100%',
+                            height: '130px',
+                            borderRadius: '16px',
+                            border: '2px solid var(--color-peach-light)',
+                            padding: '14px',
+                            fontSize: '13.5px',
+                            fontWeight: 700,
+                            resize: 'none',
+                            outline: 'none',
+                            boxShadow: '0 4px 12px rgba(255, 122, 0, 0.02)',
+                            lineHeight: '1.6'
+                          }}
+                        />
+                      </div>
+
+                      {/* Live feedback checklists */}
+                      <div style={{ background: '#FFF8F2', padding: '12px 16px', borderRadius: '12px', border: '1.5px solid var(--color-peach-light)', display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 900, color: 'var(--color-orange-dark)' }}>💡 Live Writing Assistant:</span>
+                        <div style={{ display: 'flex', gap: '16px', fontSize: '12px', fontWeight: 850, color: 'var(--text-dark)' }}>
+                          <span>{hasCapitalization ? '🟢' : '⚪'} Capitalized start</span>
+                          <span>{hasPunctuation ? '🟢' : '⚪'} Ending punctuation</span>
+                          <span>{wordCount >= 10 ? '🟢' : '⚪'} Length ({wordCount}/10 words)</span>
+                        </div>
+                      </div>
                       
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 800 }}>
-                          Word Count: <strong style={{ color: 'var(--color-orange-dark)' }}>{paragraphText.trim() === '' ? 0 : paragraphText.trim().split(/\s+/).length}</strong>
+                          Word Count: <strong style={{ color: 'var(--color-orange-dark)' }}>{wordCount}</strong>
                         </span>
                         
                         {!paragraphSubmitted ? (
                           <button
                             onClick={() => {
-                              const count = paragraphText.trim() === '' ? 0 : paragraphText.trim().split(/\s+/).length;
-                              if (count < 10) {
+                              if (wordCount < 10) {
                                 speak(t('writeParagraphLimit'), knownSpeechLang, audioSpeed);
                                 return;
                               }
                               setParagraphSubmitted(true);
                               speak(t('paragraphSubmitted'), knownSpeechLang, audioSpeed);
                             }}
+                            disabled={paragraphText.trim() === ''}
                             style={{
                               padding: '10px 24px',
                               background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))',
@@ -4213,8 +4720,8 @@ export default function LessonPlayer() {
                               borderRadius: '12px',
                               fontWeight: 800,
                               fontSize: '13px',
-                              cursor: 'pointer',
-                              boxShadow: '0 4px 10px rgba(255, 122, 0, 0.2)'
+                              cursor: paragraphText.trim() === '' ? 'default' : 'pointer',
+                              boxShadow: paragraphText.trim() === '' ? 'none' : '0 4px 10px rgba(255, 122, 0, 0.2)'
                             }}
                             type="button"
                           >
@@ -5326,6 +5833,7 @@ export default function LessonPlayer() {
           onClose={() => setShowNotes(false)}
         />
       )}
+      {renderWizardModal()}
     </div>
   );
 }

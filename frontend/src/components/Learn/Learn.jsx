@@ -126,11 +126,50 @@ export default function Learn() {
 
   if (!learner) {
     return (
-      <div className={styles.centerPage}>
-        <p>Please log in first.</p>
-        <button className={styles.primaryButton} onClick={() => navigate('/login')}>
-          Go to Login
-        </button>
+      <div style={{
+        background: '#FAF9F6',
+        minHeight: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        textAlign: 'center',
+        fontFamily: 'system-ui, sans-serif'
+      }}>
+        <div style={{
+          background: '#FFFFFF',
+          border: '3px solid #FFE0B2',
+          borderRadius: '24px',
+          padding: '40px 32px',
+          maxWidth: '450px',
+          width: '100%',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.04)'
+        }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#FF7A00', margin: '0 0 12px 0' }}>
+            Ready to learn?
+          </h2>
+          <p style={{ fontSize: '15px', color: '#4A4A4A', fontWeight: 700, margin: '0 0 24px 0', lineHeight: 1.5 }}>
+            Please select a learner profile or register a new one to access the study area!
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              padding: '12px 32px',
+              background: 'linear-gradient(135deg, #FF7A00, #E06B00)',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '16px',
+              fontWeight: 900,
+              fontSize: '15px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(255, 122, 0, 0.2)'
+            }}
+          >
+            Go to Welcome
+          </button>
+        </div>
       </div>
     );
   }
