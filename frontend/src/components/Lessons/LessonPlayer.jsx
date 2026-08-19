@@ -892,6 +892,17 @@ export default function LessonPlayer() {
   const [jumbledPoolIndices, setJumbledPoolIndices] = useState([]);
   const [jumbledInitialPool, setJumbledInitialPool] = useState([]);
 
+  // Guided Writing System missing state variables
+  const [activeBlankIdx, setActiveBlankIdx] = useState(null);
+  const [activeLetterBlankIdx, setActiveLetterBlankIdx] = useState(null);
+  const [filledBlanks, setFilledBlanks] = useState({});
+  const [customBlankInput, setCustomBlankInput] = useState('');
+  const [letterBlanks, setLetterBlanks] = useState({});
+  const [showWizardModal, setShowWizardModal] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState('');
+  const [wizardAnswers, setWizardAnswers] = useState([]);
+  const [wizardStep, setWizardStep] = useState(0);
+
   const exploreData = (lesson.activities && lesson.activities.length > 0) ? lesson.activities[0] : (lesson.activities_data?.[0] || {});
   const practiceData = (lesson.activities && lesson.activities.length > 1) ? lesson.activities[1] : (lesson.activities_data?.[1] || {});
   const gameData = (lesson.mini_game && Object.keys(lesson.mini_game).length > 0) ? lesson.mini_game : (lesson.activities_data?.[2] || {});
@@ -1112,7 +1123,7 @@ export default function LessonPlayer() {
       }).join('');
       setLetterBody(initialText);
       setLetterSubmitted(false);
-      setActiveWritingStep(1);
+      setWritingStep(1);
     }
   }, [slideIndex, lesson]);
 

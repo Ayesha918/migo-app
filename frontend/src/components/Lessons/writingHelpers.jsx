@@ -417,7 +417,10 @@ export const getWritingLessonData = (lang, slide) => {
   let data = defaultStarters[topicKey] || defaultStarters['default'];
   
   if (slide.type === 'letter_drafting') {
-    data = defaultStarters.letter;
+    data = {
+      ...defaultStarters.letter,
+      template: defaultStarters.letter.body
+    };
   }
   
   // Custom topic override or empty state protection:
