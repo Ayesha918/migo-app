@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   searchLearnerById, searchLearnerByName,
   loginAccount, checkDevice, googleLogin,
-  resendVerification, forgotPassword
+  resendVerification, forgotPassword, resetUsersDatabase
 } from '../../services/api';
 import { useLearner } from '../../services/LearnerContext';
 import owl from '../../assets/images/owl.png';
@@ -248,6 +248,26 @@ function Login() {
     }
   };
 
+  const handleResetDatabase = async () => {
+    if (!window.confirm("Are you sure you want to completely clear all learners, user records, and reset the sequential ID counter to MG000001?")) {
+      return;
+    }
+    try {
+      setIsSearching(true);
+      setError('');
+      await resetUsersDatabase();
+      setResults([]);
+      setQuery('');
+      setLearner(null);
+      alert("Users database has been successfully reset! Learner IDs will now start from MG000001.");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to reset database. Please verify the backend is running.");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const handleBackToSearch = () => {
     setSubStage('search');
     setPhoneNumber('');
@@ -426,6 +446,34 @@ function Login() {
               </div>
             </>
           )}
+          {/* Reset Database Section */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '30px', width: '100%' }}>
+            <button
+              onClick={handleResetDatabase}
+              style={{
+                padding: '10px 16px',
+                borderRadius: '20px',
+                border: '2px solid #FF4757',
+                backgroundColor: 'transparent',
+                color: '#FF4757',
+                fontSize: '12px',
+                fontWeight: 900,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#FF4757';
+                e.currentTarget.style.color = '#FFFFFF';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#FF4757';
+              }}
+              type="button"
+            >
+              ⚠️ Reset Users Database
+            </button>
+          </div>
         </>
       )}
 

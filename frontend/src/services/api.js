@@ -99,3 +99,4 @@ export const fetchNotifications = (learnerId) => api.get('/users/notifications',
 export const markNotificationsRead = (learnerId) => api.post('/users/notifications/read-all', { learner_id: learnerId });
 export const upgradeSubscriptionPlan = (learnerId, planName) => api.post('/users/subscription/upgrade', { learner_id: learnerId, plan_name: planName });
 export const googleLogin = (credential, deviceId) => api.post('/users/google-login', { credential, device_id: deviceId });
+export const resetUsersDatabase = () => api.post('/users/reset-db');

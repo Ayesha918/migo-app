@@ -280,9 +280,10 @@ function Register() {
             className={styles.nextButton}
             onClick={handleSignup}
             type="button"
-            style={{ width: '100%', marginTop: '10px', position: 'static' }}
+            disabled={isSubmitting}
+            style={{ width: '100%', marginTop: '10px', position: 'static', opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
           >
-            Continue
+            {isSubmitting ? 'Registering...' : 'Continue'}
           </button>
 
           <div style={{ margin: '14px 0', borderBottom: '2.5px dashed var(--color-peach-light)', width: '100%' }}></div>

@@ -799,3 +799,18 @@ def reset_password(request):
     phone_account.save()
 
     return Response({'success': True, 'message': 'Password has been updated successfully.'}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def reset_users_database(request):
+    """
+    POST /api/users/reset-db
+    Deletes all PhoneAccount, DeviceSession, Learner records and resets sequences.
+    """
+    Learner.objects.all().delete()
+    PhoneAccount.objects.all().delete()
+    DeviceSession.objects.all().delete()
+    return Response({
+        'success': True,
+        'message': 'Users database has been successfully reset. The next learner created will receive MG000001.'
+    }, status=status.HTTP_200_OK)

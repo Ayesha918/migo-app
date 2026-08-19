@@ -35,90 +35,93 @@ export default function Sidebar({ onLogout }) {
   const { learner, hasFeatureAccess } = useLearner();
 
   return (
-    <aside className={styles.sidebar}>
-      {/* Logo Group */}
-      <div className={styles.logoBox} onClick={() => navigate('/home')}>
-        <img src={owl} alt="MiGo Owl" className={styles.logoImg} />
-        <div>
-          <h2 className={styles.logoTitle}>MiGo</h2>
-          <span className={styles.logoSub}>{t('adventureMap')}</span>
-        </div>
-      </div>
-
-      {/* Nav Menu */}
-      <nav className={styles.navMenu}>
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.route;
-
-          let isLocked = false;
-          if (learner) {
-            if (item.key === 'aiScorePrediction') {
-              isLocked = !hasFeatureAccess('Pro');
-            } else if (item.key === 'certifications') {
-              isLocked = !hasFeatureAccess('Premium');
-            }
-          }
-
-          return (
-            <button
-              key={item.title}
-              className={`${styles.navItem} ${isActive ? styles.activeNavItem : ''}`}
-              onClick={() => navigate(item.route)}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Icon size={22} />
-                <span>{t(item.key)}</span>
-              </div>
-              {isLocked && <Lock size={14} style={{ color: 'var(--text-light)', opacity: 0.7 }} />}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Keep it up widget card */}
-      <div className={styles.sidebarCard}>
-        <div className={styles.sidebarCardHeader}>
-          <ShieldCheck size={18} color="#FF7A00" />
-          <span>Keep it up!</span>
-        </div>
-        <p className={styles.sidebarCardSub}>You are doing better than yesterday.</p>
-        <svg width="100%" height="40" viewBox="0 0 120 40" style={{ marginTop: '8px' }}>
-          <path
-            d="M5,35 Q20,15 40,25 T80,10 T115,5"
-            fill="none"
-            stroke="#FF7A00"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
-          <circle cx="115" cy="5" r="4.5" fill="#FF7A00" />
-        </svg>
-      </div>
-
-      {/* Profile Progress Card */}
-      {learner && (
-        <div className={styles.profileCard}>
-          <span className={styles.profileEmoji}>
-            {AVATAR_EMOJI[learner.avatar] || '🦊'}
-          </span>
-          <div className={styles.profileInfo}>
-            <span className={styles.profileName}>{learner.name}</span>
-            <span className={styles.profileLevel}>
-              {learner.level || 'beginner'} Level
-            </span>
-            <span className={styles.profileTier}>
-              Tier: {learner.subscription_tier || 'Free'}
-            </span>
+    <>
+      <div className={styles.sidebarSpacer} />
+      <aside className={styles.sidebar}>
+        {/* Logo Group */}
+        <div className={styles.logoBox} onClick={() => navigate('/home')}>
+          <img src={owl} alt="MiGo Owl" className={styles.logoImg} />
+          <div>
+            <h2 className={styles.logoTitle}>MiGo</h2>
+            <span className={styles.logoSub}>{t('adventureMap')}</span>
           </div>
         </div>
-      )}
 
-      {/* Logout */}
-      <button className={styles.logoutBtn} onClick={onLogout}>
-        <LogOut size={20} />
-        <span>{t('exitGame')}</span>
-      </button>
-    </aside>
+        {/* Nav Menu */}
+        <nav className={styles.navMenu}>
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.route;
+
+            let isLocked = false;
+            if (learner) {
+              if (item.key === 'aiScorePrediction') {
+                isLocked = !hasFeatureAccess('Pro');
+              } else if (item.key === 'certifications') {
+                isLocked = !hasFeatureAccess('Premium');
+              }
+            }
+
+            return (
+              <button
+                key={item.title}
+                className={`${styles.navItem} ${isActive ? styles.activeNavItem : ''}`}
+                onClick={() => navigate(item.route)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Icon size={22} />
+                  <span>{t(item.key)}</span>
+                </div>
+                {isLocked && <Lock size={14} style={{ color: 'var(--text-light)', opacity: 0.7 }} />}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Keep it up widget card */}
+        <div className={styles.sidebarCard}>
+          <div className={styles.sidebarCardHeader}>
+            <ShieldCheck size={18} color="#FF7A00" />
+            <span>Keep it up!</span>
+          </div>
+          <p className={styles.sidebarCardSub}>You are doing better than yesterday.</p>
+          <svg width="100%" height="40" viewBox="0 0 120 40" style={{ marginTop: '8px' }}>
+            <path
+              d="M5,35 Q20,15 40,25 T80,10 T115,5"
+              fill="none"
+              stroke="#FF7A00"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+            />
+            <circle cx="115" cy="5" r="4.5" fill="#FF7A00" />
+          </svg>
+        </div>
+
+        {/* Profile Progress Card */}
+        {learner && (
+          <div className={styles.profileCard}>
+            <span className={styles.profileEmoji}>
+              {AVATAR_EMOJI[learner.avatar] || '🦊'}
+            </span>
+            <div className={styles.profileInfo}>
+              <span className={styles.profileName}>{learner.name}</span>
+              <span className={styles.profileLevel}>
+                {learner.level || 'beginner'} Level
+              </span>
+              <span className={styles.profileTier}>
+                Tier: {learner.subscription_tier || 'Free'}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Logout */}
+        <button className={styles.logoutBtn} onClick={onLogout}>
+          <LogOut size={20} />
+          <span>{t('exitGame')}</span>
+        </button>
+      </aside>
+    </>
   );
 }

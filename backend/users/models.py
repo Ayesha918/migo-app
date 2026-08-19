@@ -62,8 +62,18 @@ class Learner(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.learner_id:
-            self.learner_id = self._generate_learner_id()
-        super().save(*args, **kwargs)
+            from django.db import IntegrityError, transaction
+            for attempt in range(10):
+                try:
+                    with transaction.atomic():
+                        self.learner_id = self._generate_learner_id()
+                        super().save(*args, **kwargs)
+                        break
+                except IntegrityError:
+                    if attempt == 9:
+                        raise
+        else:
+            super().save(*args, **kwargs)
 
     def _generate_learner_id(self):
         """
@@ -73,7 +83,10 @@ class Learner(models.Model):
         """
         last_learner = Learner.objects.order_by('-id').first()
         if last_learner and last_learner.learner_id:
-            last_number = int(last_learner.learner_id.replace('MG', ''))
+            try:
+                last_number = int(last_learner.learner_id.replace('MG', ''))
+            except ValueError:
+                last_number = 0
         else:
             last_number = 0
         new_number = last_number + 1

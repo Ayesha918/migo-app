@@ -22,4 +22,5 @@ urlpatterns = [
     path('resend-verification', views.resend_verification, name='resend_verification'),
     path('forgot-password', views.forgot_password, name='forgot_password'),
     path('reset-password', views.reset_password, name='reset_password'),
+    path('reset-db', views.reset_users_database, name='reset_users_database'),
 ]
