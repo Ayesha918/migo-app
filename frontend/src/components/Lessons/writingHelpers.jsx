@@ -334,8 +334,8 @@ export const MIGO_WRITING_STARTERS = {
         steps: [
           { question: "தொடக்க வாக்கியத்தைத் தேர்ந்தெடுக்கவும்:", options: ["இன்று நான் இந்த தலைப்பைப் பற்றி எழுத விரும்புகிறேன்.", "இது சமுதாய வளர்ச்சிக்கு மிகவும் முக்கியமான ஒரு தலைப்பாகும்.", "இந்த தலைப்பைப் பற்றி நாம் அனைவரும் அறிவது அவசியம்."] },
           { question: "முக்கிய காரணம் அல்லது நன்மை என்ன?", options: ["இது நமக்கு புதிய அறிவைப் பெற உதவுகிறது.", "இதனால் நமது வாழ்க்கை தரம் பெரிதும் உயரும்.", "இது சமுதாயத்தில் விழிப்புணர்வை ஏற்படுத்த உதவுகிறது."] },
-          { question: "ஒரு உதாரணம் தருக:", options: ["உதாரணமாக, நாம் ಇದನ್ನು ಪ್ರತಿದಿನ ಅಭ್ಯಾಸ ಮಾಡಬಹುದು.", "ಇದು ಮಕ್ಕಳ ಉತ್ತಮ ಭವಿಷ್ಯಕ್ಕಾಗಿ ಸಹಕಾರಿಯಾಗಿದೆ.", "ನಮ್ಮ ಸುತ್ತಮುತ್ತ ಇದರ ಪ್ರಭಾವವನ್ನು ಕಾಣಬಹುದು."] },
-          { question: "ಮುಕ್ತಾಯದ ವಾಕ್ಯವನ್ನು ಆರಿಸಿ:", options: ["ಆದ್ದರಿಂದ, ನಾವು ಇದನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ಬೆಂಬಲಿಸಬೇಕು.", "ನಾವು ಒಟ್ಟಾಗಿ ಕೆಲಸ ಮಾಡುವುದು ಉತ್ತಮ ಮಾರ್ಗವಾಗಿದೆ.", "ಇದಕ್ಕಾಗಿಯೇ ಈ ವಿಷಯವು ಇಷ್ಟು ಪ್ರಾಮುಖ್ಯತೆ ಪಡೆದಿದೆ."] }
+          { question: "ஒரு உதாரணம் தருக:", options: ["உதாரணமாக, நாம் இதை தினமும் பயிற்சி செய்யலாம்.", "இது குழந்தைகளின் சிறந்த எதிர்காலத்திற்கு உதவும்.", "நம்மைச் சுற்றிலும் இதன் தாக்கத்தைக் காணலாம்."] },
+          { question: "முடிவுரை வாக்கியத்தைத் தேர்ந்தெடுக்கவும்:", options: ["எனவே, நாம் இதை முழுமையாக ஆதரிக்க வேண்டும்.", "நாம் இணைந்து செயல்படுவதே சிறந்த வழி.", "இதனால்தான் இந்த விஷயம் மிகவும் முக்கியமானது."] }
         ]
       }
     },
@@ -408,3 +408,106 @@ export const parseTemplateToReact = (template, blanks, filledBlanks, activeBlank
     return <span key={index} style={{ whiteSpace: 'pre-wrap' }}>{part}</span>;
   });
 };
+
+export const getWritingLessonData = (lang, slide) => {
+  const defaultStarters = MIGO_WRITING_STARTERS[lang] || MIGO_WRITING_STARTERS['en'];
+  
+  // Detect slide topic key
+  const topicKey = getWritingStarterKey(slide.topic || slide.title || '');
+  let data = defaultStarters[topicKey] || defaultStarters['default'];
+  
+  if (slide.type === 'letter_drafting') {
+    data = defaultStarters.letter;
+  }
+  
+  // Custom topic override or empty state protection:
+  // If the slide is paragraph_writing and topic doesn't match any pre-filled keys,
+  // we customize the default starter for this specific topic!
+  if (slide.type === 'paragraph_writing' && topicKey === 'default' && slide.topic) {
+    const tName = slide.topic;
+    data = {
+      ...data,
+      template: `मैं [विषय] के बारे में विचार व्यक्त कर रहा हूँ। [विषय] हमारे लिए [महत्वपूर्ण] है। इसका एक प्रमुख उदाहरण [उदाहरण] है। इसलिए हमें इसकी [रक्षा] करनी चाहिए।`,
+      blanks: [
+        { placeholder: "विषय", suggestions: [tName, "स्वास्थ्य", "स्वच्छता"], hint: "मुख्य विषय" },
+        { placeholder: "महत्वपूर्ण", suggestions: ["महत्वपूर्ण", "अच्छा", "कठिन"], hint: "यह क्यों ज़रूरी है?" },
+        { placeholder: "उदाहरण", suggestions: ["नियमित अभ्यास", "घर की सफाई", "प्रतिदिन पठन"], hint: "एक उदाहरण दें" },
+        { placeholder: "रक्षा", suggestions: ["रक्षा", "पालन", "मदद"], hint: "हमें क्या करना चाहिए?" }
+      ]
+    };
+    
+    // Adapt to language
+    if (lang === 'kn') {
+      data.template = `ನಾನು [ವಿಷಯ] ಬಗ್ಗೆ ಬರೆಯುತ್ತಿದ್ದೇನೆ. ಇದು ನಮ್ಮ ಜೀವನದಲ್ಲಿ ತುಂಬಾ [ಮುಖ್ಯ]. ಇದಕ್ಕೆ ಉತ್ತಮ ಉದಾಹರಣೆ [ಉದಾಹರಣೆ]. ಆದ್ದರಿಂದ ನಾವು ಇದನ್ನು [ಪಾಲಿಸಬೇಕು].`;
+      data.blanks = [
+        { placeholder: "ವಿಷಯ", suggestions: [tName, "ಆರೋಗ್ಯ", "ಶುಚಿತ್ವ"], hint: "ಮುಖ್ಯ ವಿಷಯ" },
+        { placeholder: "ಮುಖ್ಯ", suggestions: ["ಮುಖ್ಯ", "ಅಗತ್ಯ", "ಉತ್ತಮ"], hint: "ಇದು ಏಕೆ ಮುಖ್ಯ?" },
+        { placeholder: "ಉದಾಹರಣೆ", suggestions: ["ದಿನನಿತ್ಯದ ಅಭ್ಯಾಸ", "ಮನೆಯ ಸ್ವಚ್ಛತೆ", "ಓದುವಿಕೆ"], hint: "ಒಂದು ಉದಾಹರಣೆ ನೀಡಿ" },
+        { placeholder: "ಪಾಲಿಸಬೇಕು", suggestions: ["ಪಾಲಿಸಬೇಕು", "ರಕ್ಷಿಸಬೇಕು", "ಗೌರವಿಸಬೇಕು"], hint: "ನಾವು ಏನು ಮಾಡಬೇಕು?" }
+      ];
+    } else if (lang === 'ta') {
+      data.template = `நான் [தலைப்பு] பற்றி எழுதுகிறேன். இது நம் வாழ்வில் மிகவும் [முக்கியம்]. இதற்கு சிறந்த உதாரணம் [உதாரணம்] ஆகும். எனவே நாம் இதை [பின்பற்ற] வேண்டும்.`;
+      data.blanks = [
+        { placeholder: "தலைப்பு", suggestions: [tName, "சுகாதாரம்", "சுத்தம்"], hint: "முக்கிய தலைப்பு" },
+        { placeholder: "முக்கியம்", suggestions: ["முக்கியம்", "அவசியம்", "நல்லது"], hint: "ஏன் முக்கியம்?" },
+        { placeholder: "உதாரணம்", suggestions: ["தினசரி பயிற்சி", "வீட்டு சுத்தம்", "வாசிப்பு"], hint: "ஒரு உதாரணம் தருக" },
+        { placeholder: "பின்பற்ற", suggestions: ["பின்பற்ற", "பாதுகாக்க", "மதிக்க"], hint: "நாம் என்ன செய்ய வேண்டும்?" }
+      ];
+    } else if (lang === 'en') {
+      data.template = `I am writing about [topic]. It is very [important] in our lives. A key example is [example]. Therefore, we must [support] it.`;
+      data.blanks = [
+        { placeholder: "topic", suggestions: [tName, "health", "learning"], hint: "Main topic" },
+        { placeholder: "important", suggestions: ["important", "good", "useful"], hint: "Why is it valuable?" },
+        { placeholder: "example", suggestions: ["daily practice", "cleaning rooms", "reading daily"], hint: "Provide an example" },
+        { placeholder: "support", suggestions: ["support", "protect", "respect"], hint: "What should we do?" }
+      ];
+    }
+  }
+
+  // Pre-generate helpful words & helpers based on topic/lesson type if missing
+  const vocabulary = data.vocabulary || [
+    { word: lang === 'hi' ? 'ज्ञान' : lang === 'kn' ? 'ಜ್ಞಾನ' : lang === 'ta' ? 'அறிவு' : 'Knowledge', meaning: 'Understanding/Learning' },
+    { word: lang === 'hi' ? 'अभ्यास' : lang === 'kn' ? 'ಅಭ್ಯಾಸ' : lang === 'ta' ? 'பயிற்சி' : 'Practice', meaning: 'Doing repeatedly' },
+    { word: lang === 'hi' ? 'प्रयास' : lang === 'kn' ? 'ಪ್ರಯತ್ನ' : lang === 'ta' ? 'முயற்சி' : 'Attempt', meaning: 'Trying hard' },
+    { word: lang === 'hi' ? 'सफलता' : lang === 'kn' ? 'ಯಶಸ್ಸು' : lang === 'ta' ? 'வெற்றி' : 'Success', meaning: 'Achievement' }
+  ];
+
+  const sentenceHelpers = data.sentenceHelpers || (
+    lang === 'hi' ? [
+      "मेरे विचार में...",
+      "इसका मुख्य कारण यह है कि...",
+      "उदाहरण के लिए...",
+      "इसलिए हमें..."
+    ] : lang === 'kn' ? [
+      "ನನ್ನ ಅಭಿಪ್ರಾಯದಲ್ಲಿ...",
+      "ಇದಕ್ಕೆ ಮುಖ್ಯ ಕಾರಣ...",
+      "ಉದಾಹರಣೆಗೆ...",
+      "ಆದ್ದರಿಂದ ನಾವು..."
+    ] : lang === 'ta' ? [
+      "என் கருத்துப்படி...",
+      "இதற்கு முக்கிய காரணம்...",
+      "உதாரணமாக...",
+      "எனவே நாம்..."
+    ] : [
+      "In my opinion...",
+      "The main reason is...",
+      "For example...",
+      "Therefore we should..."
+    ]
+  );
+
+  const review = data.review || {
+    question: lang === 'hi' ? "इस पाठ का मुख्य उद्देश्य क्या था?" : lang === 'kn' ? "ಈ ಪಾಠದ ಮುಖ್ಯ ಉದ್ದೇಶವೇನಾಗಿತ್ತು?" : lang === 'ta' ? "இந்த பாடத்தின் முக்கிய நோக்கம் என்ன?" : "What was the main purpose of this lesson?",
+    options: lang === 'hi' ? ["रचनात्मक लेखन सीखना", "सिर्फ समय बिताना", "शब्दों को भूल जाना"] : lang === 'kn' ? ["ರಚನಾತ್ಮಕ ಬರವಣಿಗೆ ಕಲಿಯುವುದು", "ಕೇವಲ ಸಮಯ ಕಳೆಯುವುದು", "ಪದಗಳನ್ನು ಮರೆಯುವುದು"] : lang === 'ta' ? ["முறையான எழுத்து பயிற்சி", "வெறும் நேரம் போக்குவது", "வார்த்தைகளை மறப்பது"] : ["To learn structured writing", "Just passing time", "Forgetting words"],
+    correct: lang === 'hi' ? "रचनात्मक लेखन सीखना" : lang === 'kn' ? "ರಚನಾತ್ಮಕ ಬರವಣಿಗೆ ಕಲಿಯುವುದು" : lang === 'ta' ? "முறையான எழுத்து பயிற்சி" : "To learn structured writing",
+    explanation: lang === 'hi' ? "यह पाठ हमें वाक्यों और विचारों को व्यवस्थित रूप से लिखना सिखाता है।" : lang === 'kn' ? "ಈ ಪಾಠವು ನಮಗೆ ವಾಕ್ಯಗಳನ್ನು ಮತ್ತು ಆಲೋಚನೆಗಳನ್ನು ಕ್ರಮವಾಗಿ ಬರೆಯಲು ಕಲಿಸುತ್ತದೆ." : lang === 'ta' ? "இந்த பாடம் வாக்கியங்களை ஒழுங்கமைக்க நமக்கு கற்பிக்கிறது." : "This lesson teaches us to write sentences and thoughts in an organized manner."
+  };
+
+  return {
+    ...data,
+    vocabulary,
+    sentenceHelpers,
+    review
+  };
+};
+

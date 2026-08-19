@@ -1221,6 +1221,10 @@
   border: 2px solid var(--color-peach-light);
   text-align: left;
   flex-shrink: 0;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  position: sticky;
+  top: 20px;
 }
 
 /* Mobile responsive styles for LessonPlayer */
@@ -1237,6 +1241,9 @@
   .writingSidebar {
     width: 100%;
     max-width: 100%;
+    max-height: none;
+    overflow-y: visible;
+    position: static;
   }
   .card {
     padding: 20px 16px;
