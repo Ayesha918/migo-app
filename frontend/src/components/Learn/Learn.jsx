@@ -92,13 +92,14 @@ export default function Learn() {
   const handlePlayLesson = (lessonEntry, lessonPath) => {
     if (!lessonEntry) return;
     const dayNum = lessonEntry.day_number || 1;
+    const lessonId = lessonEntry.lesson_detail?.lesson_id || lessonEntry.lesson_id || lessonEntry.id;
     if (!hasFeatureAccess('Pro') && dayNum > 3) {
       triggerUpgradeModal('Pro', `Lessons Day ${dayNum} and beyond`, () => {
-        navigate('/lesson-player', { state: { entry: lessonEntry, path: lessonPath } });
+        navigate(`/lesson-player?id=${lessonId}`, { state: { entry: lessonEntry, path: lessonPath } });
       });
       return;
     }
-    navigate('/lesson-player', { state: { entry: lessonEntry, path: lessonPath } });
+    navigate(`/lesson-player?id=${lessonId}`, { state: { entry: lessonEntry, path: lessonPath } });
   };
 
   const playLesson = (lesson) => {
@@ -114,7 +115,7 @@ export default function Learn() {
       const activeOrCompleted = learningPath.find(l => l.status !== 'locked') || learningPath[0];
       handlePlayLesson(activeOrCompleted, learningPath);
     } else {
-      navigate('/lesson-player', { state: { dayNumber: 1 } });
+      navigate('/lesson-player?id=BEG-EN-001');
     }
   };
 

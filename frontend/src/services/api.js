@@ -100,3 +100,4 @@ export const markNotificationsRead = (learnerId) => api.post('/users/notificatio
 export const upgradeSubscriptionPlan = (learnerId, planName) => api.post('/users/subscription/upgrade', { learner_id: learnerId, plan_name: planName });
 export const googleLogin = (credential, deviceId) => api.post('/users/google-login', { credential, device_id: deviceId });
 export const resetUsersDatabase = () => api.post('/users/reset-db');
+export const fetchLessonDetail = (lessonId) => api.get(`/lessons/${lessonId}`);

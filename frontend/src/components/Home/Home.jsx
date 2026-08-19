@@ -103,15 +103,16 @@ function Home() {
   const handlePlayLesson = (entry) => {
     if (!entry) return;
     const dayNum = entry.day_number || 1;
+    const lessonId = entry.lesson_detail?.lesson_id || entry.lesson_id || entry.id;
     if (!hasFeatureAccess('Pro') && dayNum > 3) {
       triggerUpgradeModal('Pro', `Lessons Day ${dayNum} and beyond`, () => {
-        navigate('/lesson-player', {
+        navigate(`/lesson-player?id=${lessonId}`, {
           state: { entry, path },
         });
       });
       return;
     }
-    navigate('/lesson-player', {
+    navigate(`/lesson-player?id=${lessonId}`, {
       state: { entry, path },
     });
   };

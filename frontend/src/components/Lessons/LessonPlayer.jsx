@@ -11,7 +11,7 @@ import { useLearner } from '../../services/LearnerContext';
 import useTranslate from '../../services/useTranslate';
 import speak from '../../services/speak';
 import useVoiceInput from '../../services/useVoiceInput';
-import { completeLessonDay, fetchLearningPath, generateLearningPath, startSession, endSession } from '../../services/api';
+import { completeLessonDay, fetchLearningPath, generateLearningPath, startSession, endSession, fetchLessonDetail } from '../../services/api';
 import owl from '../../assets/images/owl.png';
 import treasure from '../../assets/images/treasure.png';
 import LessonDocument from './LessonDocument';
@@ -681,6 +681,99 @@ export default function LessonPlayer() {
 
   const [currentEntry, setCurrentEntry] = useState(location.state?.entry);
   const [learningPath, setLearningPath] = useState(location.state?.path || []);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    const loadLesson = async () => {
+      if (!learner) return;
+      setLoading(true);
+      setErrorMsg('');
+
+      try {
+        const queryParams = new URLSearchParams(location.search);
+        const lessonId = queryParams.get('id') || queryParams.get('lessonId');
+
+        if (!lessonId) {
+          // Fallback: load learning path to match the available day
+          const pathRes = await fetchLearningPath(learner.learner_id);
+          const freshPath = pathRes.data || [];
+          const nextAvailable = freshPath.find(node => node.status === 'available') || freshPath[0];
+          
+          if (nextAvailable) {
+            const nextId = nextAvailable.lesson_detail?.lesson_id || nextAvailable.lesson_id;
+            if (active) {
+              navigate(`/lesson-player?id=${nextId}`, { replace: true, state: { entry: nextAvailable, path: freshPath } });
+            }
+          } else {
+            if (active) {
+              navigate(`/lesson-player?id=BEG-EN-001`, { replace: true });
+            }
+          }
+          return;
+        }
+
+        // Check if current entry matches lessonId
+        const stateLessonId = currentEntry?.lesson_detail?.lesson_id || currentEntry?.lesson_id;
+        if (currentEntry && stateLessonId === lessonId && learningPath && learningPath.length > 0) {
+          if (active) {
+            setLoading(false);
+          }
+          return;
+        }
+
+        // Fetch learning path
+        const pathRes = await fetchLearningPath(learner.learner_id);
+        const freshPath = pathRes.data || [];
+
+        let matchingEntry = freshPath.find(node => 
+          (node.lesson_detail?.lesson_id === lessonId) || 
+          (node.lesson_id === lessonId)
+        );
+
+        if (matchingEntry) {
+          if (active) {
+            setCurrentEntry(matchingEntry);
+            setLearningPath(freshPath);
+            setLoading(false);
+          }
+        } else {
+          // Fetch direct lesson detail from backend
+          const lessonRes = await fetchLessonDetail(lessonId);
+          const lessonObj = lessonRes.data;
+          if (lessonObj) {
+            if (active) {
+              const mockEntry = {
+                id: -1,
+                day_number: 1,
+                status: 'available',
+                lesson_detail: lessonObj
+              };
+              setCurrentEntry(mockEntry);
+              setLearningPath(freshPath);
+              setLoading(false);
+            }
+          } else {
+            throw new Error("Lesson not found");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load lesson:", err);
+        if (active) {
+          setErrorMsg(err.response?.data?.error || "We encountered an issue loading this lesson. Please check your network connection.");
+          setLoading(false);
+        }
+      }
+    };
+
+    loadLesson();
+
+    return () => {
+      active = false;
+    };
+  }, [location.search, learner]);
 
   const lesson = currentEntry?.lesson_detail || (currentEntry?.lesson_id ? currentEntry : null) || {
     lesson_id: 'BEG-EN-001',
@@ -1418,8 +1511,10 @@ export default function LessonPlayer() {
 
       if (nextEntryNode) {
         resetPlayerStates();
-        setCurrentEntry(nextEntryNode);
-        setLearningPath(freshPath);
+        const nextId = nextEntryNode.lesson_detail?.lesson_id || nextEntryNode.lesson_id;
+        navigate(`/lesson-player?id=${nextId}`, {
+          state: { entry: nextEntryNode, path: freshPath }
+        });
       } else {
         navigate('/home');
       }
@@ -1453,8 +1548,10 @@ export default function LessonPlayer() {
 
       if (nextEntryNode) {
         resetPlayerStates();
-        setCurrentEntry(nextEntryNode);
-        setLearningPath(freshPath);
+        const nextId = nextEntryNode.lesson_detail?.lesson_id || nextEntryNode.lesson_id;
+        navigate(`/lesson-player?id=${nextId}`, {
+          state: { entry: nextEntryNode, path: freshPath }
+        });
       } else {
         navigate('/home');
       }
@@ -2930,6 +3027,118 @@ export default function LessonPlayer() {
     );
   };
 
+  if (loading) {
+    return (
+      <div style={{
+        background: '#FAF9F6',
+        minHeight: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        textAlign: 'center',
+        fontFamily: 'system-ui, sans-serif'
+      }}>
+        <div style={{
+          background: '#FFFFFF',
+          border: '3px solid #FFE0B2',
+          borderRadius: '24px',
+          padding: '40px 32px',
+          maxWidth: '450px',
+          width: '100%',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '16px'
+        }}>
+          <RefreshCw className={styles.pulse} size={48} color="#FF7A00" style={{ animation: 'spin 2s linear infinite' }} />
+          <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#FF7A00', margin: 0 }}>
+            Loading Your Lesson...
+          </h2>
+          <p style={{ fontSize: '14px', color: '#666666', fontWeight: 700, margin: 0 }}>
+            Please wait while we retrieve your personalized literacy content.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div style={{
+        background: '#FAF9F6',
+        minHeight: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        textAlign: 'center',
+        fontFamily: 'system-ui, sans-serif'
+      }}>
+        <div style={{
+          background: '#FFFFFF',
+          border: '3px solid #FFE0B2',
+          borderRadius: '24px',
+          padding: '40px 32px',
+          maxWidth: '450px',
+          width: '100%',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '16px'
+        }}>
+          <AlertCircle size={48} color="#FF4757" />
+          <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#FF4757', margin: 0 }}>
+            Lesson Not Found
+          </h2>
+          <p style={{ fontSize: '14px', color: '#666666', fontWeight: 700, margin: 0, lineHeight: 1.5 }}>
+            {errorMsg}
+          </p>
+          <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '12px' }}>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                flex: 1,
+                padding: '12px',
+                background: '#FF7A00',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '14px',
+                fontWeight: 900,
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              Retry
+            </button>
+            <button
+              onClick={() => navigate('/home')}
+              style={{
+                flex: 1,
+                padding: '12px',
+                background: '#F1F5F9',
+                color: '#475569',
+                border: 'none',
+                borderRadius: '14px',
+                fontWeight: 900,
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              Adventure Map
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -3070,9 +3279,12 @@ export default function LessonPlayer() {
                         entry.lesson_detail?.order_in_level === (tIdx + 1)
                       );
                       if (targetEntry) {
-                        setCurrentEntry(targetEntry);
+                        const targetId = targetEntry.lesson_detail?.lesson_id || targetEntry.lesson_id;
                         setSlideIndex(0);
                         setStage(0);
+                        navigate(`/lesson-player?id=${targetId}`, {
+                          state: { entry: targetEntry, path: learningPath }
+                        });
                       } else {
                         speak(t('completeCurrentLessons'), knownSpeechLang, audioSpeed);
                       }
