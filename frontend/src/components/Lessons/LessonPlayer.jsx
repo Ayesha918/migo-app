@@ -566,8 +566,27 @@ const INTERMEDIATE_WRITING_TOPICS = [
   { title: 'Practice Test', desc: 'Test your writing skills' }
 ];
 
+const ADVANCED_WRITING_TOPICS = [
+  { title: 'Formal Correspondence', desc: 'Draft letters and emails' },
+  { title: 'Creative Narratives', desc: 'Compose short stories with moral' },
+  { title: 'Descriptive Essays', desc: 'Describe scenery or experiences' },
+  { title: 'Opinion & Arguments', desc: 'Express viewpoints on social themes' },
+  { title: 'Text Summarization', desc: 'Summarize a given reading passage' },
+  { title: 'Business Letters', desc: 'Write applications or invites' },
+  { title: 'Report Writing', desc: 'Document incidents or observations' },
+  { title: 'Independent Project', desc: 'Comprehensive independent essay' }
+];
+
 const WRITING_TRANSLATIONS = {
   hi: {
+    'Formal Correspondence': 'औपचारिक पत्रचार',
+    'Creative Narratives': 'सृजनात्मक कहानियाँ',
+    'Descriptive Essays': 'वर्णनात्मक निबंध',
+    'Opinion & Arguments': 'विचार और तर्क',
+    'Text Summarization': 'पाठ सारांश',
+    'Business Letters': 'व्यावसायिक पत्र',
+    'Report Writing': 'विवरण लेखन',
+    'Independent Project': 'स्वतंत्र परियोजना',
     'Writing the Alphabet': 'वर्णमाला लिखना',
     'Writing Small Letters': 'छोटे अक्षर लिखना',
     'Writing Numbers': 'संख्याएँ लिखना',
@@ -580,12 +599,20 @@ const WRITING_TRANSLATIONS = {
     'Sentence Building': 'वाक्य निर्माण',
     'Paragraph Writing': 'अनुच्छेद लेखन',
     'Punctuation': 'विराम चिन्ह',
-    'Capitalization': 'बड़े अक्षर',
+    'Capitalization': 'वर्तनी और शुद्धता',
     'Creative Writing': 'रचनात्मक लेखन',
     'Letter Writing': 'पत्र लेखन',
     'Practice Test': 'अभ्यास परीक्षा',
   },
   kn: {
+    'Formal Correspondence': 'ಔಪಚಾರಿಕ ಪತ್ರವ್ಯವಹಾರ',
+    'Creative Narratives': 'ಸೃಜನಶೀಲ ಕಥೆಗಳು',
+    'Descriptive Essays': 'ವಿವರಣಾತ್ಮಕ ಪ್ರಬಂಧಗಳು',
+    'Opinion & Arguments': 'ಅಭಿಪ್ರಾಯ ಮತ್ತು ಚರ್ಚೆ',
+    'Text Summarization': 'ಪಠ್ಯದ ಸಾರಾಂಶ',
+    'Business Letters': 'ವ್ಯವಹಾರ ಪತ್ರಗಳು',
+    'Report Writing': 'ವರದಿ ಬರವಣಿಗೆ',
+    'Independent Project': 'ಸ್ವತಂತ್ರ ಯೋಜನೆ',
     'Writing the Alphabet': 'ಅಕ್ಷರಮಾಲೆ ಬರೆಯುವುದು',
     'Writing Small Letters': 'ಚಿಕ್ಕ ಅಕ್ಷರಗಳನ್ನು ಬರೆಯುವುದು',
     'Writing Numbers': 'ಸಂಖ್ಯೆಗಳನ್ನು ಬರೆಯುವುದು',
@@ -598,12 +625,20 @@ const WRITING_TRANSLATIONS = {
     'Sentence Building': 'ವಾಕ್ಯ ರಚನೆ',
     'Paragraph Writing': 'ಪ್ಯಾರಾಗ್ರಾಫ್ ಬರೆಯುವುದು',
     'Punctuation': 'ವಿರಾಮ ಚಿಹ್ನೆಗಳು',
-    'Capitalization': 'ದೊಡ್ಡ ಅಕ್ಷರಗಳು',
+    'Capitalization': 'ಅಕ್ಷರ ಜೋಡಣೆ',
     'Creative Writing': 'ಸೃಜನಶೀಲ ಬರವಣಿಗೆ',
     'Letter Writing': 'ಪತ್ರ ಬರವಣಿಗೆ',
     'Practice Test': 'ಅಭ್ಯಾಸ ಪರೀಕ್ಷೆ',
   },
   ta: {
+    'Formal Correspondence': 'அலுவலகத் தொடர்பு',
+    'Creative Narratives': 'படைப்பாற்றல் கதைகள்',
+    'Descriptive Essays': 'விளக்கக் கட்டுரைகள்',
+    'Opinion & Arguments': 'கருத்துக்கள் மற்றும் வாதங்கள்',
+    'Text Summarization': 'உரைச் சுருக்கம்',
+    'Business Letters': 'வணிகக் கடிதங்கள்',
+    'Report Writing': 'அறிக்கை எழுதுதல்',
+    'Independent Project': 'சுயாதீன திட்டம்',
     'Writing the Alphabet': 'நெடுங்கணக்கு எழுதுதல்',
     'Writing Small Letters': 'சிறிய எழுத்துக்களை எழுதுதல்',
     'Writing Numbers': 'எண்களை எழுதுதல்',
@@ -616,7 +651,7 @@ const WRITING_TRANSLATIONS = {
     'Sentence Building': 'வாக்கிய உருவாக்கம்',
     'Paragraph Writing': 'பத்தி எழுதுதல்',
     'Punctuation': 'நிறுத்தற்குறிகள்',
-    'Capitalization': 'பெரிய எழுத்துக்கள்',
+    'Capitalization': 'எழுத்துக்கூட்டுதல்',
     'Creative Writing': 'படைப்பாற்றல் எழுத்து',
     'Letter Writing': 'கடிதம் எழுதுதல்',
     'Practice Test': 'பயிற்சி தேர்வு',
@@ -1119,6 +1154,11 @@ function LessonPlayerInner() {
         letters: groupLetters
       });
     }
+  } else {
+    const rawActivities = lesson.activities || lesson.activities_data || [];
+    rawActivities.forEach((act) => {
+      slides.push(act);
+    });
   }
 
   // Generate 3 unique questions testing different skills from pool
@@ -3436,13 +3476,13 @@ function LessonPlayerInner() {
               <div>
                 <h2 style={{ fontSize: '15px', fontWeight: 900, margin: 0 }}>WRITING LESSONS</h2>
                 <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.9 }}>
-                  {lesson.difficulty === 'beginner' ? 'Beginner Level' : 'Intermediate Level'}
+                  {lesson.difficulty === 'beginner' ? 'Beginner Level' : lesson.difficulty === 'intermediate' ? 'Intermediate Level' : 'Advanced Level'}
                 </span>
               </div>
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {(lesson.difficulty === 'beginner' ? BEGINNER_WRITING_TOPICS : INTERMEDIATE_WRITING_TOPICS).map((topic, tIdx) => {
+              {(lesson.difficulty === 'beginner' ? BEGINNER_WRITING_TOPICS : lesson.difficulty === 'intermediate' ? INTERMEDIATE_WRITING_TOPICS : ADVANCED_WRITING_TOPICS).map((topic, tIdx) => {
                 const isActive = (tIdx + 1) === lesson.order_in_level;
                 const langTrans = WRITING_TRANSLATIONS[preferredLanguage] || {};
                 const localizedTitle = langTrans[topic.title] || topic.title;
@@ -3520,7 +3560,7 @@ function LessonPlayerInner() {
             (() => {
               const currentSlide = slides[slideIndex] || {};
               
-              if (lesson.skill === 'writing' && currentSlide.type !== 'welcome' && currentSlide.type !== 'learn_concept' && currentSlide.type !== 'graduation') {
+              if (lesson.skill === 'writing' && (currentSlide.type === 'letter_drafting' || currentSlide.type === 'paragraph_writing')) {
                 return renderGuidedWritingSystem(currentSlide);
               }
 
