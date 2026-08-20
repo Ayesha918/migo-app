@@ -672,6 +672,25 @@ class ErrorBoundary extends Component {
             <p style={{ fontSize: '14px', color: '#666666', fontWeight: 700, margin: 0, lineHeight: 1.5 }}>
               We encountered a display issue while rendering this lesson slide.
             </p>
+            {this.state.error && (
+              <pre style={{
+                background: '#FFF5F5',
+                border: '1px solid #FFCDD2',
+                borderRadius: '8px',
+                padding: '12px',
+                fontSize: '11px',
+                color: '#C62828',
+                textAlign: 'left',
+                width: '100%',
+                overflowX: 'auto',
+                whiteSpace: 'pre-wrap',
+                fontFamily: 'monospace',
+                margin: '8px 0'
+              }}>
+                {this.state.error.toString()}<br />
+                {this.state.error.stack?.split("\n").slice(0, 4).join("\n")}
+              </pre>
+            )}
             <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '12px' }}>
               <button
                 onClick={() => window.location.reload()}
