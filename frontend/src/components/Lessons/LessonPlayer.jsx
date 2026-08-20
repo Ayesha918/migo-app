@@ -1,5 +1,5 @@
 // src/components/Lessons/LessonPlayer.jsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Component } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -623,7 +623,99 @@ const WRITING_TRANSLATIONS = {
   }
 };
 
-export default function LessonPlayer() {
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("LessonPlayer Error Boundary caught an error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          background: '#FAF9F6',
+          minHeight: '100vh',
+          width: '100vw',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+          textAlign: 'center',
+          fontFamily: 'system-ui, sans-serif'
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            border: '3px solid #FFCDD2',
+            borderRadius: '24px',
+            padding: '40px 32px',
+            maxWidth: '500px',
+            width: '100%',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <span style={{ fontSize: '48px' }}>⚠️</span>
+            <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#D32F2F', margin: 0 }}>
+              Lesson Failed to Render
+            </h2>
+            <p style={{ fontSize: '14px', color: '#666666', fontWeight: 700, margin: 0, lineHeight: 1.5 }}>
+              We encountered a display issue while rendering this lesson slide.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '12px' }}>
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: '#FF7A00',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '14px',
+                  fontWeight: 900,
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                Reload
+              </button>
+              <button
+                onClick={() => window.location.href = '/home'}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: '#F1F5F9',
+                  color: '#475569',
+                  border: 'none',
+                  borderRadius: '14px',
+                  fontWeight: 900,
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                Adventure Map
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+function LessonPlayerInner() {
   const location = useLocation();
   const navigate = useNavigate();
   const { learner } = useLearner();
@@ -3145,6 +3237,61 @@ export default function LessonPlayer() {
               Adventure Map
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!loading && (!slides || slides.length === 0)) {
+    return (
+      <div style={{
+        background: '#FAF9F6',
+        minHeight: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        textAlign: 'center',
+        fontFamily: 'system-ui, sans-serif'
+      }}>
+        <div style={{
+          background: '#FFFFFF',
+          border: '3px solid #FFE0B2',
+          borderRadius: '24px',
+          padding: '40px 32px',
+          maxWidth: '450px',
+          width: '100%',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '16px'
+        }}>
+          <span style={{ fontSize: '48px' }}>📚</span>
+          <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#FF7A00', margin: 0 }}>
+            No Slides Configured
+          </h2>
+          <p style={{ fontSize: '14px', color: '#666666', fontWeight: 700, margin: 0, lineHeight: 1.5 }}>
+            This lesson does not have any learning activities configured yet.
+          </p>
+          <button
+            onClick={() => navigate('/home')}
+            style={{
+              padding: '12px 32px',
+              background: '#FF7A00',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '14px',
+              fontWeight: 900,
+              fontSize: '14px',
+              cursor: 'pointer',
+              marginTop: '12px'
+            }}
+          >
+            Adventure Map
+          </button>
         </div>
       </div>
     );
@@ -6873,5 +7020,13 @@ export default function LessonPlayer() {
       )}
       {renderWizardModal()}
     </div>
+  );
+}
+
+export default function LessonPlayer() {
+  return (
+    <ErrorBoundary>
+      <LessonPlayerInner />
+    </ErrorBoundary>
   );
 }

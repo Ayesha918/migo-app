@@ -46,6 +46,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Network-First for HTML/navigation requests so updates bypass caching immediately
+  const isHtmlRequest = event.request.mode === 'navigate' || 
+                        event.request.url.endsWith('index.html') || 
+                        event.request.url === new URL('/', location.href).href;
+
+  if (isHtmlRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
