@@ -102,7 +102,7 @@ def get_llm_recommendations(learner):
     
     # If all regular lessons of the level are completed, insert the level-specific assessment!
     if all_regular_completed:
-        assessment_id = f"{level.upper()}-ASSESSMENT-{language.upper()}"
+        assessment_id = f"{level.upper()[:3]}-ASSESS-{language.upper()}"
         result_ids.append(assessment_id)
 
     # Fallback to English if not enough lessons in selected language (only for English learners)

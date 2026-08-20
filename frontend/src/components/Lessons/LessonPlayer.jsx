@@ -6414,7 +6414,7 @@ function LessonPlayerInner() {
                       <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '20px' }}>Tap any letter to hear sound</h2>
                       <div className={styles.alphabetGrid}>
                         {(ALPHABETS[preferredLanguage] || ALPHABETS.en).map((letter) => {
-                          const details = LETTER_DETAILS[preferredLanguage]?.[letter] || LETTER_DETAILS.en[letter] || { name: letter, phonetic: letter, word: letter, emoji: '🔤' };
+                          const details = LETTER_META[letter] || { name: letter, phonetic: letter, word: letter, illustration: 'default' };
                           return (
                             <div
                               key={letter}
@@ -6427,8 +6427,10 @@ function LessonPlayerInner() {
                               }}
                               style={{ minWidth: '80px', padding: '12px' }}
                             >
-                              <span style={{ fontSize: '32px', fontWeight: 800 }}>{details.name} {details.name.toLowerCase()}</span>
-                              <span style={{ fontSize: '24px' }}>{details.emoji}</span>
+                              <span style={{ fontSize: '32px', fontWeight: 800 }}>{details.name} {preferredLanguage === 'en' ? details.name.toLowerCase() : ''}</span>
+                              <div style={{ display: 'flex', justifyContent: 'center', margin: '4px 0' }}>
+                                <IllustrationSVG name={details.illustration || 'default'} size={32} />
+                              </div>
                               <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)' }}>{details.word}</span>
                             </div>
                           );
