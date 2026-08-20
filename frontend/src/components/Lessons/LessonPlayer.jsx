@@ -1013,6 +1013,7 @@ function LessonPlayerInner() {
   const [selectedTopic, setSelectedTopic] = useState('');
   const [wizardAnswers, setWizardAnswers] = useState([]);
   const [wizardStep, setWizardStep] = useState(0);
+  const [letterSubmitted, setLetterSubmitted] = useState(false);
 
   const exploreData = (lesson.activities && lesson.activities.length > 0) ? lesson.activities[0] : (lesson.activities_data?.[0] || {});
   const practiceData = (lesson.activities && lesson.activities.length > 1) ? lesson.activities[1] : (lesson.activities_data?.[1] || {});
